@@ -1,0 +1,51 @@
+
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { ListingCard } from '@/components/ListingCard';
+import { mockListings } from '@/data/mockListings';
+import { useAppContext } from '@/contexts/AppContext';
+
+export function FeaturedListings() {
+  const { t } = useAppContext();
+  const [activeTab, setActiveTab] = useState('featured');
+  
+  const featuredListings = mockListings.filter(listing => listing.isFeatured);
+  const latestListings = [...mockListings].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  ).slice(0, 8);
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <Tabs defaultValue="featured" onValueChange={setActiveTab}>
+        <div className="flex justify-between items-center mb-6">
+          <TabsList>
+            <TabsTrigger value="featured">{t('featuredAds')}</TabsTrigger>
+            <TabsTrigger value="latest">{t('latestAds')}</TabsTrigger>
+          </TabsList>
+          
+          <Button variant="link" asChild>
+            <Link to="/listings">{t('allAds')}</Link>
+          </Button>
+        </div>
+        
+        <TabsContent value="featured" className="mt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {featuredListings.slice(0, 8).map(listing => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="latest" className="mt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {latestListings.map(listing => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

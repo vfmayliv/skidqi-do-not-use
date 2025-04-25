@@ -1,33 +1,78 @@
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
+import { AppProvider } from '@/contexts/AppContext';
+import { SearchProvider } from '@/contexts/SearchContext';
+import Index from '@/pages/Index';
+import CategoryPage from '@/pages/CategoryPage';
+import SubcategoryPage from '@/pages/SubcategoryPage';
+import ListingDetail from '@/pages/ListingDetail';
+import SearchResults from '@/pages/SearchResults';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import UserProfile from '@/pages/UserProfile';
+import CreateListing from '@/pages/CreateListing';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
+import Help from '@/pages/Help';
+import TermsOfService from '@/pages/TermsOfService';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import NotFound from '@/pages/NotFound';
+import AdminPanel from '@/pages/AdminPanel';
+import OwnerPanel from '@/pages/OwnerPanel';
+import ConfirmEmail from '@/pages/ConfirmEmail';
+import { AuthProtection } from '@/components/AuthProtection';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Dashboard from "./pages/Dashboard";
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <SidebarProvider>
+const App: React.FC = () => {
+  return (
+    <AppProvider>
+      <SearchProvider>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/search" element={<SearchResults />} />
+          <Route path="/category/:categoryId" element={<CategoryPage />} />
+          <Route path="/category/:categoryId/:subcategoryId" element={<SubcategoryPage />} />
+          
+          {/* Категории с индивидуальным содержимым */}
+          {/* Единый маршрут для категории "Недвижимость" через CategoryPage */}
+          <Route path="/property" element={<CategoryPage overrideId="property" />} />
+          <Route path="/transport" element={<CategoryPage overrideId="transport" />} />
+          
+          <Route path="/listing/:listingId" element={<ListingDetail />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/confirm-email" element={<ConfirmEmail />} />
+          <Route path="/profile" element={
+            <AuthProtection>
+              <UserProfile />
+            </AuthProtection>
+          } />
+          <Route path="/create-listing" element={
+            <AuthProtection>
+              <CreateListing />
+            </AuthProtection>
+          } />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/help" element={<Help />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/admin" element={
+            <AuthProtection requiredRole="admin">
+              <AdminPanel />
+            </AuthProtection>
+          } />
+          <Route path="/owner" element={
+            <AuthProtection>
+              <OwnerPanel />
+            </AuthProtection>
+          } />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
         <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </SidebarProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </SearchProvider>
+    </AppProvider>
+  );
+};
 
 export default App;
