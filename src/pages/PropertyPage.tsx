@@ -1,406 +1,239 @@
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { useAppContext } from '@/contexts/AppContext';
-import { mockListings } from '@/data/mockListings';
-import PropertyCard from '@/components/property/PropertyCard';
-import { PropertyType, PropertyFilters as PropertyFiltersType } from '@/types/listingType';
-import PropertyFilters from '@/components/property/PropertyFilters';
 import { useState, useEffect } from 'react';
-import AdvancedPropertyFilters from '@/components/property/AdvancedPropertyFilters';
-import { Grid3X3, List, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import PropertyMap from '@/components/property/PropertyMap';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useSearchParams } from 'react-router-dom';
+import { PropertyCard } from '@/components/PropertyCard';
+import { PropertyFilters } from '@/components/property/PropertyFilters';
+import { useAppContext } from '@/contexts/AppContext';
+import { mockProperties } from '@/data/mockProperties';
+import { DistrictData } from '@/data/propertyData';
+import { 
+  PropertyFilters as PropertyFiltersType,
+  PropertyType,
+  BuildingType,
+  ConditionType,
+  BalconyType,
+  BathroomType,
+  SortOption 
+} from '@/types/listingType';
 
-const PropertyPage = () => {
-  const { language, city } = useAppContext();
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
-  
+export function PropertyPage() {
+  const { language } = useAppContext();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState<PropertyFiltersType>({
-    priceRange: { min: null, max: null },
-    rooms: null,
-    areaRange: { min: null, max: null },
-    floorRange: { min: null, max: null },
-    propertyTypes: null,
-    districts: null,
-    hasPhoto: null,
-    onlyNewBuilding: null,
-    furnished: null,
-    allowPets: null,
-    hasParking: null,
-    dealType: null,
+    propertyType: searchParams.get('type') as PropertyType || null,
+    priceRange: {
+      min: null,
+      max: null
+    },
+    areaRange: {
+      min: null,
+      max: null
+    },
+    floorRange: {
+      min: null,
+      max: null
+    },
     buildingTypes: null,
-    yearBuiltRange: { min: null, max: null },
-    ceilingHeightRange: { min: null, max: null },
+    conditionTypes: null,
+    balconyTypes: null,
     bathroomTypes: null,
-    renovationTypes: null,
-    hasBalcony: null,
-    hasElevator: null,
-    rentPeriodMin: null,
-    isCorner: null,
-    isStudio: null,
-    hasSeparateEntrance: null,
-    securityGuarded: null,
-    hasPlayground: null,
-    utilityBillsIncluded: null,
-    sortBy: null,
-    viewTypes: null,
-    nearbyInfrastructure: null
+    district: null,
+    sortBy: null
   });
+  const [filteredListings, setFilteredListings] = useState(mockProperties);
+  const [districts, setDistricts] = useState<DistrictData[]>([]);
   
-  const [filteredListings, setFilteredListings] = useState([]);
-  
-  const countActiveFilters = () => {
-    let count = 0;
-    if (filters.priceRange.min !== null || filters.priceRange.max !== null) count++;
-    if (filters.rooms !== null) count++;
-    if (filters.areaRange.min !== null || filters.areaRange.max !== null) count++;
-    if (filters.floorRange.min !== null || filters.floorRange.max !== null) count++;
-    if (filters.propertyTypes !== null) count++;
-    if (filters.districts !== null) count++;
-    if (filters.hasPhoto !== null) count++;
-    if (filters.onlyNewBuilding !== null) count++;
-    if (filters.furnished !== null) count++;
-    if (filters.allowPets !== null) count++;
-    if (filters.hasParking !== null) count++;
-    if (filters.dealType !== null) count++;
-    if (filters.buildingTypes !== null) count++;
-    if (filters.yearBuiltRange.min !== null || filters.yearBuiltRange.max !== null) count++;
-    if (filters.bathroomTypes !== null) count++;
-    if (filters.renovationTypes !== null) count++;
-    if (filters.hasBalcony !== null) count++;
-    if (filters.hasElevator !== null) count++;
-    
-    return count;
-  };
-  
-  const activeFiltersCount = countActiveFilters();
-  
+  // Mock districts data (replace with actual data fetching)
   useEffect(() => {
-    let propertyListings = mockListings.filter(listing => 
-      listing.categoryId === 'real-estate'
-    );
+    // Simulate fetching districts data
+    const mockDistricts: DistrictData[] = [
+      { id: 'almaty-district', name: { ru: 'Алмалинский район', kk: 'Алмалы ауданы' } },
+      { id: 'bostandyk-district', name: { ru: 'Бостандыкский район', kk: 'Бостандық ауданы' } },
+      { id: 'alatau-district', name: { ru: 'Алатауский район', kk: 'Алатау ауданы' } },
+    ];
+    setDistricts(mockDistricts);
+  }, []);
+  
+  // Update filters based on URL params on initial load
+  useEffect(() => {
+    const initialPropertyType = searchParams.get('type') as PropertyType || null;
+    setFilters(prevFilters => ({ ...prevFilters, propertyType: initialPropertyType }));
+  }, [searchParams]);
+  
+  // Apply filters
+  useEffect(() => {
+    let newListings = [...mockProperties];
     
-    if (city) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.city[language] === city[language]
-      );
+    if (filters.propertyType) {
+      newListings = newListings.filter(listing => listing.propertyType === filters.propertyType);
     }
     
-    if (filters.propertyTypes && filters.propertyTypes.length > 0) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.propertyType && filters.propertyTypes.includes(listing.propertyType)
-      );
+    if (filters.priceRange.min) {
+      newListings = newListings.filter(listing => listing.price >= filters.priceRange.min);
+    }
+    if (filters.priceRange.max) {
+      newListings = newListings.filter(listing => listing.price <= filters.priceRange.max);
     }
     
-    if (filters.rooms && filters.rooms.length > 0) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.rooms && filters.rooms.includes(listing.rooms)
-      );
+    if (filters.areaRange.min) {
+      newListings = newListings.filter(listing => listing.area >= filters.areaRange.min);
+    }
+    if (filters.areaRange.max) {
+      newListings = newListings.filter(listing => listing.area <= filters.areaRange.max);
     }
     
-    if (filters.priceRange.min !== null) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.discountPrice >= filters.priceRange.min
-      );
+    if (filters.floorRange.min) {
+      newListings = newListings.filter(listing => listing.floor >= filters.floorRange.min);
+    }
+    if (filters.floorRange.max) {
+      newListings = newListings.filter(listing => listing.floor <= filters.floorRange.max);
     }
     
-    if (filters.priceRange.max !== null) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.discountPrice <= filters.priceRange.max
-      );
+    if (filters.buildingTypes) {
+      newListings = newListings.filter(listing => filters.buildingTypes!.includes(listing.buildingType));
     }
     
-    if (filters.areaRange.min !== null) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.area && listing.area >= filters.areaRange.min
-      );
+    if (filters.conditionTypes) {
+      newListings = newListings.filter(listing => filters.conditionTypes!.includes(listing.condition));
     }
     
-    if (filters.areaRange.max !== null) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.area && listing.area <= filters.areaRange.max
-      );
+    if (filters.balconyTypes) {
+      newListings = newListings.filter(listing => filters.balconyTypes!.includes(listing.balcony));
     }
     
-    if (filters.floorRange.min !== null) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.floor && listing.floor >= filters.floorRange.min
-      );
+    if (filters.bathroomTypes) {
+      newListings = newListings.filter(listing => filters.bathroomTypes!.includes(listing.bathroom));
     }
     
-    if (filters.floorRange.max !== null) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.floor && listing.floor <= filters.floorRange.max
-      );
+    if (filters.district) {
+      newListings = newListings.filter(listing => listing.district === filters.district);
     }
-    
-    if (filters.yearBuiltRange.min !== null) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.yearBuilt && listing.yearBuilt >= filters.yearBuiltRange.min
-      );
-    }
-    
-    if (filters.yearBuiltRange.max !== null) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.yearBuilt && listing.yearBuilt <= filters.yearBuiltRange.max
-      );
-    }
-    
-    if (filters.hasPhoto === true) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.imageUrl && listing.imageUrl.length > 0
-      );
-    }
-    
-    if (filters.onlyNewBuilding === true) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.isNewBuilding === true
-      );
-    }
-    
-    if (filters.furnished === true) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.furnishing === true
-      );
-    }
-    
-    if (filters.hasParking === true) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.parking === true
-      );
-    }
-    
-    if (filters.hasBalcony === true) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.balcony === true
-      );
-    }
-    
-    if (filters.hasElevator === true) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.elevator === true
-      );
-    }
-    
-    if (filters.isCorner === true) {
-      propertyListings = propertyListings.filter(listing => 
-        listing.isCorner === true
-      );
-    }
-    
+
+    // Sorting logic
     if (filters.sortBy) {
       switch (filters.sortBy) {
-        case 'price_asc':
-          propertyListings.sort((a, b) => a.discountPrice - b.discountPrice);
+        case SortOption.PRICE_ASC:
+          newListings.sort((a, b) => a.price - b.price);
           break;
-        case 'price_desc':
-          propertyListings.sort((a, b) => b.discountPrice - a.discountPrice);
+        case SortOption.PRICE_DESC:
+          newListings.sort((a, b) => b.price - a.price);
           break;
-        case 'date_desc':
-          propertyListings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        case SortOption.AREA_ASC:
+          newListings.sort((a, b) => a.area - b.area);
           break;
-        case 'area_asc':
-          propertyListings.sort((a, b) => (a.area || 0) - (b.area || 0));
-          break;
-        case 'area_desc':
-          propertyListings.sort((a, b) => (b.area || 0) - (a.area || 0));
+        case SortOption.AREA_DESC:
+          newListings.sort((a, b) => b.area - a.area);
           break;
         default:
           break;
       }
     }
     
-    setFilteredListings(propertyListings);
-  }, [filters, city, language]);
+    setFilteredListings(newListings);
+  }, [filters]);
   
+  // Update URL params
+  const updateUrlParams = (newFilters: PropertyFiltersType) => {
+    const params = new URLSearchParams();
+    
+    if (newFilters.propertyType) {
+      params.set('type', newFilters.propertyType);
+    } else {
+      params.delete('type');
+    }
+    
+    setSearchParams(params);
+  };
+  
+  // Handle filter change
   const handleFilterChange = (newFilters: Partial<PropertyFiltersType>) => {
-    setFilters(prev => ({
-      ...prev,
-      ...newFilters
-    }));
+    const updatedFilters: PropertyFiltersType = { ...filters, ...newFilters };
+    setFilters(updatedFilters);
+    updateUrlParams(updatedFilters);
   };
   
-  const handleAdvancedFilterChange = (newFilters: any) => {
-    setFilters(prev => ({
-      ...prev,
-      priceRange: newFilters.priceRange || { min: null, max: null },
-      areaRange: newFilters.areaRange || { min: null, max: null },
-      rooms: newFilters.rooms.length > 0 ? newFilters.rooms : null,
-      floorRange: {
-        min: newFilters.floor?.min || null,
-        max: newFilters.floor?.max || null
-      },
-      propertyTypes: newFilters.propertyTypes.length > 0 ? newFilters.propertyTypes : null,
-      buildingTypes: newFilters.buildingTypes.length > 0 ? newFilters.buildingTypes : null,
-      yearBuiltRange: newFilters.yearBuilt || { min: null, max: null },
-      bathroomTypes: newFilters.bathroomTypes.length > 0 ? newFilters.bathroomTypes : null,
-      renovationTypes: newFilters.renovationTypes.length > 0 ? newFilters.renovationTypes : null,
-      districts: newFilters.districts.length > 0 ? newFilters.districts : null,
-      hasPhoto: newFilters.hasPhoto || null,
-      onlyNewBuilding: newFilters.isNewBuilding || null,
-      hasParking: newFilters.hasParking || null,
-      furnished: newFilters.hasFurniture || null,
-      hasBalcony: newFilters.hasBalcony || null,
-      hasElevator: newFilters.hasElevator || null,
-      isCorner: newFilters.isCorner || null,
-      sortBy: newFilters.sortBy || null
-    }));
-  };
-  
-  const resetFilters = () => {
+  // Handle reset
+  const handleReset = () => {
     setFilters({
-      priceRange: { min: null, max: null },
-      rooms: null,
-      areaRange: { min: null, max: null },
-      floorRange: { min: null, max: null },
-      propertyTypes: null,
-      districts: null,
-      hasPhoto: null,
-      onlyNewBuilding: null,
-      furnished: null,
-      allowPets: null,
-      hasParking: null,
-      dealType: null,
+      propertyType: null,
+      priceRange: {
+        min: null,
+        max: null
+      },
+      areaRange: {
+        min: null,
+        max: null
+      },
+      floorRange: {
+        min: null,
+        max: null
+      },
       buildingTypes: null,
-      yearBuiltRange: { min: null, max: null },
-      ceilingHeightRange: { min: null, max: null },
+      conditionTypes: null,
+      balconyTypes: null,
       bathroomTypes: null,
-      renovationTypes: null,
-      hasBalcony: null,
-      hasElevator: null,
-      rentPeriodMin: null,
-      isCorner: null,
-      isStudio: null,
-      hasSeparateEntrance: null,
-      securityGuarded: null,
-      hasPlayground: null,
-      utilityBillsIncluded: null,
-      sortBy: null,
-      viewTypes: null,
-      nearbyInfrastructure: null
+      district: null,
+      sortBy: null
     });
+    
+    // Clear URL params
+    setSearchParams({});
   };
   
-  const districts = [
-    { id: 'almaty-center', name: { ru: 'Центр', kz: 'Орталық' } },
-    { id: 'almaty-north', name: { ru: 'Север', kz: 'Солтүстік' } },
-    { id: 'almaty-east', name: { ru: 'Восток', kz: 'Шығыс' } },
-    { id: 'almaty-west', name: { ru: 'Запад', kz: 'Батыс' } },
-    { id: 'almaty-south', name: { ru: 'Юг', kz: 'Оңтүстік' } },
-  ];
+  // Handle search
+  const handleSearch = () => {
+    // In this mock, the filtering is already done in the useEffect hook
+    // In a real application, you might trigger an API call here
+    console.log('Search triggered with filters:', filters);
+  };
+  
+  // Count active filters
+  const activeFiltersCount = Object.keys(filters).reduce((count, key) => {
+    const filterKey = key as keyof PropertyFiltersType;
+    const filterValue = filters[filterKey];
+    
+    if (filterKey === 'priceRange' || filterKey === 'areaRange' || filterKey === 'floorRange') {
+      const range = filterValue as { min: number | null, max: number | null };
+      if ((range.min !== null && range.min > 0) || (range.max !== null && range.max < 1000000000)) {
+        return count + 1;
+      }
+      return count;
+    }
+    
+    if (filterValue !== null && filterValue !== undefined) {
+      if (Array.isArray(filterValue) && filterValue.length > 0) {
+        return count + 1;
+      } else if (!Array.isArray(filterValue)) {
+        return count + 1;
+      }
+    }
+    
+    return count;
+  }, 0);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">
-          {language === 'ru' ? 'Недвижимость' : 'Жылжымайтын мүлік'}
-          {city && (
-            <span className="text-muted-foreground font-normal ml-2 text-xl">
-              — {city[language]}
-            </span>
-          )}
-        </h1>
-        
-        <div className="mb-8">
-          <div className="mb-4">
-            <PropertyFilters 
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onReset={resetFilters}
-              onSearch={() => {/* Уже реализовано через useEffect */}}
-              districts={districts}
-              activeFiltersCount={activeFiltersCount}
-            />
-          </div>
-          
-          <div className="mb-4">
-            <AdvancedPropertyFilters
-              onApplyFilters={handleAdvancedFilterChange}
-              onReset={resetFilters}
-            />
-          </div>
-        </div>
-        
-        <div className="flex justify-between items-center mb-6">
-          <p className="text-sm text-muted-foreground">
-            {language === 'ru' 
-              ? `Найдено объявлений: ${filteredListings.length}` 
-              : `Хабарландырулар табылды: ${filteredListings.length}`}
-          </p>
-          
-          <div className="flex items-center gap-2">
-            <Tabs 
-              value={viewMode} 
-              onValueChange={(value) => setViewMode(value as 'grid' | 'list' | 'map')}
-              className="w-fit"
-            >
-              <TabsList className="grid w-fit grid-cols-3">
-                <TabsTrigger value="grid" className="px-3">
-                  <Grid3X3 className="h-4 w-4" />
-                </TabsTrigger>
-                <TabsTrigger value="list" className="px-3">
-                  <List className="h-4 w-4" />
-                </TabsTrigger>
-                <TabsTrigger value="map" className="px-3">
-                  <MapPin className="h-4 w-4" />
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </div>
-        
-        <Tabs value={viewMode} className="w-full">
-          <TabsContent value="grid" className="mt-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredListings.map((listing) => (
-                <PropertyCard key={listing.id} listing={listing} />
-              ))}
-              {filteredListings.length === 0 && (
-                <div className="col-span-full text-center py-12">
-                  <p className="text-muted-foreground">
-                    {language === 'ru' 
-                      ? 'По вашему запросу ничего не найдено. Попробуйте изменить параметры поиска.' 
-                      : 'Сұрауыңыз бойынша ештеңе табылмады. Іздеу параметрлерін өзгертіп көріңіз.'}
-                  </p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="list" className="mt-0">
-            <div className="space-y-4">
-              {filteredListings.map((listing) => (
-                <PropertyCard key={listing.id} listing={listing} variant="horizontal" />
-              ))}
-              {filteredListings.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">
-                    {language === 'ru' 
-                      ? 'По вашему запросу ничего не найдено. Попробуйте изменить параметры поиска.' 
-                      : 'Сұрауыңыз бойынша ештеңе табылмады. Іздеу параметрлерін өзгертіп көріңіз.'}
-                  </p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="map" className="mt-0">
-            <div className="relative h-[70vh] w-full rounded-lg overflow-hidden">
-              <PropertyMap 
-                listings={filteredListings} 
-                onListingClick={(listing) => {
-                  window.location.href = `/listing/${listing.id}`;
-                }}
-              />
-            </div>
-          </TabsContent>
-        </Tabs>
-      </main>
-      <Footer />
+    <div className="container mx-auto px-4 py-8">
+      <PropertyFilters
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onReset={handleReset}
+        onSearch={handleSearch}
+        districts={districts}
+        activeFiltersCount={activeFiltersCount}
+        config={{
+          priceRangeMin: 0,
+          priceRangeMax: 1000000000,
+          areaRangeMin: 0,
+          areaRangeMax: 1000,
+          floorRangeMin: 1,
+          floorRangeMax: 50,
+        }}
+      />
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+        {filteredListings.map(listing => (
+          <PropertyCard key={listing.id} listing={listing} />
+        ))}
+      </div>
     </div>
   );
-};
-
-export default PropertyPage;
+}

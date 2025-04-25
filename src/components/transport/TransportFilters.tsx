@@ -174,6 +174,52 @@ const TransportFilters = ({
     return null;
   };
   
+  // Add missing handler functions
+  const handleEngineTypeToggle = (engineType: EngineType) => {
+    const currentTypes = filters.engineTypes || [];
+    const newTypes = currentTypes.includes(engineType)
+      ? currentTypes.filter(type => type !== engineType)
+      : [...currentTypes, engineType];
+    
+    onFilterChange({ engineTypes: newTypes.length > 0 ? newTypes : null });
+  };
+
+  const handleTransmissionToggle = (transmission: TransmissionType) => {
+    const currentTransmissions = filters.transmissions || [];
+    const newTransmissions = currentTransmissions.includes(transmission)
+      ? currentTransmissions.filter(t => t !== transmission)
+      : [...currentTransmissions, transmission];
+    
+    onFilterChange({ transmissions: newTransmissions.length > 0 ? newTransmissions : null });
+  };
+
+  const handleDriveTypeToggle = (driveType: DriveType) => {
+    const currentDriveTypes = filters.driveTypes || [];
+    const newDriveTypes = currentDriveTypes.includes(driveType)
+      ? currentDriveTypes.filter(t => t !== driveType)
+      : [...currentDriveTypes, driveType];
+    
+    onFilterChange({ driveTypes: newDriveTypes.length > 0 ? newDriveTypes : null });
+  };
+
+  const handleBodyTypeToggle = (bodyType: BodyType) => {
+    const currentBodyTypes = filters.bodyTypes || [];
+    const newBodyTypes = currentBodyTypes.includes(bodyType)
+      ? currentBodyTypes.filter(t => t !== bodyType)
+      : [...currentBodyTypes, bodyType];
+    
+    onFilterChange({ bodyTypes: newBodyTypes.length > 0 ? newBodyTypes : null });
+  };
+
+  const handleFeatureToggle = (feature: VehicleFeature) => {
+    const currentFeatures = filters.features || [];
+    const newFeatures = currentFeatures.includes(feature)
+      ? currentFeatures.filter(f => f !== feature)
+      : [...currentFeatures, feature];
+    
+    onFilterChange({ features: newFeatures.length > 0 ? newFeatures : null });
+  };
+
   return (
     <div className="bg-card border border-border rounded-lg p-4">
       <div className="flex flex-col space-y-4">
@@ -353,7 +399,7 @@ const TransportFilters = ({
                         {language === 'ru' ? 'От' : 'Бастап'}: {engineVolumeValues[0].toFixed(1)} л
                       </span>
                       <span className="text-sm">
-                        {language === 'ru' ? 'До' : 'Дейін'}: {engineVolumeValues[1].toFixed(1)} л
+                        {language === 'ru' ? 'До' : 'Дейін'}: {engineVolumeValues[1].toFixed(1)} ��
                       </span>
                     </div>
                   </div>
