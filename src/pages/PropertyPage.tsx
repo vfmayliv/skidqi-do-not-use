@@ -13,13 +13,23 @@ import {
   SortOption 
 } from '@/types/listingType';
 
-// Define basic district data type
+// Define basic district data type with the correct language code structure
 interface DistrictData {
   id: string;
   name: {
     ru: string;
-    kk: string;
+    kz: string;  // Changed from kk to kz to match expected structure
   };
+}
+
+// Define the expected PropertyFilterConfig interface
+interface PropertyFilterConfig {
+  priceRangeMin: number;
+  priceRangeMax: number;
+  areaRangeMin: number;
+  areaRangeMax: number;
+  floorRangeMin: number;
+  floorRangeMax: number;
 }
 
 export function PropertyPage() {
@@ -82,9 +92,9 @@ export function PropertyPage() {
   useEffect(() => {
     // Simulate fetching districts data
     const mockDistricts: DistrictData[] = [
-      { id: 'almaty-district', name: { ru: 'Алмалинский район', kk: 'Алмалы ауданы' } },
-      { id: 'bostandyk-district', name: { ru: 'Бостандыкский район', kk: 'Бостандық ауданы' } },
-      { id: 'alatau-district', name: { ru: 'Алатауский район', kk: 'Алатау ауданы' } },
+      { id: 'almaty-district', name: { ru: 'Алмалинский район', kz: 'Алмалы ауданы' } },
+      { id: 'bostandyk-district', name: { ru: 'Бостандыкский район', kz: 'Бостандық ауданы' } },
+      { id: 'alatau-district', name: { ru: 'Алатауский район', kz: 'Алатау ауданы' } },
     ];
     setDistricts(mockDistricts);
   }, []);
@@ -109,10 +119,10 @@ export function PropertyPage() {
     }
     
     if (filters.priceRange.min) {
-      newListings = newListings.filter(listing => listing.price >= filters.priceRange.min!);
+      newListings = newListings.filter(listing => listing.discountPrice >= filters.priceRange.min!);
     }
     if (filters.priceRange.max) {
-      newListings = newListings.filter(listing => listing.price <= filters.priceRange.max!);
+      newListings = newListings.filter(listing => listing.discountPrice <= filters.priceRange.max!);
     }
     
     if (filters.areaRange.min) {
@@ -149,10 +159,10 @@ export function PropertyPage() {
     if (filters.sortBy) {
       switch (filters.sortBy) {
         case SortOption.PRICE_ASC:
-          newListings.sort((a, b) => a.price - b.price);
+          newListings.sort((a, b) => a.discountPrice - b.discountPrice);
           break;
         case SortOption.PRICE_DESC:
-          newListings.sort((a, b) => b.price - a.price);
+          newListings.sort((a, b) => b.discountPrice - a.discountPrice);
           break;
         case SortOption.AREA_ASC:
           newListings.sort((a, b) => (a.area || 0) - (b.area || 0));
