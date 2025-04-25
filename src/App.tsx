@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AppProvider } from '@/contexts/AppContext';
 import { SearchProvider } from '@/contexts/SearchContext';
 import Index from '@/pages/Index';
-import CategoryPage from '@/pages/CategoryPage';
+import { CategoryPage } from '@/pages/CategoryPage';
 import SubcategoryPage from '@/pages/SubcategoryPage';
 import ListingDetail from '@/pages/ListingDetail';
 import SearchResults from '@/pages/SearchResults';
@@ -22,6 +23,7 @@ import AdminPanel from '@/pages/AdminPanel';
 import OwnerPanel from '@/pages/OwnerPanel';
 import ConfirmEmail from '@/pages/ConfirmEmail';
 import { AuthProtection } from '@/components/AuthProtection';
+import { PropertyPage } from '@/pages/PropertyPage';
 
 const App: React.FC = () => {
   return (
@@ -34,9 +36,8 @@ const App: React.FC = () => {
           <Route path="/category/:categoryId/:subcategoryId" element={<SubcategoryPage />} />
           
           {/* Категории с индивидуальным содержимым */}
-          {/* Единый маршрут для категории "Недвижимость" через CategoryPage */}
-          <Route path="/property" element={<CategoryPage overrideId="property" />} />
-          <Route path="/transport" element={<CategoryPage overrideId="transport" />} />
+          <Route path="/property" element={<PropertyPage />} />
+          <Route path="/transport" element={<CategoryPage />} />
           
           <Route path="/listing/:listingId" element={<ListingDetail />} />
           <Route path="/login" element={<Login />} />

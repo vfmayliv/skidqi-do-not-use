@@ -1,7 +1,8 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { ListingCard } from '@/components/ListingCard';
-import { PropertyCard } from '@/components/PropertyCard';
+import PropertyCard from '@/components/property/PropertyCard';
 import { useAppContext } from '@/contexts/AppContext';
 import { mockListings } from '@/data/mockListings';
 
@@ -12,12 +13,12 @@ export function CategoryPage() {
   const [filteredListings, setFilteredListings] = useState(mockListings);
 
   useEffect(() => {
-    let newListings = mockListings.filter(listing => listing.category === categoryId);
+    let newListings = mockListings.filter(listing => listing.categoryId === categoryId);
 
     // Apply subcategory filter if present
     const subcategoryId = searchParams.get('subcategory');
     if (subcategoryId) {
-      newListings = newListings.filter(listing => listing.subcategory === subcategoryId);
+      newListings = newListings.filter(listing => listing.subcategoryId === subcategoryId);
     }
 
     setFilteredListings(newListings);
