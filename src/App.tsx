@@ -24,6 +24,7 @@ import OwnerPanel from '@/pages/OwnerPanel';
 import ConfirmEmail from '@/pages/ConfirmEmail';
 import { AuthProtection } from '@/components/AuthProtection';
 import { PropertyPage } from '@/pages/PropertyPage';
+import TransportPage from '@/pages/TransportPage';
 
 const App: React.FC = () => {
   return (
@@ -37,7 +38,7 @@ const App: React.FC = () => {
           
           {/* Категории с индивидуальным содержимым */}
           <Route path="/property" element={<PropertyPage />} />
-          <Route path="/transport" element={<CategoryPage />} />
+          <Route path="/transport" element={<TransportPage />} />
           
           <Route path="/listing/:listingId" element={<ListingDetail />} />
           <Route path="/login" element={<Login />} />

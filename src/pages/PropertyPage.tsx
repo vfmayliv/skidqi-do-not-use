@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -11,6 +12,8 @@ import {
   ConditionType,
   SortOption 
 } from '@/types/listingType';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 
 interface DistrictData {
   id: string;
@@ -267,29 +270,35 @@ export function PropertyPage() {
   }, 0);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <PropertyFilters
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onReset={handleReset}
-        onSearch={handleSearch}
-        districts={districts}
-        activeFiltersCount={activeFiltersCount}
-        config={{
-          priceRangeMin: 0,
-          priceRangeMax: 1000000000,
-          areaRangeMin: 0,
-          areaRangeMax: 1000,
-          floorRangeMin: 1,
-          floorRangeMax: 50,
-        }}
-      />
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-        {filteredListings.map(listing => (
-          <PropertyCard key={listing.id} listing={listing} />
-        ))}
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <div className="container mx-auto px-4 py-8">
+          <PropertyFilters
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onReset={handleReset}
+            onSearch={handleSearch}
+            districts={districts}
+            activeFiltersCount={activeFiltersCount}
+            config={{
+              priceRangeMin: 0,
+              priceRangeMax: 1000000000,
+              areaRangeMin: 0,
+              areaRangeMax: 1000,
+              floorRangeMin: 1,
+              floorRangeMax: 50,
+            }}
+          />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+            {filteredListings.map(listing => (
+              <PropertyCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }

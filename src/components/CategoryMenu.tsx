@@ -66,6 +66,17 @@ export function CategoryMenu() {
                 </PopoverTrigger>
                 <PopoverContent className="w-56">
                   <div className="grid grid-cols-1 gap-2">
+                    {/* Добавляем ссылку на саму категорию */}
+                    <Link
+                      to={`/category/${category.id}`}
+                      className="flex items-center p-2 rounded-md hover:bg-accent font-medium"
+                    >
+                      <DynamicIcon name={category.icon} className="h-4 w-4 mr-2" />
+                      <span className="text-sm">
+                        {language === 'ru' ? 'Все в категории' : 'Барлық санатта'} {category.name[language]}
+                      </span>
+                    </Link>
+                    
                     {category.subcategories.map((subcat) => {
                       if (category.id === 'property') {
                         return (
