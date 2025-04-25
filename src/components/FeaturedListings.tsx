@@ -26,7 +26,7 @@ export function FeaturedListings() {
           </TabsList>
           
           <Button variant="link" asChild>
-            <Link to="/listings">{t('allAds')}</Link>
+            <Link to="/search">{t('allAds')}</Link>
           </Button>
         </div>
         

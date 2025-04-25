@@ -118,7 +118,7 @@ export const categories: Category[] = [
       ru: 'Зоотовары',
       kz: 'Зоотауарлар',
     },
-    icon: 'Paw-Print',
+    icon: 'Dog',
   },
   {
     id: 'beauty',
@@ -280,12 +280,10 @@ export const categories: Category[] = [
   },
 ];
 
-// Helper function to add a new category
 export const addCategory = (category: Category): void => {
   categories.push(category);
 };
 
-// Helper function to add a subcategory to an existing category
 export const addSubcategory = (categoryId: string, subcategory: Category): boolean => {
   const category = categories.find(c => c.id === categoryId);
   if (category) {
@@ -298,12 +296,10 @@ export const addSubcategory = (categoryId: string, subcategory: Category): boole
   return false;
 };
 
-// Helper function to check if a category exists by ID
 export const categoryExists = (categoryId: string): boolean => {
   return categories.some(c => c.id === categoryId);
 };
 
-// Helper function to check if a subcategory exists in a category
 export const subcategoryExists = (categoryId: string, subcategoryId: string): boolean => {
   const category = categories.find(c => c.id === categoryId);
   if (category && category.subcategories) {
