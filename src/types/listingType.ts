@@ -1,4 +1,3 @@
-
 // Basic property filter config
 export interface PropertyFilterConfig {
   priceRangeMin?: number;
@@ -302,15 +301,15 @@ export interface TransportFilters {
     min: number | null;
     max: number | null;
   };
-  engineVolumeRange: {
-    min: number | null;
-    max: number | null;
-  };
   mileageRange: {
     min: number | null;
     max: number | null;
   };
   engineTypes: EngineType[] | null;
+  engineVolumeRange: {
+    min: number | null;
+    max: number | null;
+  };
   transmissions: TransmissionType[] | null;
   driveTypes: DriveType[] | null;
   bodyTypes: BodyType[] | null;
@@ -320,13 +319,13 @@ export interface TransportFilters {
   steeringWheel: SteeringWheelType | null;
   hasPhoto: boolean | null;
   customsCleared: boolean | null;
-  exchange: boolean | null;
+  exchange: boolean | null; // Required property
   features: VehicleFeature[] | null;
   sortBy: SortOption | null;
-  city: string | null;
-  commercialType?: string | null; // Added for commercial type support
-  inStock?: boolean | null; // Added for in stock filter
-  exchangePossible?: boolean | null; // Added for exchange possibility
-  withoutAccidents?: boolean | null; // Added for accident history
-  withServiceHistory?: boolean | null; // Added for service history 
+  city: string | null; // Required property
+  commercialType?: string | null;
+  inStock?: boolean | null;
+  exchangePossible?: boolean | null;
+  withoutAccidents?: boolean | null;
+  withServiceHistory?: boolean | null;
 }

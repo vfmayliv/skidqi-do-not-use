@@ -279,7 +279,7 @@ export function PropertyPage() {
               areaRangeMax: 1000,
               floorRangeMin: 1,
               floorRangeMax: 50,
-            }}
+            } as PropertyFilterConfig}
           />
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">

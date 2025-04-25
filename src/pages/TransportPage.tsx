@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -59,8 +60,9 @@ const TransportPage = () => {
   // Get vehicle type from URL params
   const typeParam = searchParams.get('type');
   
-  // Initialize filters
+  // Initialize filters with all required properties
   const [filters, setFilters] = useState<TransportFiltersType>({
+    vehicleTypes: null, // Add required property
     priceRange: { min: null, max: null },
     vehicleType: typeParam ? VehicleType.CAR : null,
     brands: null,
@@ -73,16 +75,19 @@ const TransportPage = () => {
     driveTypes: null,
     bodyTypes: null,
     colors: null,
+    conditions: null, // Add required property
     condition: null,
     hasPhoto: true,
     steeringWheel: null,
     customsCleared: null,
+    exchange: null, // Add required property 
     inStock: null,
     exchangePossible: null,
     withoutAccidents: null,
     withServiceHistory: null,
     features: null,
     sortBy: null,
+    city: null, // Add required property
     commercialType: null
   });
   
@@ -97,6 +102,7 @@ const TransportPage = () => {
   // Reset filters
   const handleResetFilters = () => {
     setFilters({
+      vehicleTypes: null, // Add required property
       priceRange: { min: null, max: null },
       vehicleType: filters.vehicleType,
       brands: null,
@@ -109,16 +115,19 @@ const TransportPage = () => {
       driveTypes: null,
       bodyTypes: null,
       colors: null,
+      conditions: null, // Add required property
       condition: null,
       hasPhoto: true,
       steeringWheel: null,
       customsCleared: null,
+      exchange: null, // Add required property
       inStock: null,
       exchangePossible: null,
       withoutAccidents: null,
       withServiceHistory: null,
       features: null,
       sortBy: null,
+      city: null, // Add required property
       commercialType: null
     });
     
