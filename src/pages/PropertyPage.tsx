@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -10,7 +9,8 @@ import {
   PropertyType,
   BuildingType,
   ConditionType,
-  SortOption 
+  SortOption,
+  PropertyFilterConfig 
 } from '@/types/listingType';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -21,15 +21,6 @@ interface DistrictData {
     ru: string;
     kz: string;
   };
-}
-
-interface PropertyFilterConfig {
-  priceRangeMin: number;
-  priceRangeMax: number;
-  areaRangeMin: number;
-  areaRangeMax: number;
-  floorRangeMin: number;
-  floorRangeMax: number;
 }
 
 export function PropertyPage() {
