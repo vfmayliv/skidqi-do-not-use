@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -13,16 +12,14 @@ import {
   SortOption 
 } from '@/types/listingType';
 
-// Define basic district data type with the correct language code structure
 interface DistrictData {
   id: string;
   name: {
     ru: string;
-    kz: string;  // Changed from kk to kz to match expected structure
+    kz: string;
   };
 }
 
-// Define the expected PropertyFilterConfig interface
 interface PropertyFilterConfig {
   priceRangeMin: number;
   priceRangeMax: number;
@@ -81,16 +78,13 @@ export function PropertyPage() {
     viewTypes: null,
     nearbyInfrastructure: null
   });
-  
-  // Filter property listings from mockListings
+
   const [filteredListings, setFilteredListings] = useState(
     mockListings.filter(listing => listing.propertyType)
   );
   const [districts, setDistricts] = useState<DistrictData[]>([]);
-  
-  // Mock districts data
+
   useEffect(() => {
-    // Simulate fetching districts data
     const mockDistricts: DistrictData[] = [
       { id: 'almaty-district', name: { ru: 'Алмалинский район', kz: 'Алмалы ауданы' } },
       { id: 'bostandyk-district', name: { ru: 'Бостандыкский район', kz: 'Бостандық ауданы' } },
@@ -98,8 +92,7 @@ export function PropertyPage() {
     ];
     setDistricts(mockDistricts);
   }, []);
-  
-  // Update filters based on URL params on initial load
+
   useEffect(() => {
     const initialPropertyType = searchParams.get('type') as PropertyType || null;
     if (initialPropertyType) {
@@ -109,8 +102,7 @@ export function PropertyPage() {
       }));
     }
   }, [searchParams]);
-  
-  // Apply filters
+
   useEffect(() => {
     let newListings = [...mockListings.filter(listing => listing.propertyType)];
     
@@ -155,7 +147,6 @@ export function PropertyPage() {
       newListings = newListings.filter(listing => listing.districtId && filters.districts?.includes(listing.districtId));
     }
 
-    // Sorting logic
     if (filters.sortBy) {
       switch (filters.sortBy) {
         case SortOption.PRICE_ASC:
@@ -177,8 +168,7 @@ export function PropertyPage() {
     
     setFilteredListings(newListings);
   }, [filters]);
-  
-  // Update URL params
+
   const updateUrlParams = (newFilters: PropertyFiltersType) => {
     const params = new URLSearchParams();
     
@@ -190,15 +180,13 @@ export function PropertyPage() {
     
     setSearchParams(params);
   };
-  
-  // Handle filter change
+
   const handleFilterChange = (newFilters: Partial<PropertyFiltersType>) => {
     const updatedFilters: PropertyFiltersType = { ...filters, ...newFilters };
     setFilters(updatedFilters);
     updateUrlParams(updatedFilters);
   };
-  
-  // Handle reset
+
   const handleReset = () => {
     setFilters({
       propertyTypes: null,
@@ -247,17 +235,13 @@ export function PropertyPage() {
       nearbyInfrastructure: null
     });
     
-    // Clear URL params
     setSearchParams({});
   };
-  
-  // Handle search
+
   const handleSearch = () => {
-    // In this mock, the filtering is already done in the useEffect hook
     console.log('Search triggered with filters:', filters);
   };
-  
-  // Count active filters
+
   const activeFiltersCount = Object.keys(filters).reduce((count, key) => {
     const filterKey = key as keyof PropertyFiltersType;
     const filterValue = filters[filterKey];
