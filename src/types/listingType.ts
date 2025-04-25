@@ -234,6 +234,15 @@ export enum VehicleFeature {
   ALLOY_WHEELS = 'alloy_wheels'
 }
 
+export interface PropertyFilterConfig {
+  priceRangeMin?: number;
+  priceRangeMax?: number;
+  areaRangeMin?: number;
+  areaRangeMax?: number;
+  floorRangeMin?: number;
+  floorRangeMax?: number;
+}
+
 export interface PropertyFilters {
   priceRange: { min: number | null; max: number | null };
   rooms: number[] | null;
