@@ -173,7 +173,8 @@ export enum VehicleType {
   TRUCK = "truck",
   BUS = "bus",
   SPECIAL_EQUIPMENT = "special_equipment",
-  COMMERCIAL = "commercial"
+  COMMERCIAL = "commercial",
+  PARTS = "parts"
 }
 
 export enum EngineType {
