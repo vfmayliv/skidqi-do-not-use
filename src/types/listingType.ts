@@ -6,6 +6,11 @@ export interface PropertyFilterConfig {
   areaRangeMax?: number;
   floorRangeMin?: number;
   floorRangeMax?: number;
+  dealTypes?: string[];
+  segments?: string[];
+  residentialFilters?: boolean;
+  commercialFilters?: boolean;
+  generalFilters?: boolean;
 }
 
 // Common types for listings
