@@ -64,6 +64,21 @@ export interface Listing {
   bodyType?: BodyType;
   condition?: ConditionType;
   steeringWheel?: SteeringWheelType;
+  commercialType?: string;
+  inStock?: boolean;
+  exchangePossible?: boolean;
+  accidentHistory?: boolean;
+  servicingHistory?: boolean;
+  customsCleared?: boolean;
+  features?: VehicleFeature[];
+  color?: string;
+  enginePower?: number;
+  owners?: number;
+  vin?: string;
+  registrationPlate?: string;
+  technicalInspection?: boolean;
+  withoutAccidents?: boolean;
+  withServiceHistory?: boolean;
 }
 
 // Property types
@@ -83,7 +98,8 @@ export enum BuildingType {
   BRICK = "brick",
   MONOLITHIC = "monolithic",
   BLOCK = "block",
-  WOODEN = "wooden"
+  WOODEN = "wooden",
+  MIXED = "mixed"
 }
 
 export enum RenovationType {
@@ -96,12 +112,16 @@ export enum RenovationType {
 export enum BathroomType {
   COMBINED = "combined",
   SEPARATE = "separate",
-  TWO_OR_MORE = "two_or_more"
+  TWO_OR_MORE = "two_or_more",
+  NO_BATHROOM = "no_bathroom"
 }
 
 export enum DealType {
   SALE = "sale",
-  RENT = "rent"
+  RENT = "rent",
+  BUY = "buy",
+  RENT_LONG = "rent_long",
+  RENT_DAILY = "rent_daily"
 }
 
 export enum ViewType {
@@ -109,7 +129,10 @@ export enum ViewType {
   STREET = "street",
   CITY = "city",
   MOUNTAINS = "mountains",
-  LAKE = "lake"
+  LAKE = "lake",
+  PARK = "park",
+  MOUNTAIN = "mountain",
+  COURTYARD = "courtyard"
 }
 
 export enum InfrastructureType {
@@ -121,7 +144,10 @@ export enum InfrastructureType {
   PUBLIC_TRANSPORT = "public_transport",
   PHARMACY = "pharmacy",
   RESTAURANT = "restaurant",
-  FITNESS_CENTER = "fitness_center"
+  FITNESS_CENTER = "fitness_center",
+  SPORT_COMPLEX = "sport_complex",
+  CAFE = "cafe",
+  BANK = "bank"
 }
 
 // Vehicle types
@@ -130,7 +156,8 @@ export enum VehicleType {
   MOTORCYCLE = "motorcycle",
   TRUCK = "truck",
   BUS = "bus",
-  SPECIAL_EQUIPMENT = "special_equipment"
+  SPECIAL_EQUIPMENT = "special_equipment",
+  COMMERCIAL = "commercial"
 }
 
 export enum EngineType {
@@ -165,7 +192,9 @@ export enum BodyType {
   CONVERTIBLE = "convertible",
   PICKUP = "pickup",
   VAN = "van",
-  MINIVAN = "minivan"
+  MINIVAN = "minivan",
+  CABRIOLET = "cabriolet",
+  LIMOUSINE = "limousine"
 }
 
 export enum ConditionType {
@@ -191,7 +220,10 @@ export enum VehicleFeature {
   SUNROOF = "sunroof",
   NAVIGATION = "navigation",
   PARKING_SENSORS = "parking_sensors",
-  REAR_VIEW_CAMERA = "rear_view_camera"
+  REAR_VIEW_CAMERA = "rear_view_camera",
+  AIRBAGS = "airbags",
+  CRUISE_CONTROL = "cruise_control",
+  ALLOY_WHEELS = "alloy_wheels"
 }
 
 // Common enums
@@ -202,7 +234,11 @@ export enum SortOption {
   PRICE_DESC = "price_desc",
   AREA_ASC = "area_asc",
   AREA_DESC = "area_desc",
-  VIEWS_DESC = "views_desc"
+  VIEWS_DESC = "views_desc",
+  YEAR_DESC = "year_desc",
+  YEAR_ASC = "year_asc",
+  MILEAGE_ASC = "mileage_asc",
+  MILEAGE_DESC = "mileage_desc"
 }
 
 // Filter interfaces
@@ -255,6 +291,7 @@ export interface PropertyFilters {
 
 export interface TransportFilters {
   vehicleTypes: VehicleType[] | null;
+  vehicleType?: VehicleType | null; // Additional property used in TransportPage
   priceRange: {
     min: number | null;
     max: number | null;
@@ -279,6 +316,7 @@ export interface TransportFilters {
   bodyTypes: BodyType[] | null;
   colors: string[] | null;
   conditions: ConditionType[] | null;
+  condition?: ConditionType[] | null; // Additional property used in TransportPage
   steeringWheel: SteeringWheelType | null;
   hasPhoto: boolean | null;
   customsCleared: boolean | null;
@@ -286,4 +324,9 @@ export interface TransportFilters {
   features: VehicleFeature[] | null;
   sortBy: SortOption | null;
   city: string | null;
+  commercialType?: string | null; // Added for commercial type support
+  inStock?: boolean | null; // Added for in stock filter
+  exchangePossible?: boolean | null; // Added for exchange possibility
+  withoutAccidents?: boolean | null; // Added for accident history
+  withServiceHistory?: boolean | null; // Added for service history 
 }
