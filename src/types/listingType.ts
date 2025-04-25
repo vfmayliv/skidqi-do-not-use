@@ -1,4 +1,16 @@
 // Basic property filter config
+export interface FilterOption {
+  id: string;
+  label: Record<string, string>; // Assuming this maps to language codes
+  value: string;
+}
+
+export interface FilterSegment {
+  id: string;
+  label: Record<string, string>;
+  types: FilterOption[];
+}
+
 export interface PropertyFilterConfig {
   priceRangeMin?: number;
   priceRangeMax?: number;
@@ -6,11 +18,11 @@ export interface PropertyFilterConfig {
   areaRangeMax?: number;
   floorRangeMin?: number;
   floorRangeMax?: number;
-  dealTypes?: string[];
-  segments?: string[];
-  residentialFilters?: boolean;
-  commercialFilters?: boolean;
-  generalFilters?: boolean;
+  dealTypes?: FilterOption[];
+  segments?: FilterSegment[];
+  residentialFilters?: FilterOption[];
+  commercialFilters?: FilterOption[];
+  generalFilters?: FilterOption[];
 }
 
 // Common types for listings

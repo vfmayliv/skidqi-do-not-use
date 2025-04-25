@@ -10,7 +10,9 @@ import {
   BuildingType,
   ConditionType,
   SortOption,
-  PropertyFilterConfig 
+  PropertyFilterConfig,
+  FilterOption,
+  FilterSegment
 } from '@/types/listingType';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -279,11 +281,25 @@ export function PropertyPage() {
               areaRangeMax: 1000,
               floorRangeMin: 1,
               floorRangeMax: 50,
-              dealTypes: ['sale', 'rent'],
-              segments: ['residential', 'commercial'],
-              residentialFilters: true,
-              commercialFilters: false,
-              generalFilters: true
+              dealTypes: [
+                { id: 'sale', label: { ru: 'Продажа', kz: 'Сату' }, value: 'sale' },
+                { id: 'rent', label: { ru: 'Аренда', kz: 'Жалға алу' }, value: 'rent' }
+              ],
+              segments: [
+                { 
+                  id: 'residential', 
+                  label: { ru: 'Жилая недвижимость', kz: 'Тұрғын үй' },
+                  types: []
+                },
+                { 
+                  id: 'commercial', 
+                  label: { ru: 'Коммерческая недвижимость', kz: 'Коммерциялық жылжымайтын мүлік' },
+                  types: []
+                }
+              ],
+              residentialFilters: [],
+              commercialFilters: [],
+              generalFilters: []
             }}
           />
           
