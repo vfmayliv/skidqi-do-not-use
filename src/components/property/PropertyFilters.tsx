@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
@@ -135,7 +136,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
     { value: ViewType.CITY, label: { ru: 'На город', kz: 'Қалаға' } },
     { value: ViewType.PARK, label: { ru: 'На парк', kz: 'Саябаққа' } },
     { value: ViewType.LAKE, label: { ru: 'На озеро', kz: 'Көлге' } },
-    { value: ViewType.MOUNTAIN, label: { ru: 'На горы', kz: 'Тауларға' } },
+    { value: ViewType.MOUNTAINS, label: { ru: 'На горы', kz: 'Тауларға' } }, // Fixed from MOUNTAIN to MOUNTAINS
     { value: ViewType.COURTYARD, label: { ru: 'Во двор', kz: 'Ауладға' } },
     { value: ViewType.STREET, label: { ru: 'На улицу', kz: 'Көшеге' } },
   ];

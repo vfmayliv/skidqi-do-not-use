@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAppContext } from '@/contexts/AppContext';
@@ -55,6 +55,7 @@ const TransportPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [brandsSearchQuery, setBrandsSearchQuery] = useState('');
   
   const typeParam = searchParams.get('type');
   
@@ -127,7 +128,7 @@ const TransportPage = () => {
     });
     
     toast({
-      title: language === 'ru' ? '����ильтры сброшены' : 'Сүзгілер тазартылды',
+      title: language === 'ru' ? '������ильтры сброшены' : 'Сүзгілер тазартылды',
     });
   };
   
@@ -634,6 +635,18 @@ const TransportPage = () => {
     }
   };
 
+  const filteredBrands = useMemo(() => {
+    if (!brandsSearchQuery) return brands;
+    
+    return brands.filter(brand => {
+      const brandName = typeof brand.name === 'string' 
+        ? brand.name.toLowerCase() 
+        : brand.name.ru.toLowerCase();
+        
+      return brandName.includes(brandsSearchQuery.toLowerCase());
+    });
+  }, [brands, brandsSearchQuery]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -692,8 +705,7 @@ const TransportPage = () => {
                 description: `${language === 'ru' ? 'Найдено' : 'Табылды'}: ${filteredListings.length}`,
               });
             }}
-            brands={filters.vehicleType === VehicleType.CAR ? carBrands : 
-                    filters.vehicleType === VehicleType.MOTORCYCLE ? motorcycleBrands : []}
+            brands={filteredBrands}
             activeFiltersCount={getActiveFiltersCount()}
             commercialTypes={commercialTypes}
           />
@@ -717,7 +729,7 @@ const TransportPage = () => {
             <SheetContent side="bottom" className="h-[90vh] max-h-[90vh] overflow-y-auto">
               <SheetHeader>
                 <SheetTitle>
-                  {language === 'ru' ? 'Фильт��ы' : 'Сүзгілер'}
+                  {language === 'ru' ? 'Фильт��ы' : 'Сүзгіл��р'}
                 </SheetTitle>
               </SheetHeader>
               <TransportFiltersComponent
@@ -730,8 +742,7 @@ const TransportPage = () => {
                     description: `${language === 'ru' ? 'Найдено' : 'Табылды'}: ${filteredListings.length}`,
                   });
                 }}
-                brands={filters.vehicleType === VehicleType.CAR ? carBrands : 
-                        filters.vehicleType === VehicleType.MOTORCYCLE ? motorcycleBrands : []}
+                brands={filteredBrands}
                 activeFiltersCount={getActiveFiltersCount()}
                 commercialTypes={commercialTypes}
               />

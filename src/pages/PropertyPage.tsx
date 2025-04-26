@@ -25,6 +25,14 @@ interface DistrictData {
   };
 }
 
+export const propertyFilterConfig: PropertyFilterConfig = {
+  areaRangeMin: 10,
+  areaRangeMax: 500,
+  floorRangeMin: 1,
+  floorRangeMax: 30,
+  // Remove priceRangeMin and other non-interface properties or convert them to optional
+};
+
 export function PropertyPage() {
   const { language } = useAppContext();
   const [searchParams, setSearchParams] = useSearchParams();

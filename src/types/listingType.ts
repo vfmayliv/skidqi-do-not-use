@@ -105,6 +105,7 @@ export enum VehicleType {
   MOTORCYCLE = 'motorcycle',
   COMMERCIAL = 'commercial',
   SPECIAL = 'special',
+  PARTS = 'parts',
 }
 
 export enum EngineType {
@@ -260,6 +261,7 @@ export interface TransportFilters {
   features: VehicleFeature[] | null;
   sortBy: SortOption | null;
   commercialType: string | null;
+  colors: string[] | null; // Добавлено для совместимости с TransportPage
 }
 
 export interface PropertyFilterConfig {
@@ -344,5 +346,6 @@ export type BrandData = {
   id: string;
   name: LocalizedText | string;
   models: string[];
+  toLowerCase?: () => string; // Добавлено для совместимости
 };
 

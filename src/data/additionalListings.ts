@@ -1,4 +1,3 @@
-
 import { cities } from './cities';
 import { Listing } from '../types/listingType';
 
@@ -19,6 +18,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 85000,
       discount: 29,
       imageUrl: 'https://via.placeholder.com/300x200?text=BabyStroller',
+      category: 'kids',
+      subcategory: 'strollers',
       categoryId: 'kids',
       subcategoryId: undefined,
       city: cities[0],
@@ -26,6 +27,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 253,
       isFeatured: true,
       userId: 'user-9',
+      seller: {
+        name: 'Мария',
+        phone: '+7 (777) 901-23-45',
+        rating: 4.9
+      },
     },
     {
       id: 'listing-10',
@@ -41,6 +47,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 150000,
       discount: 17,
       imageUrl: 'https://via.placeholder.com/300x200?text=WashingMachine',
+      category: 'electronics',
+      subcategory: 'appliances',
       categoryId: 'electronics',
       subcategoryId: undefined,
       city: cities[2],
@@ -48,6 +56,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 187,
       isFeatured: false,
       userId: 'user-10',
+      seller: {
+        name: 'Алихан',
+        phone: '+7 (777) 012-34-56',
+        rating: 4.7
+      },
     },
     {
       id: 'listing-11',
@@ -63,6 +76,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 4200000,
       discount: 16,
       imageUrl: 'https://via.placeholder.com/300x200?text=Land',
+      category: 'property',
+      subcategory: 'land',
       categoryId: 'property',
       subcategoryId: undefined,
       city: cities[0],
@@ -70,6 +85,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 421,
       isFeatured: true,
       userId: 'user-11',
+      seller: {
+        name: 'Сергей',
+        phone: '+7 (777) 123-45-67',
+        rating: 4.6
+      },
     },
     {
       id: 'listing-12',
@@ -85,6 +105,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 290000,
       discount: 17,
       imageUrl: 'https://via.placeholder.com/300x200?text=PS5',
+      category: 'electronics',
+      subcategory: 'gaming',
       categoryId: 'electronics',
       subcategoryId: undefined,
       city: cities[1],
@@ -92,6 +114,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 378,
       isFeatured: true,
       userId: 'user-12',
+      seller: {
+        name: 'Арман',
+        phone: '+7 (777) 234-56-78',
+        rating: 4.8
+      },
     },
     {
       id: 'listing-13',
@@ -107,6 +134,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 180000,
       discount: 28,
       imageUrl: 'https://via.placeholder.com/300x200?text=Kitchen',
+      category: 'home',
+      subcategory: 'furniture',
       categoryId: 'home',
       subcategoryId: undefined,
       city: cities[3],
@@ -114,6 +143,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 215,
       isFeatured: false,
       userId: 'user-13',
+      seller: {
+        name: 'Светлана',
+        phone: '+7 (777) 345-67-89',
+        rating: 4.5
+      },
     },
     {
       id: 'listing-14',
@@ -129,6 +163,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 90000,
       discount: 55,
       imageUrl: 'https://via.placeholder.com/300x200?text=WeddingDress',
+      category: 'fashion',
+      subcategory: 'wedding',
       categoryId: 'fashion',
       subcategoryId: undefined,
       city: cities[2],
@@ -136,6 +172,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 167,
       isFeatured: false,
       userId: 'user-14',
+      seller: {
+        name: 'Жанна',
+        phone: '+7 (777) 456-78-90',
+        rating: 4.9
+      },
     },
     {
       id: 'listing-15',
@@ -151,6 +192,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 500000,
       discount: 33,
       imageUrl: 'https://via.placeholder.com/300x200?text=MassageChair',
+      category: 'beauty',
+      subcategory: 'equipment',
       categoryId: 'beauty',
       subcategoryId: undefined,
       city: cities[0],
@@ -158,6 +201,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 245,
       isFeatured: true,
       userId: 'user-15',
+      seller: {
+        name: 'Николай',
+        phone: '+7 (777) 567-89-01',
+        rating: 4.7
+      },
     },
     {
       id: 'listing-16',
@@ -173,6 +221,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 5900000,
       discount: 9,
       imageUrl: 'https://via.placeholder.com/300x200?text=Motorcycle',
+      category: 'transport',
+      subcategory: 'motorcycles',
       categoryId: 'transport',
       subcategoryId: 'motorcycles',
       city: cities[1],
@@ -180,6 +230,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 432,
       isFeatured: true,
       userId: 'user-16',
+      seller: {
+        name: 'Руслан',
+        phone: '+7 (777) 678-90-12',
+        rating: 4.8
+      },
     },
     {
       id: 'listing-17',
@@ -195,6 +250,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 980000,
       discount: 18,
       imageUrl: 'https://via.placeholder.com/300x200?text=Camera',
+      category: 'electronics',
+      subcategory: 'photo',
       categoryId: 'electronics',
       subcategoryId: undefined,
       city: cities[5],
@@ -202,6 +259,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 265,
       isFeatured: true,
       userId: 'user-17',
+      seller: {
+        name: 'Евгений',
+        phone: '+7 (777) 789-01-23',
+        rating: 4.6
+      },
     },
     {
       id: 'listing-18',
@@ -217,6 +279,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 120000,
       discount: 20,
       imageUrl: 'https://via.placeholder.com/300x200?text=Wardrobe',
+      category: 'home',
+      subcategory: 'furniture',
       categoryId: 'home',
       subcategoryId: undefined,
       city: cities[6],
@@ -224,6 +288,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 198,
       isFeatured: false,
       userId: 'user-18',
+      seller: {
+        name: 'Гульнара',
+        phone: '+7 (777) 890-12-34',
+        rating: 4.5
+      },
     },
     {
       id: 'listing-19',
@@ -239,6 +308,8 @@ export const getAdditionalFixedListings = (): Listing[] => {
       discountPrice: 65000,
       discount: 28,
       imageUrl: 'https://via.placeholder.com/300x200?text=Elliptical',
+      category: 'hobby',
+      subcategory: 'sports',
       categoryId: 'hobby',
       subcategoryId: undefined,
       city: cities[7],
@@ -246,6 +317,11 @@ export const getAdditionalFixedListings = (): Listing[] => {
       views: 176,
       isFeatured: false,
       userId: 'user-19',
+      seller: {
+        name: 'Виталий',
+        phone: '+7 (777) 901-23-45',
+        rating: 4.7
+      },
     },
   ];
 };
