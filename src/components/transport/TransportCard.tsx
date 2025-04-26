@@ -12,9 +12,16 @@ type TransportCardProps = {
   variant?: 'default' | 'horizontal';
   onFavoriteToggle?: (id: string) => void;
   isFavorite?: boolean;
+  viewMode?: 'grid' | 'list';
 };
 
-const TransportCard = ({ listing, variant = 'default', onFavoriteToggle, isFavorite = false }: TransportCardProps) => {
+const TransportCard = ({ 
+  listing, 
+  variant = 'default', 
+  onFavoriteToggle, 
+  isFavorite = false,
+  viewMode = 'grid'
+}: TransportCardProps) => {
   const { language } = useAppContext();
   
   // Helper to format discount price

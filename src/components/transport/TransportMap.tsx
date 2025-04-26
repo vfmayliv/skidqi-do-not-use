@@ -3,17 +3,29 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Listing } from '@/types/listingType';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
-import { MapPin, ListFilter, X } from 'lucide-react';
+import { MapPin, ListFilter, X, Maximize, Minimize } from 'lucide-react';
 
 type TransportMapProps = {
   listings: Listing[];
   onListingClick: (listing: Listing) => void;
   className?: string;
   showListToggle?: boolean;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
+  language?: string;
 };
 
-const TransportMap = ({ listings, onListingClick, className = '', showListToggle = false }: TransportMapProps) => {
-  const { language } = useAppContext();
+const TransportMap = ({ 
+  listings, 
+  onListingClick, 
+  className = '', 
+  showListToggle = false,
+  isFullscreen = false,
+  onToggleFullscreen,
+  language
+}: TransportMapProps) => {
+  const appContext = useAppContext();
+  const currentLanguage = language || appContext.language;
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -22,7 +34,7 @@ const TransportMap = ({ listings, onListingClick, className = '', showListToggle
   
   // Format price for display in popup
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat(language === 'ru' ? 'ru-RU' : 'kk-KZ').format(price);
+    return new Intl.NumberFormat(currentLanguage === 'ru' ? 'ru-RU' : 'kk-KZ').format(price);
   };
   
   // Load Yandex Maps script
@@ -184,7 +196,24 @@ const TransportMap = ({ listings, onListingClick, className = '', showListToggle
         <div className="absolute top-4 left-4 z-10">
           <Button variant="secondary" size="sm" className="shadow-md">
             <ListFilter className="h-4 w-4 mr-1" />
-            {language === 'ru' ? 'Список' : 'Тізім'}
+            {currentLanguage === 'ru' ? 'Список' : 'Тізім'}
+          </Button>
+        </div>
+      )}
+      
+      {onToggleFullscreen && (
+        <div className="absolute top-4 right-4 z-10">
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            className="shadow-md"
+            onClick={onToggleFullscreen}
+          >
+            {isFullscreen ? (
+              <Minimize className="h-4 w-4" />
+            ) : (
+              <Maximize className="h-4 w-4" />
+            )}
           </Button>
         </div>
       )}
