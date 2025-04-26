@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -786,3 +787,127 @@ const TransportPage = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={language === 'ru' ? 'Поиск по марке, модели или описанию' : 'Марка, үлгі немесе сипаттама бойынша іздеу'}
+            className="w-full pl-10 pr-4 py-2 border border-input rounded-md"
+          />
+        </div>
+
+        {/* View Mode Selector */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="text-sm text-muted-foreground">
+            {language === 'ru' ? `Найдено ${sortedListings.length} предложений` : `${sortedListings.length} ұсыныс табылды`}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'secondary' : 'outline'}
+              size="sm"
+              className="px-3"
+              onClick={() => setViewMode('grid')}
+            >
+              <Grid3X3 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'secondary' : 'outline'}
+              size="sm"
+              className="px-3"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'map' ? 'secondary' : 'outline'}
+              size="sm"
+              className="px-3"
+              onClick={() => setViewMode('map')}
+            >
+              <MapPin className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Active Filters */}
+        {getActiveFiltersCount() > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {filters.vehicleType && renderActiveFilter('vehicleType', filters.vehicleType, language === 'ru' ? 'Тип' : 'Түрі')}
+            {filters.commercialType && renderActiveFilter('commercialType', filters.commercialType, language === 'ru' ? 'Тип коммерческого' : 'Коммерциялық түрі')}
+            {filters.brands && filters.brands.length > 0 && renderActiveFilter('brands', filters.brands, language === 'ru' ? 'Марка' : 'Марка')}
+            {filters.models && filters.models.length > 0 && renderActiveFilter('models', filters.models, language === 'ru' ? 'Модель' : 'Үлгі')}
+            {(filters.yearRange.min !== null || filters.yearRange.max !== null) && renderActiveFilter('yearRange', filters.yearRange, language === 'ru' ? 'Год' : 'Жыл')}
+            {(filters.priceRange.min !== null || filters.priceRange.max !== null) && renderActiveFilter('priceRange', filters.priceRange, language === 'ru' ? 'Цена' : 'Баға')}
+            {(filters.mileageRange.min !== null || filters.mileageRange.max !== null) && renderActiveFilter('mileageRange', filters.mileageRange, language === 'ru' ? 'Пробег' : 'Жүріс')}
+            {filters.engineTypes && filters.engineTypes.length > 0 && renderActiveFilter('engineTypes', filters.engineTypes, language === 'ru' ? 'Двигатель' : 'Қозғалтқыш')}
+            {(filters.engineVolumeRange.min !== null || filters.engineVolumeRange.max !== null) && renderActiveFilter('engineVolumeRange', filters.engineVolumeRange, language === 'ru' ? 'Объем' : 'Көлемі')}
+            {filters.transmissions && filters.transmissions.length > 0 && renderActiveFilter('transmissions', filters.transmissions, language === 'ru' ? 'КПП' : 'БҚҚ')}
+            {filters.driveTypes && filters.driveTypes.length > 0 && renderActiveFilter('driveTypes', filters.driveTypes, language === 'ru' ? 'Привод' : 'Жетегі')}
+            {filters.bodyTypes && filters.bodyTypes.length > 0 && renderActiveFilter('bodyTypes', filters.bodyTypes, language === 'ru' ? 'Кузов' : 'Шанақ')}
+            {filters.condition && filters.condition.length > 0 && renderActiveFilter('condition', filters.condition, language === 'ru' ? 'Состояние' : 'Жағдайы')}
+            {filters.hasPhoto === true && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                {language === 'ru' ? 'С фото' : 'Фотосымен'}
+                <X 
+                  className="h-3 w-3 cursor-pointer ml-1" 
+                  onClick={() => handleFilterChange({ hasPhoto: null })}
+                />
+              </Badge>
+            )}
+            <Button variant="ghost" size="sm" className="text-xs" onClick={handleResetFilters}>
+              {language === 'ru' ? 'Сбросить все' : 'Барлығын тазалау'}
+            </Button>
+          </div>
+        )}
+
+        {/* Results Display */}
+        {viewMode === 'map' ? (
+          <div className={`relative ${isMapFullscreen ? 'fixed inset-0 z-50' : 'h-[70vh]'}`}>
+            <TransportMap 
+              listings={sortedListings} 
+              onListingClick={(id) => {/* Handle listing click */}}
+              isFullscreen={isMapFullscreen}
+              onToggleFullscreen={() => setIsMapFullscreen(!isMapFullscreen)}
+              language={language}
+            />
+          </div>
+        ) : (
+          <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'grid-cols-1 gap-4'}`}>
+            {sortedListings.length > 0 ? (
+              sortedListings.map(listing => (
+                <TransportCard 
+                  key={listing.id}
+                  listing={listing}
+                  isFavorite={favorites.includes(listing.id)}
+                  onFavoriteToggle={() => handleFavoriteToggle(listing.id)}
+                  viewMode={viewMode}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-20">
+                <div className="text-4xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold mb-2">
+                  {language === 'ru' ? 'Ничего не найдено' : 'Ештеңе табылмады'}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {language === 'ru' ? 'Попробуйте изменить параметры поиска' : 'Іздеу параметрлерін өзгертіп көріңіз'}
+                </p>
+                <Button onClick={handleResetFilters}>
+                  {language === 'ru' ? 'Сбросить все фильтры' : 'Барлық сүзгілерді тазалау'}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {sortedListings.length > 0 && (
+          <div className="flex justify-center mt-8">
+            <Button variant="outline" className="flex items-center gap-2">
+              {language === 'ru' ? 'Загрузить еще' : 'Тағы жүктеу'}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </main>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default TransportPage;
