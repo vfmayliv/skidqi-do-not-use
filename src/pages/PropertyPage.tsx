@@ -282,8 +282,8 @@ export function PropertyPage() {
               floorRangeMin: 1,
               floorRangeMax: 50,
               dealTypes: [
-                { id: 'sale', label: { ru: 'Продажа', kz: 'Сату' }, value: 'sale' },
-                { id: 'rent', label: { ru: 'Аренда', kz: 'Жалға алу' }, value: 'rent' }
+                { id: 'sale', label: { ru: 'Продажа', kz: 'Сату' } },
+                { id: 'rent', label: { ru: 'Аренда', kz: 'Жалға алу' } }
               ],
               segments: [
                 { 
