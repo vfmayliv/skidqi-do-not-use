@@ -717,7 +717,7 @@ const TransportPage = () => {
             <SheetContent side="bottom" className="h-[90vh] max-h-[90vh] overflow-y-auto">
               <SheetHeader>
                 <SheetTitle>
-                  {language === 'ru' ? 'Фильтры' : 'Сүзгілер'}
+                  {language === 'ru' ? 'Фильт��ы' : 'Сүзгілер'}
                 </SheetTitle>
               </SheetHeader>
               <TransportFiltersComponent
