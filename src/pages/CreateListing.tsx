@@ -21,6 +21,10 @@ import { categories, Category } from '@/data/categories';
 import { cities } from '@/data/cities';
 import { processImageForUpload, createImagePreviewUrl, revokeImagePreviewUrl } from '@/utils/imageUtils';
 import { useNavigate } from 'react-router-dom';
+import { Listing } from '@/types/listingType';
+
+// Ключ для хранения объявлений пользователя в localStorage
+const USER_LISTINGS_KEY = 'userListings';
 
 const CreateListing = () => {
   const { language, city: selectedCity, t } = useAppContext();
@@ -202,6 +206,35 @@ const CreateListing = () => {
     ));
   };
 
+  // Сохранение черновика и загрузка из localStorage
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('currentListingDraft');
+    if (savedDraft) {
+      try {
+        const draftData = JSON.parse(savedDraft);
+        setTitle(draftData.title || '');
+        setDescription(draftData.description || '');
+        setPrice(draftData.price || '');
+        setDiscountPrice(draftData.discountPrice || '');
+        setDiscount(draftData.discount || '');
+        setCity(draftData.city || (selectedCity ? selectedCity[language] : ''));
+        setPhone(draftData.phone || '');
+        
+        // Восстановление изображений
+        if (draftData.images && Array.isArray(draftData.images)) {
+          setUploadedImages(draftData.images);
+        }
+      } catch (error) {
+        console.error('Error loading draft data:', error);
+      }
+    }
+  }, []);
+
+  // Генерация уникального ID для нового объявления
+  const generateUniqueId = () => {
+    return Date.now().toString() + Math.random().toString(36).substr(2, 5);
+  };
+
   // Handle form submission and save draft
   const handlePublish = () => {
     if (!isFormValid) {
@@ -215,9 +248,45 @@ const CreateListing = () => {
       return;
     }
 
-    // Here would be the API call to publish the listing
+    // Создаем новое объявление
+    const newListing: Listing = {
+      id: generateUniqueId(),
+      title: {
+        ru: language === 'ru' ? title : title,
+        kz: language === 'kz' ? title : title
+      },
+      description: {
+        ru: language === 'ru' ? description : description,
+        kz: language === 'kz' ? description : description
+      },
+      category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].id : '',
+      city: {
+        ru: language === 'ru' ? city : city,
+        kz: language === 'kz' ? city : city
+      },
+      imageUrl: uploadedImages.length > 0 ? uploadedImages[0] : '/placeholder.svg',
+      images: uploadedImages,
+      originalPrice: parseFloat(price) || 0,
+      discountPrice: parseFloat(discountPrice) || parseFloat(price) || 0,
+      discount: parseInt(discount) || 0,
+      seller: {
+        name: 'Пользователь',
+        phone: phone,
+        rating: 5
+      },
+      createdAt: new Date().toISOString(),
+      views: 0,
+      isFeatured: false
+    };
+
+    // Сохраняем объявление в localStorage
+    const savedListings = JSON.parse(localStorage.getItem(USER_LISTINGS_KEY) || '[]');
+    const updatedListings = [newListing, ...savedListings];
+    localStorage.setItem(USER_LISTINGS_KEY, JSON.stringify(updatedListings));
     
-    // For now, simulate success
+    // Удаляем черновик после публикации
+    localStorage.removeItem('currentListingDraft');
+    
     toast({
       title: language === 'ru' ? 'Успех' : 'Сәтті',
       description: language === 'ru' 
@@ -232,25 +301,22 @@ const CreateListing = () => {
   };
   
   const handleSaveDraft = () => {
-    // Here would be the API call to save as draft
-    
-    // For now, just simulate storing in local storage
+    // Сохраняем текущее состояние формы
     const draftData = {
       title,
-      selectedCategories,
       description,
       price,
       discountPrice,
+      discount,
       city,
       phone,
       images: uploadedImages,
+      categoryIndices: selectedCategoryIndices,
       createdAt: new Date().toISOString()
     };
     
-    // Store in local storage
-    const drafts = JSON.parse(localStorage.getItem('listingDrafts') || '[]');
-    drafts.push(draftData);
-    localStorage.setItem('listingDrafts', JSON.stringify(drafts));
+    // Сохраняем в localStorage
+    localStorage.setItem('currentListingDraft', JSON.stringify(draftData));
     
     toast({
       title: language === 'ru' ? 'Черновик сохранен' : 'Жоба сақталды',

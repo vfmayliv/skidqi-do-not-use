@@ -2,7 +2,7 @@
 import { CitySelectionModal } from '@/components/CitySelectionModal';
 import { Header } from '@/components/Header';
 import { CategoryMenu } from '@/components/CategoryMenu';
-import { FeaturedListings } from '@/components/FeaturedListings';
+import { EnhancedFeaturedListings } from '@/components/EnhancedFeaturedListings';
 import { Footer } from '@/components/Footer';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { useAppContext } from '@/contexts/AppContext';
@@ -53,7 +53,7 @@ const Index = () => {
       <Banner />
       <CategoryMenu />
       <main className="flex-1">
-        <FeaturedListings />
+        <EnhancedFeaturedListings />
       </main>
       <Footer />
     </div>
