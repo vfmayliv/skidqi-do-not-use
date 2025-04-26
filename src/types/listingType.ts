@@ -1,4 +1,5 @@
 
+
 export interface LocalizedText {
   ru: string;
   kz: string;
@@ -21,6 +22,10 @@ export enum PropertyType {
   HOUSE = 'house',
   COMMERCIAL = 'commercial',
   LAND = 'land',
+  TOWNHOUSE = 'townhouse',
+  DACHA = 'dacha',
+  GARAGE = 'garage',
+  BUILDING = 'building',
 }
 
 export enum BuildingType {
@@ -29,6 +34,7 @@ export enum BuildingType {
   MONOLITHIC = 'monolithic',
   WOODEN = 'wooden',
   BLOCK = 'block',
+  MIXED = 'mixed',
 }
 
 export enum RenovationType {
@@ -36,17 +42,22 @@ export enum RenovationType {
   EURO = 'euro',
   COSMETIC = 'cosmetic',
   NEEDS_RENOVATION = 'needs_renovation',
+  WITHOUT_RENOVATION = 'without_renovation',
 }
 
 export enum BathroomType {
   COMBINED = 'combined',
   SEPARATE = 'separate',
   TWO_OR_MORE = 'two_or_more',
+  NO_BATHROOM = 'no_bathroom',
 }
 
 export enum DealType {
   SALE = 'sale',
   RENT = 'rent',
+  BUY = 'buy',
+  RENT_LONG = 'rent_long',
+  RENT_DAILY = 'rent_daily',
 }
 
 export enum ViewType {
@@ -56,6 +67,8 @@ export enum ViewType {
   MOUNTAINS = 'mountains',
   LAKE = 'lake',
   SEA = 'sea',
+  CITY = 'city',
+  COURTYARD = 'courtyard',
 }
 
 export enum InfrastructureType {
@@ -71,6 +84,7 @@ export enum InfrastructureType {
   CAFE = 'cafe',
   RESTAURANT = 'restaurant',
   BANK = 'bank',
+  SPORT_COMPLEX = 'sport_complex',
 }
 
 export enum SortOption {
@@ -134,6 +148,9 @@ export enum ConditionType {
   USED = 'used',
   DAMAGED = 'damaged',
   FOR_PARTS = 'for_parts',
+  EXCELLENT = 'excellent',
+  GOOD = 'good',
+  FAIR = 'fair',
 }
 
 export enum SteeringWheelType {
@@ -221,6 +238,7 @@ export interface TransportFiltersRange {
 
 export interface TransportFilters {
   vehicleType: VehicleType | null;
+  vehicleTypes?: VehicleType[] | null; // Добавлено для совместимости
   brands: string[] | null;
   models: string[] | null;
   yearRange: TransportFiltersRange;
@@ -245,22 +263,22 @@ export interface TransportFilters {
 }
 
 export interface PropertyFilterConfig {
-  priceRangeMin: number;
-  priceRangeMax: number;
-  roomsMin: number;
-  roomsMax: number;
-  areaMin: number;
-  areaMax: number;
-  propertyType: string | null;
-  areaRangeMin: number;
-  areaRangeMax: number;
-  floorRangeMin: number;
-  floorRangeMax: number;
-  dealTypes: FilterOption[];
-  segments: FilterSegment[];
-  residentialFilters: FilterOption[];
-  commercialFilters: FilterOption[];
-  generalFilters: FilterOption[];
+  priceRangeMin?: number;
+  priceRangeMax?: number;
+  roomsMin?: number;
+  roomsMax?: number;
+  areaMin?: number;
+  areaMax?: number;
+  propertyType?: string | null;
+  areaRangeMin?: number;
+  areaRangeMax?: number;
+  floorRangeMin?: number;
+  floorRangeMax?: number;
+  dealTypes?: FilterOption[];
+  segments?: FilterSegment[];
+  residentialFilters?: FilterOption[];
+  commercialFilters?: FilterOption[];
+  generalFilters?: FilterOption[];
 }
 
 export interface Listing {
@@ -279,6 +297,10 @@ export interface Listing {
   seller: Seller;
   createdAt: string;
   views: number;
+  
+  // Для совместимости с существующим кодом
+  categoryId?: string;
+  subcategoryId?: string;
   
   // Property specific fields
   propertyType?: PropertyType;
@@ -313,6 +335,9 @@ export interface Listing {
   steeringWheel?: SteeringWheelType;
   customsCleared?: boolean;
   features?: VehicleFeature[];
+  enginePower?: number;
+  commercialType?: string;
+  userId?: string;
 }
 
 export type BrandData = {
@@ -320,3 +345,4 @@ export type BrandData = {
   name: LocalizedText | string;
   models: string[];
 };
+
