@@ -59,16 +59,10 @@ const TransportPage = () => {
   
   const typeParam = searchParams.get('type');
   
-  const brands = filters.vehicleType === VehicleType.MOTORCYCLE 
-    ? motorcycleBrands 
-    : filters.vehicleType === VehicleType.COMMERCIAL
-      ? [] // No brands for commercial vehicles, use commercialTypes instead
-      : carBrands;
-  
   const [filters, setFilters] = useState<TransportFiltersType>({
     vehicleTypes: null,
     priceRange: { min: null, max: null },
-    vehicleType: typeParam ? VehicleType.CAR : null,
+    vehicleType: typeParam ? typeParam as VehicleType : null,
     brands: null,
     models: null,
     yearRange: { min: null, max: null },
@@ -80,7 +74,7 @@ const TransportPage = () => {
     bodyTypes: null,
     colors: null,
     condition: null,
-    conditions: null, // Added to match the type
+    conditions: null,
     hasPhoto: true,
     steeringWheel: null,
     customsCleared: null,
@@ -94,6 +88,14 @@ const TransportPage = () => {
     city: null,
     commercialType: null
   });
+  
+  const brands = useMemo(() => {
+    return filters.vehicleType === VehicleType.MOTORCYCLE 
+      ? motorcycleBrands 
+      : filters.vehicleType === VehicleType.COMMERCIAL
+        ? [] // No brands for commercial vehicles, use commercialTypes instead
+        : carBrands;
+  }, [filters.vehicleType]);
   
   const handleFilterChange = (newFilters: Partial<TransportFiltersType>) => {
     setFilters(prevFilters => ({
@@ -117,7 +119,7 @@ const TransportPage = () => {
       driveTypes: null,
       bodyTypes: null,
       colors: null,
-      conditions: null, // Added to match the type
+      conditions: null,
       condition: null,
       hasPhoto: true,
       steeringWheel: null,
@@ -134,7 +136,7 @@ const TransportPage = () => {
     });
     
     toast({
-      title: language === 'ru' ? '������ильтры сброшены' : 'Сүзгілер тазартылды',
+      title: language === 'ru' ? 'Фильтры сброшены' : 'Сүзгілер тазартылды',
     });
   };
   

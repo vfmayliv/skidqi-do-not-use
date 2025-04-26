@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
 import PropertyFilters from '@/components/property/PropertyFilters';
@@ -283,12 +283,6 @@ export function PropertyPage() {
             districts={districts}
             activeFiltersCount={activeFiltersCount}
             config={{
-              priceRangeMin: 0,
-              priceRangeMax: 1000000000,
-              areaRangeMin: 0,
-              areaRangeMax: 1000,
-              floorRangeMin: 1,
-              floorRangeMax: 50,
               dealTypes: [
                 { id: 'sale', label: { ru: 'Продажа', kz: 'Сату' } },
                 { id: 'rent', label: { ru: 'Аренда', kz: 'Жалға алу' } }

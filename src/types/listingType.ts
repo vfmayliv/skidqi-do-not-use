@@ -1,3 +1,4 @@
+
 export interface LocalizedText {
   ru: string;
   kz: string;
@@ -237,7 +238,7 @@ export interface TransportFiltersRange {
 
 export interface TransportFilters {
   vehicleType: VehicleType | null;
-  vehicleTypes?: VehicleType[] | null; // Добавлено для совместимости
+  vehicleTypes?: VehicleType[] | null; // Added for compatibility
   brands: string[] | null;
   models: string[] | null;
   yearRange: TransportFiltersRange;
@@ -299,7 +300,7 @@ export interface Listing {
   createdAt: string;
   views: number;
   
-  // Для совместимости с существующим кодом
+  // For compatibility with existing code
   categoryId?: string;
   subcategoryId?: string;
   
