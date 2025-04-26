@@ -1,3 +1,4 @@
+
 export const carBrands = [
   'Acura', 'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley', 'BMW', 'Bugatti', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler', 'Citroen', 'Dacia', 'Daewoo', 'Daihatsu', 'Dodge', 'DS', 'Ferrari', 'Fiat', 'Ford', 'Genesis', 'GMC', 'Honda', 'Hummer', 'Hyundai', 'Infiniti', 'Isuzu', 'Jaguar', 'Jeep', 'Kia', 'Lamborghini', 'Lancia', 'Land Rover', 'Lexus', 'Lincoln', 'Lotus', 'Maserati', 'Mazda', 'McLaren', 'Mercedes-Benz', 'MG', 'Mini', 'Mitsubishi', 'Nissan', 'Opel', 'Peugeot', 'Plymouth', 'Polestar', 'Pontiac', 'Porsche', 'RAM', 'Renault', 'Rolls-Royce', 'Rover', 'Saab', 'Saturn', 'Scion', 'Seat', 'Škoda', 'Smart', 'SsangYong', 'Subaru', 'Suzuki', 'Tesla', 'Toyota', 'Volkswagen', 'Volvo', 'ВАЗ (Lada)', 'ГАЗ', 'ЗАЗ', 'Москвич', 'УАЗ'
 ];
@@ -9,6 +10,23 @@ export const motorcycleBrands = [
 export const commercialTypes = [
   'Тягачи', 'Автобусы', 'Микроавтобусы', 'Фургоны', 'Самосвалы', 'Автокраны', 'Бетономешалки', 'Рефрижераторы', 'Цистерны', 'Эвакуаторы', 'Сельхозтехника', 'Погрузчики', 'Экскаваторы', 'Катки', 'Бульдозеры', 'Автогрейдеры', 'Коммунальная техника', 'Спецтехника', 'Другая'
 ];
+
+// Define the interfaces that are referenced but not defined
+export interface BrandData {
+  id: string;
+  name: {
+    ru: string;
+    kz: string;
+  };
+}
+
+export interface CommercialType {
+  id: string;
+  name: {
+    ru: string;
+    kz: string;
+  };
+}
 
 export const transportCategories = [
   {
@@ -70,7 +88,7 @@ export const transportCategories = [
       {
         id: 'transport-additional',
         name: {
-          ru: 'Дополнительно',  // Fixed from "Дополнительн"
+          ru: 'Дополнительно',
           kz: 'Қосымша'
         }
       }

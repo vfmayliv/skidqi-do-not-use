@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -57,12 +56,10 @@ const TransportPage = () => {
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Get vehicle type from URL params
   const typeParam = searchParams.get('type');
   
-  // Initialize filters with all required properties
   const [filters, setFilters] = useState<TransportFiltersType>({
-    vehicleTypes: null, // Add required property
+    vehicleTypes: null,
     priceRange: { min: null, max: null },
     vehicleType: typeParam ? VehicleType.CAR : null,
     brands: null,
@@ -75,23 +72,22 @@ const TransportPage = () => {
     driveTypes: null,
     bodyTypes: null,
     colors: null,
-    conditions: null, // Add required property
+    conditions: null,
     condition: null,
     hasPhoto: true,
     steeringWheel: null,
     customsCleared: null,
-    exchange: null, // Add required property 
+    exchange: null,
     inStock: null,
     exchangePossible: null,
     withoutAccidents: null,
     withServiceHistory: null,
     features: null,
     sortBy: null,
-    city: null, // Add required property
+    city: null,
     commercialType: null
   });
   
-  // Handle filter changes
   const handleFilterChange = (newFilters: Partial<TransportFiltersType>) => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -99,10 +95,9 @@ const TransportPage = () => {
     }));
   };
   
-  // Reset filters
   const handleResetFilters = () => {
     setFilters({
-      vehicleTypes: null, // Add required property
+      vehicleTypes: null,
       priceRange: { min: null, max: null },
       vehicleType: filters.vehicleType,
       brands: null,
@@ -115,29 +110,27 @@ const TransportPage = () => {
       driveTypes: null,
       bodyTypes: null,
       colors: null,
-      conditions: null, // Add required property
+      conditions: null,
       condition: null,
       hasPhoto: true,
       steeringWheel: null,
       customsCleared: null,
-      exchange: null, // Add required property
+      exchange: null,
       inStock: null,
       exchangePossible: null,
       withoutAccidents: null,
       withServiceHistory: null,
       features: null,
       sortBy: null,
-      city: null, // Add required property
+      city: null,
       commercialType: null
     });
     
     toast({
       title: language === 'ru' ? 'Фильтры сброшены' : 'Сүзгілер тазартылды',
-      description: language === 'ru' ? 'Все фильтры были сброшены' : 'Барлық сүзгілер тазартылды',
     });
   };
   
-  // Handle favorite toggle
   const handleFavoriteToggle = (id: string) => {
     setFavorites(prev => {
       const isFavorite = prev.includes(id);
@@ -155,14 +148,17 @@ const TransportPage = () => {
     });
   };
 
-  
-  // Get transport listings from mock data
   const transportListings = mockListings.filter(listing => listing.categoryId === 'transport');
   
-  // Extend the transport listings with vehicle data for demonstration
   const listingsWithExtendedData = transportListings.map(listing => {
-    // Generate random data for demonstration
-    const brand = carBrands[Math.floor(Math.random() * carBrands.length)].id;
+    const brandObj = {
+      id: carBrands[Math.floor(Math.random() * carBrands.length)].toLowerCase().replace(/\s+/g, '-'),
+      name: {
+        ru: carBrands[Math.floor(Math.random() * carBrands.length)],
+        kz: carBrands[Math.floor(Math.random() * carBrands.length)]
+      }
+    };
+    
     const models = {
       'toyota': ['Camry', 'RAV4', 'Land Cruiser', 'Corolla'],
       'mercedes': ['E-Class', 'S-Class', 'GLC', 'GLE'],
@@ -178,23 +174,19 @@ const TransportPage = () => {
       'renault': ['Logan', 'Duster', 'Kaptur', 'Arkana']
     };
     
-    const selectedModels = (models as any)[brand] || ['Model S', 'Model 3'];
+    const selectedModels = (models as any)[brandObj.id] || ['Model S', 'Model 3'];
     const model = selectedModels[Math.floor(Math.random() * selectedModels.length)];
     
-    // Vehicle type based on subcategory
     const vehicleType = listing.subcategoryId === 'cars' 
       ? VehicleType.CAR 
       : listing.subcategoryId === 'motorcycles'
         ? VehicleType.MOTORCYCLE
         : VehicleType.CAR;
     
-    // Random year between 2000 and 2023
     const year = 2000 + Math.floor(Math.random() * 24);
     
-    // Random mileage
     const mileage = Math.floor(Math.random() * 200000);
     
-    // Random engine type
     const engineTypes = [
       EngineType.PETROL, 
       EngineType.DIESEL, 
@@ -203,10 +195,8 @@ const TransportPage = () => {
     ];
     const engineType = engineTypes[Math.floor(Math.random() * engineTypes.length)];
     
-    // Random engine volume
     const engineVolume = (1.0 + Math.random() * 4.0).toFixed(1);
     
-    // Random transmission
     const transmissions = [
       TransmissionType.MANUAL,
       TransmissionType.AUTOMATIC,
@@ -215,11 +205,9 @@ const TransportPage = () => {
     ];
     const transmission = transmissions[Math.floor(Math.random() * transmissions.length)];
     
-    // Random drive type
     const driveTypes = [DriveType.FRONT, DriveType.REAR, DriveType.ALL_WHEEL];
     const driveType = driveTypes[Math.floor(Math.random() * driveTypes.length)];
     
-    // Random body type for cars
     const bodyTypes = [
       BodyType.SEDAN,
       BodyType.HATCHBACK,
@@ -228,11 +216,9 @@ const TransportPage = () => {
     ];
     const bodyType = bodyTypes[Math.floor(Math.random() * bodyTypes.length)];
     
-    // Random colors
     const colors = ['white', 'black', 'silver', 'red', 'blue', 'gray'];
     const color = colors[Math.floor(Math.random() * colors.length)];
     
-    // Random condition
     const conditions = [
       ConditionType.EXCELLENT,
       ConditionType.GOOD,
@@ -240,14 +226,13 @@ const TransportPage = () => {
     ];
     const condition = conditions[Math.floor(Math.random() * conditions.length)];
     
-    // Random coordinates for map view
-    const randomLat = 43.2 + Math.random() * 0.1;  // Примерные координаты Алматы
+    const randomLat = 43.2 + Math.random() * 0.1;
     const randomLng = 76.85 + Math.random() * 0.2;
     
     return {
       ...listing,
       vehicleType,
-      brand,
+      brand: brandObj.id,
       model,
       year,
       mileage,
@@ -284,21 +269,16 @@ const TransportPage = () => {
     };
   });
   
-  // Apply filters to listings
   const filteredListings = listingsWithExtendedData.filter(listing => {
-    
-    // Vehicle type filter
     if (filters.vehicleType && listing.vehicleType !== filters.vehicleType) {
       return false;
     }
     
-    // Commercial type filter
     if (filters.vehicleType === VehicleType.COMMERCIAL && filters.commercialType && 
         listing.commercialType !== filters.commercialType) {
       return false;
     }
     
-    // Search term filter
     if (searchTerm) {
       const normalizedSearchTerm = searchTerm.toLowerCase();
       const titleMatches = listing.title[language].toLowerCase().includes(normalizedSearchTerm);
@@ -310,7 +290,6 @@ const TransportPage = () => {
       }
     }
     
-    // Basic filters
     if (filters.priceRange.min !== null && listing.discountPrice < filters.priceRange.min) {
       return false;
     }
@@ -428,7 +407,6 @@ const TransportPage = () => {
     return true;
   });
   
-  // Sort listings
   const sortedListings = [...filteredListings].sort((a, b) => {
     if (filters.sortBy) {
       switch (filters.sortBy) {
@@ -449,14 +427,12 @@ const TransportPage = () => {
       }
     }
     
-    // Default sorting: featured first, then by date
     if (a.isFeatured && !b.isFeatured) return -1;
     if (!a.isFeatured && b.isFeatured) return 1;
     
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
   
-  // Count active filters
   const getActiveFiltersCount = () => {
     let count = 0;
     
@@ -488,8 +464,6 @@ const TransportPage = () => {
     return count;
   };
   
-  
-  // Get label for active filter
   const getFilterLabel = (key: string, value: any) => {
     switch(key) {
       case 'vehicleType':
@@ -509,8 +483,16 @@ const TransportPage = () => {
       
       case 'brands':
         if (Array.isArray(value) && value.length > 0) {
+          const brandsArray = carBrands.map(brand => ({
+            id: brand.toLowerCase().replace(/\s+/g, '-'),
+            name: {
+              ru: brand,
+              kz: brand
+            }
+          }));
+          
           return value.map(brand => {
-            const brandObj = carBrands.find(b => b.id === brand);
+            const brandObj = brandsArray.find(b => b.id === brand);
             return brandObj ? brandObj.name[language] : brand;
           }).join(', ');
         }
@@ -575,7 +557,6 @@ const TransportPage = () => {
     }
   };
   
-  // Render active filter badge
   const renderActiveFilter = (key: string, value: any, label: string) => {
     if (value === null || (Array.isArray(value) && value.length === 0)) {
       return null;
@@ -583,7 +564,6 @@ const TransportPage = () => {
     
     let displayValue = '';
     
-    // Handle ranges
     if (key.includes('Range') && typeof value === 'object') {
       const min = value.min !== null ? value.min : '';
       const max = value.max !== null ? value.max : '';
@@ -600,15 +580,12 @@ const TransportPage = () => {
       if (key === 'engineVolumeRange') displayValue += ' л';
       if (key === 'mileageRange') displayValue += ' км';
     } 
-    // Handle arrays
     else if (Array.isArray(value)) {
       displayValue = getFilterLabel(key, value);
     }
-    // Handle booleans
     else if (typeof value === 'boolean') {
       displayValue = value ? (language === 'ru' ? 'Да' : 'Иә') : '';
     }
-    // Handle single values
     else if (value !== null) {
       displayValue = getFilterLabel(key, value);
     }
@@ -619,7 +596,6 @@ const TransportPage = () => {
         <X 
           className="h-3 w-3 cursor-pointer ml-1" 
           onClick={() => {
-            // Reset filter value based on type
             if (key.includes('Range')) {
               const resetRange = { min: null, max: null };
               handleFilterChange({ [key]: resetRange });
@@ -634,7 +610,6 @@ const TransportPage = () => {
     );
   };
   
-  // Tab change handler
   const handleTabChange = (value: string) => {
     switch(value) {
       case 'cars':
@@ -652,7 +627,6 @@ const TransportPage = () => {
     }
   };
   
-  // Get current tab value
   const getCurrentTabValue = () => {
     switch(filters.vehicleType) {
       case VehicleType.CAR:
@@ -696,7 +670,6 @@ const TransportPage = () => {
           </div>
         </div>
         
-        {/* Vehicle type tabs */}
         <Tabs defaultValue={getCurrentTabValue()} onValueChange={handleTabChange} className="mb-6">
           <TabsList className="w-full md:w-auto">
             <TabsTrigger value="cars">
@@ -714,7 +687,6 @@ const TransportPage = () => {
           </TabsList>
         </Tabs>
         
-        {/* Desktop Filters */}
         <div className="hidden md:block mb-6">
           <TransportFiltersComponent
             filters={filters}
@@ -733,7 +705,6 @@ const TransportPage = () => {
           />
         </div>
         
-        {/* Mobile Filters Button */}
         <div className="md:hidden mb-4">
           <Sheet>
             <SheetTrigger asChild>
@@ -779,7 +750,6 @@ const TransportPage = () => {
           </Sheet>
         </div>
         
-        {/* Search Input */}
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
@@ -791,7 +761,6 @@ const TransportPage = () => {
           />
         </div>
 
-        {/* View Mode Selector */}
         <div className="flex justify-between items-center mb-6">
           <div className="text-sm text-muted-foreground">
             {language === 'ru' ? `Найдено ${sortedListings.length} предложений` : `${sortedListings.length} ұсыныс табылды`}
@@ -824,7 +793,6 @@ const TransportPage = () => {
           </div>
         </div>
 
-        {/* Active Filters */}
         {getActiveFiltersCount() > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
             {filters.vehicleType && renderActiveFilter('vehicleType', filters.vehicleType, language === 'ru' ? 'Тип' : 'Түрі')}
@@ -855,7 +823,6 @@ const TransportPage = () => {
           </div>
         )}
 
-        {/* Results Display */}
         {viewMode === 'map' ? (
           <div className={`relative ${isMapFullscreen ? 'fixed inset-0 z-50' : 'h-[70vh]'}`}>
             <TransportMap 
