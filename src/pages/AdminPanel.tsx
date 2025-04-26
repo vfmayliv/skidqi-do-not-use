@@ -594,7 +594,7 @@ const AdminPanel = () => {
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {language === 'ru' 
-                        ? 'Изображения будут автоматически конвертированы в фор��ат WebP'
+                        ? 'Изображения будут автоматически конвертированы в формат WebP'
                         : 'Суреттер автоматты түрде WebP форматына түрлендіріледі'}
                     </p>
                     <Button className="mt-4">

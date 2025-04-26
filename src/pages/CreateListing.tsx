@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAppContext } from '@/contexts/AppContext';
@@ -19,11 +18,13 @@ import { useToast } from '@/components/ui/use-toast';
 import { Upload, Camera, X, ChevronRight, ChevronLeft } from 'lucide-react';
 import { categories, Category } from '@/data/categories';
 import { cities } from '@/data/cities';
+import { processImageForUpload, createImagePreviewUrl, revokeImagePreviewUrl } from '@/utils/imageUtils';
 
 const CreateListing = () => {
   const { language, city: selectedCity, t } = useAppContext();
   const { toast } = useToast();
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Цена и скидка
   const [price, setPrice] = useState<string>('');
@@ -97,25 +98,60 @@ const CreateListing = () => {
   };
   
   const handleFileUpload = () => {
-    // Имитация загрузки изображения
-    const mockImageUrl = 'https://via.placeholder.com/600x400';
-    if (uploadedImages.length < 10) {
-      setUploadedImages([...uploadedImages, mockImageUrl]);
-      
-      toast({
-        title: language === 'ru' ? 'Фото загружено' : 'Фото жүктелді',
-        description: language === 'ru' ? 'Фото успешно добавлено' : 'Фото сәтті қосылды',
-      });
-    } else {
+    // Open the file input when the button is clicked
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    if (uploadedImages.length + files.length > 10) {
       toast({
         title: language === 'ru' ? 'Ошибка' : 'Қате',
         description: language === 'ru' ? 'Максимум 10 фотографий' : 'Максимум 10 сурет',
         variant: 'destructive',
       });
+      return;
+    }
+    
+    const newImages: string[] = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      try {
+        const file = files[i];
+        // Process the image (convert to WebP)
+        const processedFile = await processImageForUpload(file);
+        // Create a preview URL
+        const imageUrl = createImagePreviewUrl(processedFile);
+        newImages.push(imageUrl);
+      } catch (error) {
+        console.error('Error processing image:', error);
+      }
+    }
+    
+    // Clear the file input value so the same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    
+    if (newImages.length > 0) {
+      setUploadedImages(prev => [...prev, ...newImages]);
+      toast({
+        title: language === 'ru' ? 'Фото загружено' : 'Фото жүктелді',
+        description: language === 'ru' 
+          ? `Добавлено ${newImages.length} фото` 
+          : `${newImages.length} фото қосылды`,
+      });
     }
   };
   
   const removeImage = (index: number) => {
+    const imageUrl = uploadedImages[index];
+    // Revoke the URL to free up memory
+    revokeImagePreviewUrl(imageUrl);
     setUploadedImages(uploadedImages.filter((_, i) => i !== index));
   };
   
@@ -308,14 +344,22 @@ const CreateListing = () => {
                       <span className="text-xs text-muted-foreground">
                         {language === 'ru' ? 'Добавить фото' : 'Сурет қосу'}
                       </span>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef}
+                        className="hidden" 
+                        accept="image/*" 
+                        multiple
+                        onChange={handleFileChange}
+                      />
                     </div>
                   )}
                 </div>
                 
                 <p className="text-sm text-muted-foreground">
                   {language === 'ru' 
-                    ? 'Вы можете загрузить до 10 фотографий'
-                    : 'Сіз 10-ға дейін сурет жүктей аласыз'}
+                    ? 'Вы можете загрузить до 10 фотографий. Изображения будут автоматически конвертированы в формат WebP.'
+                    : 'Сіз 10-ға дейін сурет жүктей аласыз. Суреттер автоматты түрде WebP пішіміне түрлендіріледі.'}
                 </p>
               </CardContent>
             </Card>

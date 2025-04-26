@@ -1,8 +1,11 @@
 // Basic property filter config
 export interface FilterOption {
   id: string;
-  label: Record<string, string>; // Assuming this maps to language codes
-  value: string;
+  label: {
+    ru: string;
+    kz: string;
+  };
+  value?: string; // Add the value property
 }
 
 export interface FilterSegment {
