@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -26,7 +27,8 @@ import {
   ConditionType,
   SteeringWheelType,
   VehicleFeature,
-  SortOption
+  SortOption,
+  BrandData
 } from '@/types/listingType';
 import { mockListings } from '@/data/mockListings';
 import { useToast } from '@/components/ui/use-toast';

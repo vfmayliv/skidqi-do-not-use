@@ -346,5 +346,6 @@ export type BrandData = {
   id: string;
   name: LocalizedText | string;
   models: string[];
-  toLowerCase?: () => string; // Method for string compatibility
+  toLowerCase(): string; // Method for string compatibility
 };
+
