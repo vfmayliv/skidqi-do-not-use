@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAppContext } from '@/contexts/AppContext';
@@ -10,6 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { processImageForUpload, uploadImage } from '@/utils/imageUtils';
+
+// User profile localstorage key
+const USER_PROFILE_STORAGE_KEY = 'userProfileData';
 
 const UserProfile = () => {
   const { language, setLanguage } = useAppContext();
@@ -32,6 +35,25 @@ const UserProfile = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
+  // Load saved profile data on component mount
+  useEffect(() => {
+    const savedProfile = localStorage.getItem(USER_PROFILE_STORAGE_KEY);
+    if (savedProfile) {
+      try {
+        const profileData = JSON.parse(savedProfile);
+        setFirstName(profileData.firstName || firstName);
+        setLastName(profileData.lastName || lastName);
+        setEmail(profileData.email || email);
+        setPhone(profileData.phone || phone);
+        if (profileData.profilePhoto) {
+          setProfilePhoto(profileData.profilePhoto);
+        }
+      } catch (error) {
+        console.error('Error loading profile data:', error);
+      }
+    }
+  }, []);
+  
   const handleProfilePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -52,7 +74,16 @@ const UserProfile = () => {
   };
   
   const handleSaveProfile = () => {
-    // Here would be the API call to save the profile
+    // Save profile data to local storage
+    const profileData = {
+      firstName,
+      lastName,
+      email,
+      phone,
+      profilePhoto
+    };
+    
+    localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(profileData));
     setIsEditingProfile(false);
     
     toast({

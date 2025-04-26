@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -15,16 +16,24 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Upload, Camera, X, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Upload, Camera, X, ChevronRight, ChevronLeft, Save } from 'lucide-react';
 import { categories, Category } from '@/data/categories';
 import { cities } from '@/data/cities';
 import { processImageForUpload, createImagePreviewUrl, revokeImagePreviewUrl } from '@/utils/imageUtils';
+import { useNavigate } from 'react-router-dom';
 
 const CreateListing = () => {
   const { language, city: selectedCity, t } = useAppContext();
   const { toast } = useToast();
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+  
+  // Form data states
+  const [title, setTitle] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
+  const [city, setCity] = useState<string>(selectedCity ? selectedCity[language] : '');
   
   // Цена и скидка
   const [price, setPrice] = useState<string>('');
@@ -49,6 +58,22 @@ const CreateListing = () => {
     
     setSelectedCategories(selected.filter(Boolean));
   }, [selectedCategoryIndices, categoryPath]);
+
+  // Form validation state
+  const [isFormValid, setIsFormValid] = useState<boolean>(false);
+
+  // Check form validity
+  useEffect(() => {
+    const valid = 
+      title.trim().length > 0 && 
+      selectedCategories.length > 0 &&
+      description.trim().length > 0 &&
+      price.trim().length > 0 &&
+      city.trim().length > 0 &&
+      phone.trim().length > 0;
+    
+    setIsFormValid(valid);
+  }, [title, selectedCategories, description, price, city, phone]);
 
   // Выбор категории на определенном уровне
   const selectCategory = (level: number, index: number) => {
@@ -177,6 +202,64 @@ const CreateListing = () => {
     ));
   };
 
+  // Handle form submission and save draft
+  const handlePublish = () => {
+    if (!isFormValid) {
+      toast({
+        title: language === 'ru' ? 'Ошибка' : 'Қате',
+        description: language === 'ru' 
+          ? 'Пожалуйста, заполните все обязательные поля' 
+          : 'Барлық міндетті өрістерді толтырыңыз',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Here would be the API call to publish the listing
+    
+    // For now, simulate success
+    toast({
+      title: language === 'ru' ? 'Успех' : 'Сәтті',
+      description: language === 'ru' 
+        ? 'Объявление успешно опубликовано' 
+        : 'Хабарландыру сәтті жарияланды',
+    });
+    
+    // Navigate to home page after successful submission
+    setTimeout(() => {
+      navigate('/');
+    }, 1500);
+  };
+  
+  const handleSaveDraft = () => {
+    // Here would be the API call to save as draft
+    
+    // For now, just simulate storing in local storage
+    const draftData = {
+      title,
+      selectedCategories,
+      description,
+      price,
+      discountPrice,
+      city,
+      phone,
+      images: uploadedImages,
+      createdAt: new Date().toISOString()
+    };
+    
+    // Store in local storage
+    const drafts = JSON.parse(localStorage.getItem('listingDrafts') || '[]');
+    drafts.push(draftData);
+    localStorage.setItem('listingDrafts', JSON.stringify(drafts));
+    
+    toast({
+      title: language === 'ru' ? 'Черновик сохранен' : 'Жоба сақталды',
+      description: language === 'ru' 
+        ? 'Объявление сохранено как черновик' 
+        : 'Хабарландыру жоба ретінде сақталды',
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -200,6 +283,8 @@ const CreateListing = () => {
                   <Input 
                     id="title" 
                     placeholder={language === 'ru' ? 'Введите название' : 'Атауын енгізіңіз'} 
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
                 
@@ -258,6 +343,8 @@ const CreateListing = () => {
                   <Textarea 
                     id="description" 
                     rows={6}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     placeholder={language === 'ru' ? 'Подробно опишите ваш товар или услугу' : 'Тауарыңызды немесе қызметіңізді толық сипаттаңыз'} 
                   />
                 </div>
@@ -376,7 +463,10 @@ const CreateListing = () => {
                   <Label htmlFor="city">
                     {language === 'ru' ? 'Город' : 'Қала'}
                   </Label>
-                  <Select defaultValue={selectedCity ? selectedCity[language] : undefined}>
+                  <Select 
+                    defaultValue={selectedCity ? selectedCity[language] : undefined}
+                    onValueChange={(value) => setCity(value)}
+                  >
                     <SelectTrigger id="city">
                       <SelectValue 
                         placeholder={language === 'ru' ? 'Выберите город' : 'Қаланы таңдаңыз'} 
@@ -399,6 +489,8 @@ const CreateListing = () => {
                   <Input 
                     id="phone" 
                     placeholder="+7 (___) ___-__-__" 
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
                 
@@ -412,11 +504,20 @@ const CreateListing = () => {
             
             <Card>
               <CardContent className="p-6">
-                <Button className="w-full mb-4">
+                <Button 
+                  className="w-full mb-4"
+                  onClick={handlePublish}
+                  disabled={!isFormValid}
+                >
                   {language === 'ru' ? 'Опубликовать объявление' : 'Хабарландыруды жариялау'}
                 </Button>
                 
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleSaveDraft}
+                >
+                  <Save className="mr-2 h-4 w-4" />
                   {language === 'ru' ? 'Сохранить черновик' : 'Қолжазбаны сақтау'}
                 </Button>
               </CardContent>
