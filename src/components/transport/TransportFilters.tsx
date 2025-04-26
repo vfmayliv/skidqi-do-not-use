@@ -528,7 +528,7 @@ const TransportFilters = ({
             {/* Additional Options */}
             <AccordionItem value="additional">
               <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Дополнительн��' : 'Қосымша'}
+                {language === 'ru' ? 'Дополнительно' : 'Қосымша'}
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-3 pt-2">
