@@ -30,7 +30,7 @@ export const propertyFilterConfig: PropertyFilterConfig = {
   areaRangeMax: 500,
   floorRangeMin: 1,
   floorRangeMax: 30,
-  // Remove priceRangeMin and other non-interface properties or convert them to optional
+  // All properties are optional according to the updated interface
 };
 
 export function PropertyPage() {

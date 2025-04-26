@@ -1,5 +1,3 @@
-
-
 export interface LocalizedText {
   ru: string;
   kz: string;
@@ -251,6 +249,7 @@ export interface TransportFilters {
   driveTypes: DriveType[] | null;
   bodyTypes: BodyType[] | null;
   condition: ConditionType | null;
+  conditions?: ConditionType[] | null; // Added for compatibility
   steeringWheel: SteeringWheelType | null;
   customsCleared: boolean | null;
   inStock: boolean | null;
@@ -261,7 +260,9 @@ export interface TransportFilters {
   features: VehicleFeature[] | null;
   sortBy: SortOption | null;
   commercialType: string | null;
-  colors: string[] | null; // Добавлено для совместимости с TransportPage
+  colors: string[] | null; // For compatibility with TransportPage
+  city: string | null;
+  exchange: boolean | null; // For compatibility
 }
 
 export interface PropertyFilterConfig {
@@ -269,8 +270,6 @@ export interface PropertyFilterConfig {
   priceRangeMax?: number;
   roomsMin?: number;
   roomsMax?: number;
-  areaMin?: number;
-  areaMax?: number;
   propertyType?: string | null;
   areaRangeMin?: number;
   areaRangeMax?: number;
@@ -346,6 +345,5 @@ export type BrandData = {
   id: string;
   name: LocalizedText | string;
   models: string[];
-  toLowerCase?: () => string; // Добавлено для совместимости
+  toLowerCase?: () => string; // Method for string compatibility
 };
-

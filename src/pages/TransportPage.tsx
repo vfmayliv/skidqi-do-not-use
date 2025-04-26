@@ -59,6 +59,12 @@ const TransportPage = () => {
   
   const typeParam = searchParams.get('type');
   
+  const brands = filters.vehicleType === VehicleType.MOTORCYCLE 
+    ? motorcycleBrands 
+    : filters.vehicleType === VehicleType.COMMERCIAL
+      ? [] // No brands for commercial vehicles, use commercialTypes instead
+      : carBrands;
+  
   const [filters, setFilters] = useState<TransportFiltersType>({
     vehicleTypes: null,
     priceRange: { min: null, max: null },
@@ -73,8 +79,8 @@ const TransportPage = () => {
     driveTypes: null,
     bodyTypes: null,
     colors: null,
-    conditions: null,
     condition: null,
+    conditions: null, // Added to match the type
     hasPhoto: true,
     steeringWheel: null,
     customsCleared: null,
@@ -111,7 +117,7 @@ const TransportPage = () => {
       driveTypes: null,
       bodyTypes: null,
       colors: null,
-      conditions: null,
+      conditions: null, // Added to match the type
       condition: null,
       hasPhoto: true,
       steeringWheel: null,
