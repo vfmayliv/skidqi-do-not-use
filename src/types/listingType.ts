@@ -1,3 +1,4 @@
+
 // Basic property filter config
 export interface FilterOption {
   id: string;
@@ -5,7 +6,7 @@ export interface FilterOption {
     ru: string;
     kz: string;
   };
-  value?: string; // Add the value property
+  value?: string;
 }
 
 export interface FilterSegment {
@@ -15,12 +16,12 @@ export interface FilterSegment {
 }
 
 export interface PropertyFilterConfig {
-  priceRangeMin?: number;
-  priceRangeMax?: number;
-  areaRangeMin?: number;
-  areaRangeMax?: number;
-  floorRangeMin?: number;
-  floorRangeMax?: number;
+  priceRangeMin: number;
+  priceRangeMax: number;
+  areaRangeMin: number;
+  areaRangeMax: number;
+  floorRangeMin: number;
+  floorRangeMax: number;
   dealTypes?: FilterOption[];
   segments?: FilterSegment[];
   residentialFilters?: FilterOption[];

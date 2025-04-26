@@ -127,7 +127,7 @@ const TransportPage = () => {
     });
     
     toast({
-      title: language === 'ru' ? '��ильтры сброшены' : 'Сүзгілер тазартылды',
+      title: language === 'ru' ? '����ильтры сброшены' : 'Сүзгілер тазартылды',
     });
   };
   
@@ -533,7 +533,7 @@ const TransportPage = () => {
       case 'bodyTypes':
         if (Array.isArray(value) && value.length > 0) {
           const bodyLabels = {
-            [BodyType.SEDAN]: { ru: 'Седан', kz: 'Седан' },
+            [BodyType.SEDAN]: { ru: 'Седан', kz: 'С��дан' },
             [BodyType.HATCHBACK]: { ru: 'Хэтчбек', kz: 'Хэтчбек' },
             [BodyType.SUV]: { ru: 'Внедорожник', kz: 'Жол талғамайтын' },
             [BodyType.PICKUP]: { ru: 'Пикап', kz: 'Пикап' },
@@ -843,7 +843,7 @@ const TransportPage = () => {
               <div className="col-span-full text-center py-20">
                 <div className="text-4xl mb-4">🔍</div>
                 <h3 className="text-xl font-semibold mb-2">
-                  {language === 'ru' ? 'Ничего не найдено' : 'Ештеңе табылмады'}
+                  {language === 'ru' ? 'Н��чего не найдено' : 'Ештеңе табылмады'}
                 </h3>
                 <p className="text-muted-foreground mb-4">
                   {language === 'ru' ? 'Попробуйте изменить параметры поиска' : 'Іздеу параметрлерін өзгертіп көріңіз'}
