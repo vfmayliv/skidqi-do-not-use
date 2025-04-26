@@ -127,7 +127,7 @@ const TransportPage = () => {
     });
     
     toast({
-      title: language === 'ru' ? 'Фильтры сброшены' : 'Сүзгілер тазартылды',
+      title: language === 'ru' ? '��ильтры сброшены' : 'Сүзгілер тазартылды',
     });
   };
   
@@ -151,23 +151,17 @@ const TransportPage = () => {
   const transportListings = mockListings.filter(listing => listing.categoryId === 'transport');
   
   const listingsWithExtendedData = transportListings.map(listing => {
-    const brandObj = {
-      id: carBrands[Math.floor(Math.random() * carBrands.length)].toLowerCase().replace(/\s+/g, '-'),
-      name: {
-        ru: carBrands[Math.floor(Math.random() * carBrands.length)],
-        kz: carBrands[Math.floor(Math.random() * carBrands.length)]
-      }
-    };
+    const brandObj = carBrands[Math.floor(Math.random() * carBrands.length)];
     
     const models = {
       'toyota': ['Camry', 'RAV4', 'Land Cruiser', 'Corolla'],
-      'mercedes': ['E-Class', 'S-Class', 'GLC', 'GLE'],
+      'mercedes-benz': ['E-Class', 'S-Class', 'GLC', 'GLE'],
       'bmw': ['3 Series', '5 Series', 'X5', 'X3'],
       'audi': ['A4', 'A6', 'Q5', 'Q7'],
       'volkswagen': ['Golf', 'Passat', 'Tiguan', 'Touareg'],
       'hyundai': ['Sonata', 'Elantra', 'Tucson', 'Santa Fe'],
       'kia': ['Sportage', 'Cerato', 'Rio', 'Sorento'],
-      'lada': ['Vesta', 'Granta', 'XRAY', 'Largus'],
+      'ваз-lada': ['Vesta', 'Granta', 'XRAY', 'Largus'],
       'nissan': ['X-Trail', 'Qashqai', 'Juke', 'Patrol'],
       'ford': ['Focus', 'Mondeo', 'Kuga', 'Explorer'],
       'chevrolet': ['Cruze', 'Aveo', 'Captiva', 'Tahoe'],
