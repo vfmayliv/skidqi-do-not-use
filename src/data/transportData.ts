@@ -1,4 +1,3 @@
-
 // Define the interfaces that are referenced but not defined
 export interface BrandData {
   id: string;
@@ -22,7 +21,7 @@ export interface CommercialType {
 export const carBrands: BrandData[] = [
   'Acura', 'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley', 'BMW', 'Bugatti', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler', 'Citroen', 'Dacia', 'Daewoo', 'Daihatsu', 'Dodge', 'DS', 'Ferrari', 'Fiat', 'Ford', 'Genesis', 'GMC', 'Honda', 'Hummer', 'Hyundai', 'Infiniti', 'Isuzu', 'Jaguar', 'Jeep', 'Kia', 'Lamborghini', 'Lancia', 'Land Rover', 'Lexus', 'Lincoln', 'Lotus', 'Maserati', 'Mazda', 'McLaren', 'Mercedes-Benz', 'MG', 'Mini', 'Mitsubishi', 'Nissan', 'Opel', 'Peugeot', 'Plymouth', 'Polestar', 'Pontiac', 'Porsche', 'RAM', 'Renault', 'Rolls-Royce', 'Rover', 'Saab', 'Saturn', 'Scion', 'Seat', 'Škoda', 'Smart', 'SsangYong', 'Subaru', 'Suzuki', 'Tesla', 'Toyota', 'Volkswagen', 'Volvo', 'ВАЗ (Lada)', 'ГАЗ', 'ЗАЗ', 'Москвич', 'УАЗ'
 ].map(brand => {
-  const brandObj = {
+  const brandObj: BrandData = {
     id: brand.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
     name: {
       ru: brand,
@@ -40,7 +39,7 @@ export const carBrands: BrandData[] = [
 export const motorcycleBrands: BrandData[] = [
   'Aprilia', 'Benelli', 'Beta', 'BMW', 'BRP', 'Buell', 'CFMOTO', 'Ducati', 'Gas Gas', 'Harley-Davidson', 'Honda', 'Husqvarna', 'Kawasaki', 'KTM', 'Kymco', 'MV Agusta', 'Norton', 'Piaggio', 'Royal Enfield', 'Suzuki', 'Triumph', 'Vespa', 'Yamaha', 'Другой'
 ].map(brand => {
-  const brandObj = {
+  const brandObj: BrandData = {
     id: brand.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, ''),
     name: {
       ru: brand,

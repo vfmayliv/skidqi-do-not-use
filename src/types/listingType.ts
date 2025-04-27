@@ -1,4 +1,3 @@
-
 export interface LocalizedText {
   ru: string;
   kz: string;
@@ -348,4 +347,3 @@ export type BrandData = {
   models: string[];
   toLowerCase(): string; // Method for string compatibility
 };
-

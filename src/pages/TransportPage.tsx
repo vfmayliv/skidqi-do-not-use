@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -649,6 +648,10 @@ const TransportPage = () => {
     if (!brandsSearchQuery) return brands;
     
     return brands.filter(brand => {
+      if (typeof brand === 'string') {
+        return brand.toLowerCase().includes(brandsSearchQuery.toLowerCase());
+      }
+      
       const brandName = typeof brand.name === 'string' 
         ? brand.name.toLowerCase() 
         : brand.name.ru.toLowerCase();
@@ -833,7 +836,7 @@ const TransportPage = () => {
               </Badge>
             )}
             <Button variant="ghost" size="sm" className="text-xs" onClick={handleResetFilters}>
-              {language === 'ru' ? 'Сбросить все' : 'Барлығын тазалау'}
+              {language === 'ru' ? 'Сбросить все' : 'Барлық сүзгілерді тазалау'}
             </Button>
           </div>
         )}
