@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import TransportCard from '@/components/transport/TransportCard';
@@ -7,7 +6,7 @@ import TransportMap from '@/components/transport/TransportMap';
 import TransportFilters from '@/components/transport/TransportFilters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Filter, MapPin, Grid, List } from 'lucide-react';
@@ -67,7 +66,6 @@ const TransportPage = () => {
   
   const handleApplyFilters = () => {
     toast({
-      title: language === 'ru' ? 'Фильтры применены' : 'Фильтрлер қолданылды',
       description: language === 'ru' 
         ? 'Результаты обновлены в соответствии с выбранными фильтрами.' 
         : 'Нәтижелер таңдалған фильтрлерге сәйкес жаңартылды.',

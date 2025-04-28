@@ -26,19 +26,15 @@ export const AuthProtection: React.FC<AuthProtectionProps> = ({
   useEffect(() => {
     if (!isAuthenticated) {
       toast({
-        title: language === 'ru' ? 'Доступ запрещен' : 'Қол жеткізу тыйым салынған',
         description: language === 'ru' 
           ? 'Пожалуйста, войдите в систему для доступа к этой странице' 
-          : 'Бұл бетке кіру үшін жүйеге кіріңіз',
-        variant: 'destructive'
+          : 'Бұл бетке кіру үшін жүйеге кіріңіз'
       });
     } else if (!hasAccess) {
       toast({
-        title: language === 'ru' ? 'Недостаточно прав' : 'Құқықтар жеткіліксіз',
         description: language === 'ru' 
           ? 'У вас нет необходимых прав для доступа к этой странице' 
-          : 'Бұл бетке кіру үшін қажетті құқықтарыңыз жоқ',
-        variant: 'destructive'
+          : 'Бұл бетке кіру үшін қажетті құқықтарыңыз жоқ'
       });
     }
   }, [isAuthenticated, hasAccess, toast, language]);
