@@ -1,3 +1,4 @@
+
 // Define the interfaces that are referenced but not defined
 export interface BrandData {
   id: string;

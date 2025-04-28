@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { TransportCard } from '@/components/transport/TransportCard';
+import TransportCard from '@/components/transport/TransportCard';
 import TransportMap from '@/components/transport/TransportMap';
-import { TransportFilters } from '@/components/transport/TransportFilters';
+import TransportFilters from '@/components/transport/TransportFilters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,15 +17,14 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Filter, MapPin, Car, ArrowUpDown, Grid, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useAppContext } from '@/contexts/AppContext';
-import { transportData } from '@/data/transportData';
-import { categories } from '@/data/categories';
+import { carBrands, motorcycleBrands, commercialTypes } from '@/data/transportData';
 import {
-  CarType,
+  VehicleType,
   TransmissionType,
   DriveType,
-  FuelType,
+  EngineType,
   SteeringWheelType,
   VehicleFeature,
   SortOption,
@@ -36,7 +35,7 @@ import { mockListings } from '@/data/mockListings';
 import { useToast } from '@/components/ui/use-toast';
 
 const TransportPage = () => {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const { language } = useAppContext();
   const { toast } = useToast();
   const [isMapOpen, setIsMapOpen] = useState(false);
@@ -64,8 +63,9 @@ const TransportPage = () => {
   };
   
   useEffect(() => {
-    const allBrands = transportData.map(item => item.brand);
-    setAvailableBrands([...new Set(allBrands)]);
+    // Combine car brands and motorcycle brands as the available brands
+    const allBrands = [...carBrands, ...motorcycleBrands];
+    setAvailableBrands(allBrands);
   }, []);
   
   // Filtered brands based on search query
@@ -105,6 +105,39 @@ const TransportPage = () => {
         ? 'Результаты обновлены в соответствии с выбранными фильтрами.' 
         : 'Нәтижелер таңдалған фильтрлерге сәйкес жаңартылды.',
     });
+  };
+
+  // Define empty props for TransportFilters
+  const emptyFilters = {
+    filters: {
+      vehicleType: null,
+      brands: [],
+      models: null,
+      yearRange: { min: null, max: null },
+      priceRange: { min: null, max: null },
+      mileageRange: { min: null, max: null },
+      engineVolumeRange: { min: null, max: null },
+      engineTypes: null,
+      transmissions: null,
+      driveTypes: null,
+      bodyTypes: null,
+      condition: null,
+      steeringWheel: null,
+      customsCleared: null,
+      inStock: null,
+      exchangePossible: null,
+      withoutAccidents: null,
+      withServiceHistory: null,
+      hasPhoto: null,
+      features: null,
+      sortBy: null,
+      commercialType: null
+    },
+    onFilterChange: () => {},
+    onReset: () => {},
+    onSearch: () => {},
+    brands: carBrands,
+    activeFiltersCount: 0
   };
   
   return (
@@ -160,7 +193,7 @@ const TransportPage = () => {
                     </DrawerTitle>
                   </DrawerHeader>
                   <div className="px-4 pb-4">
-                    <TransportFilters />
+                    <TransportFilters {...emptyFilters} />
                   </div>
                   <DrawerFooter>
                     <Button onClick={handleApplyFilters}>
@@ -187,7 +220,7 @@ const TransportPage = () => {
                       {language === 'ru' ? 'Фильтры' : 'Фильтрлер'}
                     </DialogTitle>
                   </DialogHeader>
-                  <TransportFilters />
+                  <TransportFilters {...emptyFilters} />
                   <div className="flex justify-end space-x-2 pt-4">
                     <Button variant="outline">
                       {language === 'ru' ? 'Сбросить' : 'Қайтару'}
