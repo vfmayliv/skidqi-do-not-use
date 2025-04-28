@@ -19,7 +19,6 @@ import Help from '@/pages/Help';
 import TermsOfService from '@/pages/TermsOfService';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import NotFound from '@/pages/NotFound';
-import AdminPanel from '@/pages/AdminPanel';
 import OwnerPanel from '@/pages/OwnerPanel';
 import ConfirmEmail from '@/pages/ConfirmEmail';
 import { AuthProtection } from '@/components/AuthProtection';
@@ -59,13 +58,8 @@ const App: React.FC = () => {
           <Route path="/help" element={<Help />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/admin" element={
-            <AuthProtection requiredRole="admin">
-              <AdminPanel />
-            </AuthProtection>
-          } />
           <Route path="/owner" element={
-            <AuthProtection>
+            <AuthProtection requiredRole="admin">
               <OwnerPanel />
             </AuthProtection>
           } />
