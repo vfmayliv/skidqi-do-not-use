@@ -2,8 +2,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import { AppProvider } from '@/contexts/AppContext';
-import { SearchProvider } from '@/contexts/SearchContext';
 import Index from '@/pages/Index';
 import { CategoryPage } from '@/pages/CategoryPage';
 import SubcategoryPage from '@/pages/SubcategoryPage';
@@ -27,47 +25,45 @@ import TransportPage from '@/pages/TransportPage';
 
 const App: React.FC = () => {
   return (
-    <AppProvider>
-      <SearchProvider>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/search" element={<SearchResults />} />
-          <Route path="/category/:categoryId" element={<CategoryPage />} />
-          <Route path="/category/:categoryId/:subcategoryId" element={<SubcategoryPage />} />
-          
-          {/* Категории с индивидуальным содержимым */}
-          <Route path="/property" element={<PropertyPage />} />
-          <Route path="/transport" element={<TransportPage />} />
-          
-          <Route path="/listing/:listingId" element={<ListingDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/confirm-email" element={<ConfirmEmail />} />
-          <Route path="/profile" element={
-            <AuthProtection>
-              <UserProfile />
-            </AuthProtection>
-          } />
-          <Route path="/create-listing" element={
-            <AuthProtection>
-              <CreateListing />
-            </AuthProtection>
-          } />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/help" element={<Help />} />
-          <Route path="/terms" element={<TermsOfService />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/owner" element={
-            <AuthProtection requiredRole="admin">
-              <OwnerPanel />
-            </AuthProtection>
-          } />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </SearchProvider>
-    </AppProvider>
+    <React.Fragment>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/search" element={<SearchResults />} />
+        <Route path="/category/:categoryId" element={<CategoryPage />} />
+        <Route path="/category/:categoryId/:subcategoryId" element={<SubcategoryPage />} />
+        
+        {/* Категории с индивидуальным содержимым */}
+        <Route path="/property" element={<PropertyPage />} />
+        <Route path="/transport" element={<TransportPage />} />
+        
+        <Route path="/listing/:listingId" element={<ListingDetail />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/confirm-email" element={<ConfirmEmail />} />
+        <Route path="/profile" element={
+          <AuthProtection>
+            <UserProfile />
+          </AuthProtection>
+        } />
+        <Route path="/create-listing" element={
+          <AuthProtection>
+            <CreateListing />
+          </AuthProtection>
+        } />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/help" element={<Help />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/owner" element={
+          <AuthProtection requiredRole="admin">
+            <OwnerPanel />
+          </AuthProtection>
+        } />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster />
+    </React.Fragment>
   );
 };
 

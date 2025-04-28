@@ -5,33 +5,33 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cities } from '@/data/cities';
-import { useAppContext } from '@/contexts/AppContext';
+import { useAppStore } from '@/stores/useAppStore';
 
 export function CitySelectionModal() {
-  const { language, t, city, setCity, cityConfirmed, setCityConfirmed } = useAppContext();
+  const { language, selectedCity, cityConfirmed, t, setSelectedCity, setCityConfirmed } = useAppStore();
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestedCity, setSuggestedCity] = useState(cities[0]);
 
   useEffect(() => {
     // If city is not confirmed, show the confirmation dialog
-    if (!cityConfirmed && !city) {
+    if (!cityConfirmed && !selectedCity) {
       // Suggest a popular city like Almaty or Astana
       setSuggestedCity(cities[0]); // Almaty
       setOpen(true);
     }
-  }, [cityConfirmed, city]);
+  }, [cityConfirmed, selectedCity]);
 
   const confirmCity = (confirm: boolean) => {
     if (confirm) {
-      setCity(suggestedCity);
+      setSelectedCity(suggestedCity);
     }
     setCityConfirmed(true);
     setOpen(false);
   };
 
   const selectCity = (selectedCity) => {
-    setCity(selectedCity);
+    setSelectedCity(selectedCity);
     setCityConfirmed(true);
     setOpen(false);
   };
@@ -82,7 +82,7 @@ export function CitySelectionModal() {
                 variant="outline" 
                 className="justify-start"
                 onClick={() => {
-                  setCity(null);
+                  setSelectedCity(null);
                   setCityConfirmed(true);
                   setOpen(false);
                 }}
@@ -94,11 +94,11 @@ export function CitySelectionModal() {
                 <Button
                   key={index}
                   variant="outline"
-                  className={`justify-start ${city && city[language] === c[language] ? 'bg-primary/10' : ''}`}
+                  className={`justify-start ${selectedCity && selectedCity[language] === c[language] ? 'bg-primary/10' : ''}`}
                   onClick={() => selectCity(c)}
                 >
                   {c[language]}
-                  {city && city[language] === c[language] && (
+                  {selectedCity && selectedCity[language] === c[language] && (
                     <Check className="ml-auto h-4 w-4" />
                   )}
                 </Button>

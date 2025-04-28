@@ -5,10 +5,10 @@ import { CategoryMenu } from '@/components/CategoryMenu';
 import { EnhancedFeaturedListings } from '@/components/EnhancedFeaturedListings';
 import { Footer } from '@/components/Footer';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { useAppContext } from '@/contexts/AppContext';
+import { useAppStore } from '@/stores/useAppStore';
 
 const Banner = () => {
-  const { t, language } = useAppContext();
+  const { language, t } = useAppStore();
   
   return (
     <div className="bg-blue-50 py-6">

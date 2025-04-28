@@ -1,18 +1,17 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
 import PropertyFilters from '@/components/property/PropertyFilters';
-import { useAppContext } from '@/contexts/AppContext';
+import { useAppStore } from '@/stores/useAppStore';
+import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { mockListings } from '@/data/mockListings';
 import { 
-  PropertyFilters as PropertyFiltersType,
   PropertyType,
   BuildingType,
   ConditionType,
   SortOption,
   PropertyFilterConfig,
-  FilterOption,
-  FilterSegment
 } from '@/types/listingType';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -34,55 +33,9 @@ export const propertyFilterConfig: PropertyFilterConfig = {
 };
 
 export function PropertyPage() {
-  const { language } = useAppContext();
+  const { language } = useAppStore();
+  const { filters, setFilters, resetFilters, activeFiltersCount } = usePropertyFiltersStore();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filters, setFilters] = useState<PropertyFiltersType>({
-    propertyTypes: searchParams.get('type') ? [searchParams.get('type') as PropertyType] : null,
-    priceRange: {
-      min: null,
-      max: null
-    },
-    areaRange: {
-      min: null,
-      max: null
-    },
-    floorRange: {
-      min: null,
-      max: null
-    },
-    buildingTypes: null,
-    rooms: null,
-    districts: null,
-    hasPhoto: null,
-    onlyNewBuilding: null,
-    furnished: null,
-    allowPets: null,
-    hasParking: null,
-    dealType: null,
-    yearBuiltRange: {
-      min: null,
-      max: null
-    },
-    ceilingHeightRange: {
-      min: null,
-      max: null
-    },
-    bathroomTypes: null,
-    renovationTypes: null,
-    hasBalcony: null,
-    hasElevator: null,
-    rentPeriodMin: null,
-    isCorner: null,
-    isStudio: null,
-    hasSeparateEntrance: null,
-    securityGuarded: null,
-    hasPlayground: null,
-    utilityBillsIncluded: null,
-    sortBy: null,
-    viewTypes: null,
-    nearbyInfrastructure: null
-  });
-
   const [filteredListings, setFilteredListings] = useState(
     mockListings.filter(listing => listing.propertyType)
   );
@@ -100,12 +53,11 @@ export function PropertyPage() {
   useEffect(() => {
     const initialPropertyType = searchParams.get('type') as PropertyType || null;
     if (initialPropertyType) {
-      setFilters(prevFilters => ({ 
-        ...prevFilters, 
+      setFilters({ 
         propertyTypes: initialPropertyType ? [initialPropertyType] : null 
-      }));
+      });
     }
-  }, [searchParams]);
+  }, [searchParams, setFilters]);
 
   useEffect(() => {
     let newListings = [...mockListings.filter(listing => listing.propertyType)];
@@ -173,7 +125,7 @@ export function PropertyPage() {
     setFilteredListings(newListings);
   }, [filters]);
 
-  const updateUrlParams = (newFilters: PropertyFiltersType) => {
+  const updateUrlParams = (newFilters) => {
     const params = new URLSearchParams();
     
     if (newFilters.propertyTypes && newFilters.propertyTypes.length > 0) {
@@ -185,90 +137,19 @@ export function PropertyPage() {
     setSearchParams(params);
   };
 
-  const handleFilterChange = (newFilters: Partial<PropertyFiltersType>) => {
-    const updatedFilters: PropertyFiltersType = { ...filters, ...newFilters };
-    setFilters(updatedFilters);
-    updateUrlParams(updatedFilters);
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    updateUrlParams({...filters, ...newFilters});
   };
 
   const handleReset = () => {
-    setFilters({
-      propertyTypes: null,
-      priceRange: {
-        min: null,
-        max: null
-      },
-      areaRange: {
-        min: null,
-        max: null
-      },
-      floorRange: {
-        min: null,
-        max: null
-      },
-      buildingTypes: null,
-      rooms: null,
-      districts: null,
-      hasPhoto: null,
-      onlyNewBuilding: null,
-      furnished: null,
-      allowPets: null,
-      hasParking: null,
-      dealType: null,
-      yearBuiltRange: {
-        min: null,
-        max: null
-      },
-      ceilingHeightRange: {
-        min: null,
-        max: null
-      },
-      bathroomTypes: null,
-      renovationTypes: null,
-      hasBalcony: null,
-      hasElevator: null,
-      rentPeriodMin: null,
-      isCorner: null,
-      isStudio: null,
-      hasSeparateEntrance: null,
-      securityGuarded: null,
-      hasPlayground: null,
-      utilityBillsIncluded: null,
-      sortBy: null,
-      viewTypes: null,
-      nearbyInfrastructure: null
-    });
-    
+    resetFilters();
     setSearchParams({});
   };
 
   const handleSearch = () => {
     console.log('Search triggered with filters:', filters);
   };
-
-  const activeFiltersCount = Object.keys(filters).reduce((count, key) => {
-    const filterKey = key as keyof PropertyFiltersType;
-    const filterValue = filters[filterKey];
-    
-    if (filterKey === 'priceRange' || filterKey === 'areaRange' || filterKey === 'floorRange' || 
-        filterKey === 'yearBuiltRange' || filterKey === 'ceilingHeightRange') {
-      const range = filterValue as { min: number | null, max: number | null };
-      if ((range.min !== null && range.min > 0) || (range.max !== null && range.max < 1000000000)) {
-        return count + 1;
-      }
-      return count;
-    }
-    
-    if (filterValue !== null && filterValue !== undefined) {
-      if (Array.isArray(filterValue) && filterValue.length > 0) {
-        return count + 1;
-      } else if (!Array.isArray(filterValue) && filterValue !== null) {
-        return count + 1;
-      }
-    }
-    
-    return count;
-  }, 0);
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -1,7 +1,7 @@
 
 import { Navigate } from 'react-router-dom';
-import { useAppContext } from '@/contexts/AppContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useAppStore } from '@/stores/useAppStore';
+import { useToast } from '@/hooks/useToast';
 import { useEffect } from 'react';
 
 interface AuthProtectionProps {
@@ -13,7 +13,7 @@ export const AuthProtection: React.FC<AuthProtectionProps> = ({
   children, 
   requiredRole = 'user' 
 }) => {
-  const { isAuthenticated, userRole, language } = useAppContext();
+  const { isAuthenticated, userRole, language } = useAppStore();
   const { toast } = useToast();
   
   // Check if user has required authentication

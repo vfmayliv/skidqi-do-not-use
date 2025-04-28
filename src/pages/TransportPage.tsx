@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import TransportCard from '@/components/transport/TransportCard';
@@ -7,60 +7,27 @@ import TransportMap from '@/components/transport/TransportMap';
 import TransportFilters from '@/components/transport/TransportFilters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, MapPin, Car, ArrowUpDown, Grid, List } from 'lucide-react';
+import { Search, Filter, MapPin, Grid, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAppContext } from '@/contexts/AppContext';
-import { carBrands, motorcycleBrands, commercialTypes } from '@/data/transportData';
-import {
-  VehicleType,
-  TransmissionType,
-  DriveType,
-  EngineType,
-  SteeringWheelType,
-  VehicleFeature,
-  SortOption,
-  BrandData,
-  LocalizedText
-} from '@/types/listingType';
+import { useAppStore } from '@/stores/useAppStore';
+import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
+import { carBrands, motorcycleBrands } from '@/data/transportData';
 import { mockListings } from '@/data/mockListings';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/useToast';
 
 const TransportPage = () => {
   const isMobile = useIsMobile();
-  const { language } = useAppContext();
+  const { language } = useAppStore();
+  const { filters, setFilters, resetFilters, activeFiltersCount } = useTransportFiltersStore();
   const { toast } = useToast();
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [gridView, setGridView] = useState(true);
   const [brandsSearchQuery, setBrandsSearchQuery] = useState('');
-  const [selectedBrands, setSelectedBrands] = useState<Array<string | BrandData>>([]);
-  const [availableBrands, setAvailableBrands] = useState<Array<string | BrandData>>([]);
-  
-  const toggleBrand = (brand: string | BrandData) => {
-    setSelectedBrands((prevSelectedBrands) => {
-      if (prevSelectedBrands.some(selectedBrand => 
-        typeof selectedBrand === 'string' ? selectedBrand === brand :
-        typeof brand === 'string' ? false :
-        selectedBrand.id === brand.id
-      )) {
-        return prevSelectedBrands.filter(selectedBrand =>
-          typeof selectedBrand === 'string' ? selectedBrand !== brand :
-          typeof brand === 'string' ? true :
-          selectedBrand.id !== brand.id
-        );
-      } else {
-        return [...prevSelectedBrands, brand];
-      }
-    });
-  };
+  const [availableBrands, setAvailableBrands] = useState<Array<string | any>>([]);
   
   useEffect(() => {
     // Combine car brands and motorcycle brands as the available brands
@@ -107,43 +74,6 @@ const TransportPage = () => {
     });
   };
 
-  // Define empty props for TransportFilters
-  const emptyFilters = {
-    filters: {
-      vehicleType: null,
-      brands: [],
-      models: null,
-      yearRange: { min: null, max: null },
-      priceRange: { min: null, max: null },
-      mileageRange: { min: null, max: null },
-      engineVolumeRange: { min: null, max: null },
-      engineTypes: null,
-      transmissions: null,
-      driveTypes: null,
-      bodyTypes: null,
-      condition: null,
-      steeringWheel: null,
-      customsCleared: null,
-      inStock: null,
-      exchangePossible: null,
-      withoutAccidents: null,
-      withServiceHistory: null,
-      hasPhoto: null,
-      features: null,
-      sortBy: null,
-      commercialType: null,
-      // Добавляем отсутствующие свойства согласно ошибке
-      colors: null,
-      city: null,
-      exchange: null
-    },
-    onFilterChange: () => {},
-    onReset: () => {},
-    onSearch: () => {},
-    brands: carBrands,
-    activeFiltersCount: 0
-  };
-  
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -197,7 +127,14 @@ const TransportPage = () => {
                     </DrawerTitle>
                   </DrawerHeader>
                   <div className="px-4 pb-4">
-                    <TransportFilters {...emptyFilters} />
+                    <TransportFilters 
+                      filters={filters}
+                      onFilterChange={setFilters}
+                      onReset={resetFilters}
+                      onSearch={handleApplyFilters}
+                      brands={availableBrands}
+                      activeFiltersCount={activeFiltersCount}
+                    />
                   </div>
                   <DrawerFooter>
                     <Button onClick={handleApplyFilters}>
@@ -224,9 +161,16 @@ const TransportPage = () => {
                       {language === 'ru' ? 'Фильтры' : 'Фильтрлер'}
                     </DialogTitle>
                   </DialogHeader>
-                  <TransportFilters {...emptyFilters} />
+                  <TransportFilters 
+                    filters={filters}
+                    onFilterChange={setFilters}
+                    onReset={resetFilters}
+                    onSearch={handleApplyFilters}
+                    brands={availableBrands}
+                    activeFiltersCount={activeFiltersCount}
+                  />
                   <div className="flex justify-end space-x-2 pt-4">
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={resetFilters}>
                       {language === 'ru' ? 'Сбросить' : 'Қайтару'}
                     </Button>
                     <Button onClick={handleApplyFilters}>
