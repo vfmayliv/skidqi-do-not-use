@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import TransportCard from '@/components/transport/TransportCard';
@@ -36,7 +35,7 @@ const TransportPage = () => {
   }, []);
   
   // Filtered brands based on search query
-  const filteredBrands = useMemo(() => {
+  const filteredBrands = React.useMemo(() => {
     return availableBrands.filter((brand) => {
       if (!brandsSearchQuery) return true;
       

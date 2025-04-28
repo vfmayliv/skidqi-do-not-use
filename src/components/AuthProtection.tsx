@@ -30,7 +30,7 @@ export const AuthProtection: React.FC<AuthProtectionProps> = ({
         description: language === 'ru' 
           ? 'Пожалуйста, войдите в систему для доступа к этой странице' 
           : 'Бұл бетке кіру үшін жүйеге кіріңіз',
-        variant: 'destructive'
+        variant: "destructive"
       });
     } else if (!hasAccess) {
       toast({
@@ -38,7 +38,7 @@ export const AuthProtection: React.FC<AuthProtectionProps> = ({
         description: language === 'ru' 
           ? 'У вас нет необходимых прав для доступа к этой странице' 
           : 'Бұл бетке кіру үшін қажетті құқықтарыңыз жоқ',
-        variant: 'destructive'
+        variant: "destructive"
       });
     }
   }, [isAuthenticated, hasAccess, toast, language]);
