@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAppContext } from '@/contexts/AppContext';
 import { mockListings } from '@/data/mockListings';
 import { Listing } from '@/types/listingType';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 // Ключ для хранения объявлений пользователя в localStorage
 const USER_LISTINGS_KEY = 'userListings';
@@ -64,13 +64,31 @@ export function EnhancedFeaturedListings() {
               {language === 'ru' ? 'Мои' : 'Менің'}
             </TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="all">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {displayedListings.slice(0, 8).map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="featured">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {displayedListings.slice(0, 8).map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="user">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {displayedListings.slice(0, 8).map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+          </TabsContent>
         </Tabs>
-      </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {displayedListings.slice(0, 8).map((listing) => (
-          <ListingCard key={listing.id} listing={listing} />
-        ))}
       </div>
       
       <div className="text-center mt-10">

@@ -18,7 +18,7 @@ export function FeaturedListings() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Tabs defaultValue="featured" onValueChange={setActiveTab}>
+      <Tabs defaultValue="featured" onValueChange={setActiveTab} value={activeTab}>
         <div className="flex justify-between items-center mb-6">
           <TabsList>
             <TabsTrigger value="featured">{t('featuredAds')}</TabsTrigger>

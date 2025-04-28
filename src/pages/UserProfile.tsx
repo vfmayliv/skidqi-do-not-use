@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -13,6 +12,12 @@ import { processImageForUpload, uploadImage } from '@/utils/imageUtils';
 import { Bell, MessageSquare, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Listing } from '@/types/listingType';
+
+// Import profile components
+import { MyListings } from '@/components/profile/MyListings';
+import { MessagesInbox } from '@/components/profile/MessagesInbox';
+import { ReviewsList } from '@/components/profile/ReviewsList';
+import { NotificationsList } from '@/components/profile/NotificationsList';
 
 // User profile localstorage key
 const USER_PROFILE_STORAGE_KEY = 'userProfileData';
@@ -432,300 +437,114 @@ const UserProfile = () => {
                   </Tabs>
                 </CardHeader>
                 <CardContent>
-                  <TabsContent value="profile" className="space-y-4">
-                    {isEditingProfile ? (
-                      // Edit profile form
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                  <Tabs value={activeTab}>
+                    <TabsContent value="profile" className="space-y-4">
+                      {isEditingProfile ? (
+                        // Edit profile form
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="firstName">
+                                {language === 'ru' ? 'Имя' : 'Аты'}
+                              </Label>
+                              <Input 
+                                id="firstName"
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="lastName">
+                                {language === 'ru' ? 'Фамилия' : 'Тегі'}
+                              </Label>
+                              <Input 
+                                id="lastName"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          
                           <div className="space-y-2">
-                            <Label htmlFor="firstName">
-                              {language === 'ru' ? 'Имя' : 'Аты'}
-                            </Label>
+                            <Label htmlFor="email">Email</Label>
                             <Input 
-                              id="firstName"
-                              value={firstName}
-                              onChange={(e) => setFirstName(e.target.value)}
+                              id="email"
+                              type="email"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
                             />
                           </div>
+                          
                           <div className="space-y-2">
-                            <Label htmlFor="lastName">
-                              {language === 'ru' ? 'Фамилия' : 'Тегі'}
+                            <Label htmlFor="phone">
+                              {language === 'ru' ? 'Телефон' : 'Телефон'}
                             </Label>
                             <Input 
-                              id="lastName"
-                              value={lastName}
-                              onChange={(e) => setLastName(e.target.value)}
+                              id="phone"
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
                             />
                           </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email</Label>
-                          <Input 
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">
-                            {language === 'ru' ? 'Телефон' : 'Телефон'}
-                          </Label>
-                          <Input 
-                            id="phone"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                          />
-                        </div>
-                        
-                        <Button onClick={handleSaveProfile}>
-                          {language === 'ru' ? 'Сохранить изменения' : 'Өзгерістерді сақтау'}
-                        </Button>
-                      </div>
-                    ) : (
-                      // Profile info
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="font-medium text-sm text-muted-foreground mb-1">
-                              {language === 'ru' ? 'Имя' : 'Аты'}
-                            </div>
-                            <div>{firstName}</div>
-                          </div>
-                          <div>
-                            <div className="font-medium text-sm text-muted-foreground mb-1">
-                              {language === 'ru' ? 'Фамилия' : 'Тегі'}
-                            </div>
-                            <div>{lastName}</div>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <div className="font-medium text-sm text-muted-foreground mb-1">
-                            Email
-                          </div>
-                          <div>{email}</div>
-                        </div>
-                        
-                        <div>
-                          <div className="font-medium text-sm text-muted-foreground mb-1">
-                            {language === 'ru' ? 'Телефон' : 'Телефон'}
-                          </div>
-                          <div>{phone}</div>
-                        </div>
-                      </div>
-                    )}
-                  </TabsContent>
-                  
-                  <TabsContent value="password" className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="current-password">
-                        {language === 'ru' ? 'Текущий пароль' : 'Ағымдағы құпия сөз'}
-                      </Label>
-                      <Input 
-                        id="current-password"
-                        type="password"
-                        value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password">
-                        {language === 'ru' ? 'Новый пароль' : 'Жаңа құпия сөз'}
-                      </Label>
-                      <Input 
-                        id="new-password"
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password">
-                        {language === 'ru' ? 'Подтвердите пароль' : 'Құпия сөзді растаңыз'}
-                      </Label>
-                      <Input 
-                        id="confirm-password"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                      />
-                    </div>
-                    
-                    <Button onClick={handlePasswordChange}>
-                      {language === 'ru' ? 'Изменить пароль' : 'Құпия сөзді өзгерту'}
-                    </Button>
-                  </TabsContent>
-                  
-                  {/* Вкладка объявлений */}
-                  <TabsContent value="listings">
-                    <div className="space-y-4">
-                      {userListings.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {userListings.map((listing, index) => (
-                            <Card key={index}>
-                              <div className="flex">
-                                <div className="w-24 h-24">
-                                  <img 
-                                    src={listing.imageUrl} 
-                                    alt={listing.title[language]} 
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <CardContent className="flex-1 p-3">
-                                  <h3 className="font-medium text-sm line-clamp-2">
-                                    {listing.title[language]}
-                                  </h3>
-                                  <p className="text-sm text-muted-foreground">
-                                    {formatPrice(listing.discountPrice)}
-                                  </p>
-                                  <div className="flex justify-between items-center mt-2">
-                                    <span className="text-xs text-muted-foreground">
-                                      {language === 'ru' ? 'Просмотров:' : 'Қаралымдар:'} {listing.views}
-                                    </span>
-                                    <Button variant="outline" size="sm" asChild>
-                                      <Link to={`/listing/${listing.id}`}>
-                                        {language === 'ru' ? 'Смотреть' : 'Қарау'}
-                                      </Link>
-                                    </Button>
-                                  </div>
-                                </CardContent>
-                              </div>
-                            </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">
-                            {language === 'ru' ? 'У вас пока нет объявлений' : 'Сізде әзірше хабарландырулар жоқ'}
-                          </p>
-                          <Button className="mt-4" asChild>
-                            <Link to="/create-listing">
-                              {language === 'ru' ? 'Создать объявление' : 'Хабарландыру жасау'}
-                            </Link>
+                          
+                          <Button onClick={handleSaveProfile}>
+                            {language === 'ru' ? 'Сохранить изменения' : 'Өзгерістерді сақтау'}
                           </Button>
                         </div>
-                      )}
-                    </div>
-                  </TabsContent>
-                  
-                  {/* Вкладка сообщений */}
-                  <TabsContent value="messages">
-                    <div className="space-y-4">
-                      {messages.length > 0 ? (
-                        <div className="space-y-4">
-                          {messages.map(message => (
-                            <Card key={message.id} className={message.read ? "" : "border-primary"}>
-                              <CardHeader className="py-3">
-                                <div className="flex justify-between items-center">
-                                  <CardTitle className="text-base">{message.sender}</CardTitle>
-                                  <span className="text-xs text-muted-foreground">{formatDate(message.date)}</span>
-                                </div>
-                              </CardHeader>
-                              <CardContent className="py-2">
-                                <p className="text-sm">{message.content}</p>
-                              </CardContent>
-                              <CardFooter className="pt-0 pb-3 flex justify-end">
-                                <Button variant="outline" size="sm">
-                                  {language === 'ru' ? 'Ответить' : 'Жауап беру'}
-                                </Button>
-                              </CardFooter>
-                            </Card>
-                          ))}
-                        </div>
                       ) : (
-                        <div className="text-center py-8">
-                          <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">
-                            {language === 'ru' ? 'У вас пока нет сообщений' : 'Сізде әзірше хабарламалар жоқ'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </TabsContent>
-                  
-                  {/* Вкладка отзывов */}
-                  <TabsContent value="reviews">
-                    <div className="space-y-4">
-                      {reviews.length > 0 ? (
+                        // Profile info
                         <div className="space-y-4">
-                          {reviews.map(review => (
-                            <Card key={review.id}>
-                              <CardHeader className="py-3">
-                                <div className="flex justify-between items-center">
-                                  <div>
-                                    <CardTitle className="text-base">{review.author}</CardTitle>
-                                    <div className="flex mt-1">
-                                      {[...Array(5)].map((_, i) => (
-                                        <svg 
-                                          key={i} 
-                                          className={`h-4 w-4 ${i < review.rating ? "text-yellow-400" : "text-gray-300"}`} 
-                                          fill="currentColor" 
-                                          viewBox="0 0 20 20"
-                                        >
-                                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                        </svg>
-                                      ))}
-                                    </div>
-                                  </div>
-                                  <span className="text-xs text-muted-foreground">{formatDate(review.date)}</span>
-                                </div>
-                              </CardHeader>
-                              <CardContent className="py-2">
-                                <p className="text-sm">{review.comment}</p>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">
-                            {language === 'ru' ? 'У вас пока нет отзывов' : 'Сізде әзірше пікірлер жоқ'}
-                          </p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <div className="font-medium text-sm text-muted-foreground mb-1">
+                                {language === 'ru' ? 'Имя' : 'Аты'}
+                              </div>
+                              <div>{firstName}</div>
+                            </div>
+                            <div>
+                              <div className="font-medium text-sm text-muted-foreground mb-1">
+                                {language === 'ru' ? 'Фамилия' : 'Тегі'}
+                              </div>
+                              <div>{lastName}</div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="font-medium text-sm text-muted-foreground mb-1">
+                              Email
+                            </div>
+                            <div>{email}</div>
+                          </div>
+                          
+                          <div>
+                            <div className="font-medium text-sm text-muted-foreground mb-1">
+                              {language === 'ru' ? 'Телефон' : 'Телефон'}
+                            </div>
+                            <div>{phone}</div>
+                          </div>
                         </div>
                       )}
-                    </div>
-                  </TabsContent>
-                  
-                  {/* Вкладка уведомлений */}
-                  <TabsContent value="notifications">
-                    <div className="space-y-4">
-                      {notifications.length > 0 ? (
-                        <div className="space-y-4">
-                          {notifications.map(notification => (
-                            <Card 
-                              key={notification.id}
-                              className={notification.read ? "" : "border-primary"}
-                              onClick={() => markNotificationAsRead(notification.id)}
-                            >
-                              <CardHeader className="py-3">
-                                <div className="flex justify-between items-center">
-                                  <CardTitle className="text-base">{notification.title}</CardTitle>
-                                  <span className="text-xs text-muted-foreground">{formatDate(notification.date)}</span>
-                                </div>
-                              </CardHeader>
-                              <CardContent className="py-2">
-                                <p className="text-sm">{notification.content}</p>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">
-                            {language === 'ru' ? 'У вас пока нет уведомлений' : 'Сізде әзірше хабарландырулар жоқ'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </TabsContent>
+                    </TabsContent>
+                    
+                    <TabsContent value="listings">
+                      <MyListings listings={userListings} />
+                    </TabsContent>
+                    
+                    <TabsContent value="messages">
+                      <MessagesInbox messages={messages} formatDate={formatDate} />
+                    </TabsContent>
+                    
+                    <TabsContent value="reviews">
+                      <ReviewsList reviews={reviews} formatDate={formatDate} />
+                    </TabsContent>
+                    
+                    <TabsContent value="notifications">
+                      <NotificationsList 
+                        notifications={notifications} 
+                        formatDate={formatDate}
+                        onMarkAsRead={markNotificationAsRead}
+                      />
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
             </div>
