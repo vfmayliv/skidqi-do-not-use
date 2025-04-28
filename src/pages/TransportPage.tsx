@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -66,9 +67,10 @@ const TransportPage = () => {
   
   const handleApplyFilters = () => {
     toast({
+      title: language === 'ru' ? 'Фильтры применены' : 'Фильтрлер қолданылды',
       description: language === 'ru' 
         ? 'Результаты обновлены в соответствии с выбранными фильтрами.' 
-        : 'Нәтижелер таңдалған фильтрлерге сәйкес жаңартылды.',
+        : 'Нәтижелер таңдалған фильтрлерге сәйкес жаңартылды.'
     });
   };
 
