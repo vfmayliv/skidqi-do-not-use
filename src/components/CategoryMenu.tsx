@@ -2,14 +2,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { categories } from '@/data/categories';
-import { useAppContext } from '@/contexts/AppContext';
+import { useAppStore } from '@/stores/useAppStore'; 
 import * as LucideIcons from 'lucide-react';
-import { LucideProps } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export function CategoryMenu() {
-  const { language, t } = useAppContext();
+  const { language, t } = useAppStore();
 
   // Helper function to dynamically render icons from Lucide
   const DynamicIcon = ({ name, className }: { name: string, className?: string }) => {
