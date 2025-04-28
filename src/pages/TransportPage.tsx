@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -648,15 +649,21 @@ const TransportPage = () => {
     if (!brandsSearchQuery) return brands;
     
     return brands.filter(brand => {
+      // Handle brand as either a string or BrandData object
       if (typeof brand === 'string') {
         return brand.toLowerCase().includes(brandsSearchQuery.toLowerCase());
       }
       
-      const brandName = typeof brand.name === 'string' 
-        ? brand.name.toLowerCase() 
-        : brand.name.ru.toLowerCase();
-        
-      return brandName.includes(brandsSearchQuery.toLowerCase());
+      // Safely handle the BrandData object case
+      if (typeof brand.name === 'string') {
+        return brand.name.toLowerCase().includes(brandsSearchQuery.toLowerCase());
+      } else if (brand.name && typeof brand.name === 'object') {
+        // Access the localized name (ru or kz)
+        return brand.name.ru.toLowerCase().includes(brandsSearchQuery.toLowerCase());
+      }
+      
+      // Fallback for other cases
+      return false;
     });
   }, [brands, brandsSearchQuery]);
 
