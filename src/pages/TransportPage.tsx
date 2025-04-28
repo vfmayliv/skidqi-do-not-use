@@ -131,7 +131,11 @@ const TransportPage = () => {
       hasPhoto: null,
       features: null,
       sortBy: null,
-      commercialType: null
+      commercialType: null,
+      // Добавляем отсутствующие свойства согласно ошибке
+      colors: null,
+      city: null,
+      exchange: null
     },
     onFilterChange: () => {},
     onReset: () => {},
