@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -28,7 +27,8 @@ import {
   SteeringWheelType,
   VehicleFeature,
   SortOption,
-  BrandData
+  BrandData,
+  LocalizedText
 } from '@/types/listingType';
 import { mockListings } from '@/data/mockListings';
 import { useToast } from '@/components/ui/use-toast';
@@ -654,12 +654,16 @@ const TransportPage = () => {
         return brand.toLowerCase().includes(brandsSearchQuery.toLowerCase());
       }
       
-      // Safely handle the BrandData object case
-      if (typeof brand.name === 'string') {
-        return brand.name.toLowerCase().includes(brandsSearchQuery.toLowerCase());
-      } else if (brand.name && typeof brand.name === 'object') {
-        // Access the localized name (ru or kz)
-        return brand.name.ru.toLowerCase().includes(brandsSearchQuery.toLowerCase());
+      // Safely handle the BrandData object case with type checking
+      if (brand && typeof brand === 'object') {
+        // Check if brand.name is a string
+        if (typeof brand.name === 'string') {
+          return brand.name.toLowerCase().includes(brandsSearchQuery.toLowerCase());
+        } 
+        // Check if brand.name is an object with ru property (LocalizedText)
+        else if (brand.name && typeof brand.name === 'object' && 'ru' in brand.name && typeof brand.name.ru === 'string') {
+          return brand.name.ru.toLowerCase().includes(brandsSearchQuery.toLowerCase());
+        }
       }
       
       // Fallback for other cases
