@@ -1,9 +1,9 @@
 
 import { Link } from 'react-router-dom';
-import { useAppContext } from '@/contexts/AppContext';
+import { useAppStore } from '@/stores/useAppStore';
 
 export function Footer() {
-  const { t } = useAppContext();
+  const { t } = useAppStore();
 
   return (
     <footer className="bg-gray-100 mt-8">
