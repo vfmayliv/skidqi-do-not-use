@@ -1,7 +1,7 @@
 
 import { CategoryConfig } from '../shared/types';
-import { TransportCard } from '@/components/transport/TransportCard';
-import { TransportFilters } from '@/components/transport/TransportFilters';
+import TransportCard from '@/components/transport/TransportCard';
+import TransportFilters from '@/components/transport/TransportFilters';
 
 export const transportConfig: CategoryConfig = {
   id: 'transport',
