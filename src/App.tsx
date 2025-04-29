@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -23,6 +22,10 @@ import { AuthProtection } from '@/components/AuthProtection';
 import { PropertyPage } from '@/pages/PropertyPage';
 import TransportPage from '@/pages/TransportPage';
 import { AppProvider } from '@/contexts/AppContext';
+
+// Import category configurations to ensure they are registered
+import '@/categories/real-estate/config';
+import '@/categories/transport/config';
 
 const App: React.FC = () => {
   return (

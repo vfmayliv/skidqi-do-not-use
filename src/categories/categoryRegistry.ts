@@ -1,12 +1,10 @@
 
 import { CategoryConfig } from './shared/types';
 import { categories } from '@/data/categories';
-// Re-export components from each category
-// import { PropertyFilters } from './real-estate/components';
-// import { TransportFilters } from './transport/components';
+import { ListingCard } from '@/components/ListingCard';
+import { CategoryFilters } from './shared/components/CategoryFilters';
 
 // This registry will be populated with all category configurations
-// For now, we're creating a skeleton with basic information from the existing categories data
 export const categoryRegistry: Record<string, CategoryConfig> = {};
 
 // Initialize the registry with basic data from the existing categories
@@ -16,9 +14,9 @@ export const initializeCategoryRegistry = () => {
     categoryRegistry[category.id] = {
       id: category.id,
       name: category.name,
-      // These will be populated later with actual components
-      filtersComponent: () => null,
-      cardComponent: () => null,
+      // Use default components until actual ones are registered
+      filtersComponent: CategoryFilters,
+      cardComponent: ListingCard,
       styles: `/src/categories/${category.id}/styles/style.css`,
       filterConfig: {},
     };
