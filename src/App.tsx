@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -34,6 +35,8 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/search" element={<SearchResults />} />
+          
+          {/* Use the universal CategoryPage for all categories */}
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/category/:categoryId/:subcategoryId" element={<SubcategoryPage />} />
           
