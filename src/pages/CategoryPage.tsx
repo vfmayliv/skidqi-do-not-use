@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { ListingCard } from '@/components/ListingCard';
 import PropertyCard from '@/components/property/PropertyCard';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppWithTranslations } from '@/stores/useAppStore';
 import { mockListings } from '@/data/mockListings';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -11,7 +11,7 @@ import { Footer } from '@/components/Footer';
 export function CategoryPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const [searchParams] = useSearchParams();
-  const { language } = useAppStore();
+  const { language, t } = useAppWithTranslations();
   const [filteredListings, setFilteredListings] = useState(mockListings);
 
   useEffect(() => {

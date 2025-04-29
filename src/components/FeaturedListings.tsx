@@ -5,10 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ListingCard } from '@/components/ListingCard';
 import { mockListings } from '@/data/mockListings';
-import { useAppStore } from '@/stores/useAppStore';
+import { useTranslation } from 'react-i18next';
 
 export function FeaturedListings() {
-  const { t } = useAppStore();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('featured');
   
   const featuredListings = mockListings.filter(listing => listing.isFeatured);

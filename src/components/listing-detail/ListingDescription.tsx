@@ -1,25 +1,28 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MapPin, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ListingDescriptionProps {
   description: string;
   language: string;
 }
 
-export const ListingDescription = ({ description, language }: ListingDescriptionProps) => {
+export const ListingDescription = ({ description }: ListingDescriptionProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm">
       <Tabs defaultValue="description">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="description">
-            {language === 'ru' ? 'Описание' : 'Сипаттама'}
+            {t('description', 'Описание')}
           </TabsTrigger>
           <TabsTrigger value="characteristics">
-            {language === 'ru' ? 'Характеристики' : 'Сипаттамалары'}
+            {t('characteristics', 'Характеристики')}
           </TabsTrigger>
           <TabsTrigger value="delivery">
-            {language === 'ru' ? 'Доставка' : 'Жеткізу'}
+            {t('delivery', 'Доставка')}
           </TabsTrigger>
         </TabsList>
         
@@ -31,19 +34,17 @@ export const ListingDescription = ({ description, language }: ListingDescription
             
             {/* Additional description content for better resemblance to Avito */}
             <p className="text-sm">
-              {language === 'ru' 
-                ? 'Товар в наличии. Гарантия качества. Возможен торг при осмотре.'
-                : 'Тауар қолда бар. Сапа кепілдігі. Қарау кезінде сауда жасау мүмкін.'}
+              {t('guaranteeMessage', 'Товар в наличии. Гарантия качества. Возможен торг при осмотре.')}
             </p>
             
             <div className="pt-4">
               <h4 className="text-sm font-medium mb-2">
-                {language === 'ru' ? 'Преимущества товара:' : 'Тауардың артықшылықтары:'}
+                {t('advantages', 'Преимущества товара:')}
               </h4>
               <ul className="list-disc pl-5 text-sm space-y-1">
-                <li>{language === 'ru' ? 'Высокое качество' : 'Жоғары сапа'}</li>
-                <li>{language === 'ru' ? 'Долгий срок службы' : 'Ұзақ қызмет ету мерзімі'}</li>
-                <li>{language === 'ru' ? 'Надежный производитель' : 'Сенімді өндіруші'}</li>
+                <li>{t('highQuality', 'Высокое качество')}</li>
+                <li>{t('longLifespan', 'Долгий срок службы')}</li>
+                <li>{t('reliableManufacturer', 'Надежный производитель')}</li>
               </ul>
             </div>
           </div>
@@ -53,39 +54,39 @@ export const ListingDescription = ({ description, language }: ListingDescription
           <dl className="space-y-4">
             <div className="flex border-b pb-2">
               <dt className="w-40 font-medium text-sm">
-                {language === 'ru' ? 'Категория' : 'Санат'}
+                {t('category', 'Категория')}
               </dt>
-              <dd className="text-sm">{language === 'ru' ? 'Электроника' : 'Электроника'}</dd>
+              <dd className="text-sm">{t('electronics', 'Электроника')}</dd>
             </div>
             <div className="flex border-b pb-2">
               <dt className="w-40 font-medium text-sm">
-                {language === 'ru' ? 'Состояние' : 'Жағдайы'}
+                {t('condition', 'Состояние')}
               </dt>
-              <dd className="text-sm">{language === 'ru' ? 'Новый' : 'Жаңа'}</dd>
+              <dd className="text-sm">{t('new', 'Новый')}</dd>
             </div>
             <div className="flex border-b pb-2">
               <dt className="w-40 font-medium text-sm">
-                {language === 'ru' ? 'Бренд' : 'Бренд'}
+                {t('brand', 'Бренд')}
               </dt>
               <dd className="text-sm">Samsung</dd>
             </div>
             <div className="flex border-b pb-2">
               <dt className="w-40 font-medium text-sm">
-                {language === 'ru' ? 'Гарантия' : 'Кепілдік'}
+                {t('warranty', 'Гарантия')}
               </dt>
-              <dd className="text-sm">{language === 'ru' ? '12 месяцев' : '12 ай'}</dd>
+              <dd className="text-sm">{t('warranty12Months', '12 месяцев')}</dd>
             </div>
             <div className="flex border-b pb-2">
               <dt className="w-40 font-medium text-sm">
-                {language === 'ru' ? 'Наличие' : 'Қолда бар'}
+                {t('availability', 'Наличие')}
               </dt>
-              <dd className="text-sm">{language === 'ru' ? 'В наличии' : 'Қолда бар'}</dd>
+              <dd className="text-sm">{t('inStock', 'В наличии')}</dd>
             </div>
             <div className="flex border-b pb-2">
               <dt className="w-40 font-medium text-sm">
-                {language === 'ru' ? 'Цвет' : 'Түсі'}
+                {t('color', 'Цвет')}
               </dt>
-              <dd className="text-sm">{language === 'ru' ? 'Черный' : 'Қара'}</dd>
+              <dd className="text-sm">{t('black', 'Черный')}</dd>
             </div>
           </dl>
         </TabsContent>
@@ -98,12 +99,10 @@ export const ListingDescription = ({ description, language }: ListingDescription
               </div>
               <div>
                 <h4 className="font-medium text-sm">
-                  {language === 'ru' ? 'Самовывоз' : 'Өзі алып кету'}
+                  {t('pickup', 'Самовывоз')}
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  {language === 'ru' 
-                    ? 'Заберите товар по адресу продавца' 
-                    : 'Тауарды сатушының мекенжайы бойынша алыңыз'}
+                  {t('pickupDesc', 'Заберите товар по адресу продавца')}
                 </p>
               </div>
             </div>
@@ -114,12 +113,10 @@ export const ListingDescription = ({ description, language }: ListingDescription
               </div>
               <div>
                 <h4 className="font-medium text-sm">
-                  {language === 'ru' ? 'Доставка курьером' : 'Курьермен жеткізу'}
+                  {t('courierDelivery', 'Доставка курьером')}
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  {language === 'ru' 
-                    ? 'Доставка курьером в течение 1-2 дней' 
-                    : 'Курьермен 1-2 күн ішінде жеткізу'}
+                  {t('courierDeliveryDesc', 'Доставка курьером в течение 1-2 дней')}
                 </p>
               </div>
             </div>

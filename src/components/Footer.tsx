@@ -1,9 +1,9 @@
 
 import { Link } from 'react-router-dom';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppWithTranslations } from '@/stores/useAppStore';
 
 export function Footer() {
-  const { t } = useAppStore();
+  const { t } = useAppWithTranslations();
 
   return (
     <footer className="bg-gray-100 mt-8">
@@ -19,22 +19,22 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link to="/category/electronics" className="text-sm text-gray-600 hover:text-primary">
-                  Электроника
+                  {t('electronics')}
                 </Link>
               </li>
               <li>
                 <Link to="/category/property" className="text-sm text-gray-600 hover:text-primary">
-                  Недвижимость
+                  {t('realestate')}
                 </Link>
               </li>
               <li>
                 <Link to="/category/transport" className="text-sm text-gray-600 hover:text-primary">
-                  Транспорт
+                  {t('transport')}
                 </Link>
               </li>
               <li>
                 <Link to="/category/jobs" className="text-sm text-gray-600 hover:text-primary">
-                  Работа
+                  {t('services')}
                 </Link>
               </li>
             </ul>
@@ -45,22 +45,22 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link to="/about" className="text-sm text-gray-600 hover:text-primary">
-                  О нас
+                  {t('about', 'О нас')}
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="text-sm text-gray-600 hover:text-primary">
-                  Контакты
+                  {t('contact', 'Контакты')}
                 </Link>
               </li>
               <li>
                 <Link to="/terms" className="text-sm text-gray-600 hover:text-primary">
-                  Правила
+                  {t('terms', 'Правила')}
                 </Link>
               </li>
               <li>
                 <Link to="/privacy" className="text-sm text-gray-600 hover:text-primary">
-                  Политика конфиденциальности
+                  {t('privacy', 'Политика конфиденциальности')}
                 </Link>
               </li>
             </ul>

@@ -1,6 +1,8 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 
 export type Language = 'ru' | 'kz';
 export type UserRole = 'guest' | 'user' | 'admin';
@@ -10,158 +12,12 @@ export type CityType = {
   kz: string;
 };
 
-// Translation helper type
-type TranslationType = {
-  [key: string]: {
-    ru: string;
-    kz: string;
-  }
-};
-
-// Basic translations
-const translations: TranslationType = {
-  siteName: {
-    ru: 'SKIDQI.COM',
-    kz: 'SKIDQI.COM'
-  },
-  tagline: {
-    ru: 'Доска объявлений со скидками в Казахстане',
-    kz: 'Қазақстандағы жеңілдіктері бар хабарландыру тақтасы'
-  },
-  search: {
-    ru: 'Поиск',
-    kz: 'Іздеу'
-  },
-  allCities: {
-    ru: 'Все города',
-    kz: 'Барлық қалалар'
-  },
-  login: {
-    ru: 'Войти',
-    kz: 'Кіру'
-  },
-  register: {
-    ru: 'Регистрация',
-    kz: 'Тіркелу'
-  },
-  profile: {
-    ru: 'Профиль',
-    kz: 'Профиль'
-  },
-  createAd: {
-    ru: 'Подать объявление',
-    kz: 'Хабарландыру беру'
-  },
-  categories: {
-    ru: 'Категории',
-    kz: 'Санаттар'
-  },
-  featuredAds: {
-    ru: 'Избранные объявления',
-    kz: 'Таңдаулы хабарландырулар'
-  },
-  latestAds: {
-    ru: 'Новые объявления',
-    kz: 'Жаңа хабарландырулар'
-  },
-  allAds: {
-    ru: 'Все объявления',
-    kz: 'Барлық хабарландырулар'
-  },
-  selectCity: {
-    ru: 'Выберите город',
-    kz: 'Қаланы таңдаңыз'
-  },
-  selectCategory: {
-    ru: 'Выберите категорию',
-    kz: 'Санатты таңдаңыз'
-  },
-  yes: {
-    ru: 'Да',
-    kz: 'Иә'
-  },
-  no: {
-    ru: 'Нет',
-    kz: 'Жоқ'
-  },
-  featured: {
-    ru: 'Рекомендуемые',
-    kz: 'Ұсынылатын'
-  },
-  tenge: {
-    ru: '₸',
-    kz: '₸'
-  },
-  allRights: {
-    ru: 'Все права защищены.',
-    kz: 'Барлық құқықтар қорғалған.'
-  },
-  // New category translations
-  free: {
-    ru: 'Бесплатно',
-    kz: 'Тегін'
-  },
-  pharmacy: {
-    ru: 'Аптеки',
-    kz: 'Дәріханалар'
-  },
-  electronics: {
-    ru: 'Техника и Электроника',
-    kz: 'Техника және Электроника'
-  },
-  fashion: {
-    ru: 'Мода и Стиль',
-    kz: 'Сән және Стиль'
-  },
-  children: {
-    ru: 'Детям',
-    kz: 'Балаларға'
-  },
-  food: {
-    ru: 'Продукты Питания',
-    kz: 'Тамақ өнімдері'
-  },
-  hobby: {
-    ru: 'Хобби и Спорт',
-    kz: 'Хобби және Спорт'
-  },
-  pets: {
-    ru: 'Зоотовары',
-    kz: 'Зоотауарлар'
-  },
-  beauty: {
-    ru: 'Красота и Здоровье',
-    kz: 'Сұлулық және Денсаулық'
-  },
-  transport: {
-    ru: 'Транспорт',
-    kz: 'Көлік'
-  },
-  realestate: {
-    ru: 'Недвижимость и строительство',
-    kz: 'Жылжымайтын мүлік және құрылыс'
-  },
-  services: {
-    ru: 'Услуги',
-    kz: 'Қызметтер'
-  },
-  home: {
-    ru: 'Все для Дома и Дачи',
-    kz: 'Үй және Саяжай үшін барлығы'
-  },
-  listings: {
-    ru: 'Объявления',
-    kz: 'Хабарландырулар'
-  }
-};
-
 type AppState = {
   language: Language;
   selectedCity: CityType | null;
   cityConfirmed: boolean;
   isAuthenticated: boolean;
   userRole: UserRole;
-  translations: TranslationType;
   
   // Actions
   setLanguage: (language: Language) => void;
@@ -170,22 +26,21 @@ type AppState = {
   login: () => void;
   logout: () => void;
   setUserRole: (role: UserRole) => void;
-  
-  // Utility
-  t: (key: string) => string;
 };
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       language: 'ru',
       selectedCity: null,
       cityConfirmed: false,
       isAuthenticated: false,
       userRole: 'guest',
-      translations,
       
-      setLanguage: (language: Language) => set({ language }),
+      setLanguage: (language: Language) => {
+        i18n.changeLanguage(language); // Change i18next language
+        set({ language });
+      },
       
       setSelectedCity: (city: CityType | null) => set({ selectedCity: city }),
       
@@ -196,14 +51,6 @@ export const useAppStore = create<AppState>()(
       logout: () => set({ isAuthenticated: false, userRole: 'guest' }),
       
       setUserRole: (role: UserRole) => set({ userRole: role }),
-      
-      t: (key: string) => {
-        const { translations, language } = get();
-        if (translations[key] && translations[key][language]) {
-          return translations[key][language];
-        }
-        return key;
-      }
     }),
     {
       name: 'app-storage',
@@ -212,7 +59,24 @@ export const useAppStore = create<AppState>()(
   )
 );
 
+// Helper hook to access translations through i18next
+export const useTranslations = () => {
+  const { t } = useTranslation();
+  return { t };
+};
+
+// Combined hook for app store and translations
+export const useAppWithTranslations = () => {
+  const appStore = useAppStore();
+  const { t } = useTranslation();
+  
+  return {
+    ...appStore,
+    t,
+  };
+};
+
 // Aliases for backward compatibility
 export const useLanguage = () => useAppStore(state => state.language);
 export const useSelectedCity = () => useAppStore(state => state.selectedCity);
-export const useTranslation = () => useAppStore(state => state.t);
+export const useTranslation = () => useTranslations();
