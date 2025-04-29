@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Filter, MapPin, Grid, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppWithTranslations } from '@/stores/useAppStore';
 import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
 import { carBrands, motorcycleBrands } from '@/data/transportData';
 import { mockListings } from '@/data/mockListings';
@@ -20,7 +20,7 @@ import { useToast } from '@/hooks/useToast';
 
 const TransportPage = () => {
   const isMobile = useIsMobile();
-  const { language } = useAppStore();
+  const { language } = useAppWithTranslations();
   const { filters, setFilters, resetFilters, activeFiltersCount } = useTransportFiltersStore();
   const { toast } = useToast();
   const [isMapOpen, setIsMapOpen] = useState(false);

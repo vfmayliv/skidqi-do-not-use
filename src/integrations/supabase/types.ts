@@ -9,7 +9,74 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      cities: {
+        Row: {
+          id: number
+          name_kz: string | null
+          name_ru: string
+          region_id: number | null
+        }
+        Insert: {
+          id?: number
+          name_kz?: string | null
+          name_ru: string
+          region_id?: number | null
+        }
+        Update: {
+          id?: number
+          name_kz?: string | null
+          name_ru?: string
+          region_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cities_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      microdistricts: {
+        Row: {
+          city_id: number | null
+          id: number
+          name_kz: string | null
+          name_ru: string
+        }
+        Insert: {
+          city_id?: number | null
+          id?: number
+          name_kz?: string | null
+          name_ru: string
+        }
+        Update: {
+          city_id?: number | null
+          id?: number
+          name_kz?: string | null
+          name_ru?: string
+        }
+        Relationships: []
+      }
+      regions: {
+        Row: {
+          id: number
+          name_kz: string | null
+          name_ru: string
+        }
+        Insert: {
+          id?: number
+          name_kz?: string | null
+          name_ru: string
+        }
+        Update: {
+          id?: number
+          name_kz?: string | null
+          name_ru?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

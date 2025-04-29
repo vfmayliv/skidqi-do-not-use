@@ -32,7 +32,7 @@ const App: React.FC = () => {
         <Route path="/category/:categoryId" element={<CategoryPage />} />
         <Route path="/category/:categoryId/:subcategoryId" element={<SubcategoryPage />} />
         
-        {/* Категории с индивидуальным содержимым */}
+        {/* Categories with custom pages */}
         <Route path="/property" element={<PropertyPage />} />
         <Route path="/transport" element={<TransportPage />} />
         
