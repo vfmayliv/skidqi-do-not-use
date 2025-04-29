@@ -4,6 +4,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { BreadcrumbNavigation } from '@/components/BreadcrumbNavigation';
 import { mockListings } from '@/data/mockListings';
 import { cities } from '@/data/cities';
 import { getCategoryConfig } from '@/categories/categoryRegistry';
@@ -69,13 +70,15 @@ export function CategoryPage() {
     );
   }
 
-  const categoryName = categoryId === 'property'
-    ? (language === 'ru' ? 'Недвижимость' : 'Жылжымайтын мүлік')
-    : (language === 'ru' ? 'Товары' : 'Тауарлар');
+  const categoryName = config?.name?.[language] || 
+    (categoryId === 'property'
+      ? (language === 'ru' ? 'Недвижимость' : 'Жылжымайтын мүлік')
+      : (language === 'ru' ? 'Товары' : 'Тауарлар'));
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      <BreadcrumbNavigation currentPage={categoryName} />
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-2xl font-semibold mb-4">{categoryName}</h1>
@@ -99,6 +102,8 @@ export function CategoryPage() {
                 onCityChange: setSelectedCity,
                 selectedCity
               }}
+              brands={[]} // For TransportFilters
+              activeFiltersCount={0} // For TransportFilters
             />
           )}
           
