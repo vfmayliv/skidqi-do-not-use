@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, User, Menu, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppWithTranslations } from '@/stores/useAppStore';
 import { useSearchStore } from '@/stores/useSearchStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -14,7 +14,7 @@ import { cities } from '@/data/cities';
 import logo from '/logo.png';
 
 export function Header() {
-  const { language, setLanguage, selectedCity: city, setSelectedCity: setCity, setCityConfirmed, isAuthenticated, logout, t } = useAppStore();
+  const { language, setLanguage, selectedCity: city, setSelectedCity: setCity, setCityConfirmed, isAuthenticated, logout, t } = useAppWithTranslations();
   const { searchTerm, setSearchTerm, performSearch } = useSearchStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCityDialogOpen, setIsCityDialogOpen] = useState(false);

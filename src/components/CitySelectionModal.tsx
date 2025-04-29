@@ -5,10 +5,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cities } from '@/data/cities';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppWithTranslations } from '@/stores/useAppStore';
 
 export function CitySelectionModal() {
-  const { language, selectedCity, cityConfirmed, t, setSelectedCity, setCityConfirmed } = useAppStore();
+  const { language, selectedCity, cityConfirmed, t, setSelectedCity, setCityConfirmed } = useAppWithTranslations();
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestedCity, setSuggestedCity] = useState(cities[0]);

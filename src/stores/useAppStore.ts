@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { useTranslation } from 'react-i18next';
+import { useTranslation as useReactTranslation } from 'react-i18next';
 import i18n from '../i18n';
 
 export type Language = 'ru' | 'kz';
@@ -61,14 +61,14 @@ export const useAppStore = create<AppState>()(
 
 // Helper hook to access translations through i18next
 export const useTranslations = () => {
-  const { t } = useTranslation();
+  const { t } = useReactTranslation();
   return { t };
 };
 
 // Combined hook for app store and translations
 export const useAppWithTranslations = () => {
   const appStore = useAppStore();
-  const { t } = useTranslation();
+  const { t } = useReactTranslation();
   
   return {
     ...appStore,
@@ -79,4 +79,3 @@ export const useAppWithTranslations = () => {
 // Aliases for backward compatibility
 export const useLanguage = () => useAppStore(state => state.language);
 export const useSelectedCity = () => useAppStore(state => state.selectedCity);
-export const useTranslation = () => useTranslations();
