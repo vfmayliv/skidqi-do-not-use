@@ -24,6 +24,7 @@ export enum BuildingType {
   MONOLITHIC = 'monolithic',
   BLOCK = 'block',
   WOODEN = 'wooden',
+  MIXED = 'mixed', // Added missing MIXED type
 }
 
 export enum RenovationType {
@@ -37,6 +38,7 @@ export enum BathroomType {
   COMBINED = 'combined',
   SEPARATE = 'separate',
   TWO_OR_MORE = 'two_or_more',
+  NO_BATHROOM = 'no_bathroom', // Added missing NO_BATHROOM type
 }
 
 export enum SortOption {
@@ -51,7 +53,10 @@ export enum SortOption {
 
 export enum DealType {
   SALE = 'sale',
-  RENT = 'rent'
+  RENT = 'rent',
+  BUY = 'buy', // Added missing BUY type
+  RENT_LONG = 'rent_long', // Added missing RENT_LONG type
+  RENT_DAILY = 'rent_daily', // Added missing RENT_DAILY type
 }
 
 export enum ViewType {
@@ -61,6 +66,10 @@ export enum ViewType {
   LANDMARK = 'landmark',
   MOUNTAINS = 'mountains',
   SEA = 'sea',
+  PARK = 'park', // Added missing PARK type
+  LAKE = 'lake', // Added missing LAKE type
+  COURTYARD = 'courtyard', // Added missing COURTYARD type
+  STREET = 'street', // Added missing STREET type
 }
 
 export enum InfrastructureType {
@@ -73,6 +82,9 @@ export enum InfrastructureType {
   GYM = 'gym',
   CAFE = 'cafe',
   PUBLIC_TRANSPORT = 'public_transport',
+  SHOPPING_CENTER = 'shopping_center', // Added missing SHOPPING_CENTER type
+  SPORT_COMPLEX = 'sport_complex', // Added missing SPORT_COMPLEX type
+  BANK = 'bank', // Added missing BANK type
 }
 
 // Transport related enums
@@ -145,23 +157,36 @@ export interface PropertyFilters {
   priceRange: { min: number | null; max: number | null };
   rooms: (number | string)[];
   areaRange: { min: number | null; max: number | null };
-  floor: { min: number | null; max: number | null };
-  totalFloors: { min: number | null; max: number | null };
-  yearBuilt: { min: number | null; max: number | null };
+  floor?: { min: number | null; max: number | null }; // Using "floor" for backward compatibility
+  floorRange?: { min: number | null; max: number | null }; // Adding floorRange for newer components
+  totalFloors?: { min: number | null; max: number | null };
+  yearBuilt?: { min: number | null; max: number | null };
+  yearBuiltRange?: { min: number | null; max: number | null }; // Adding for newer components
   buildingTypes?: BuildingType[] | null;
   renovationTypes?: RenovationType[] | null;
   bathroomTypes?: BathroomType[] | null;
   districts?: string[] | null;
+  viewTypes?: ViewType[] | null; // Added missing viewTypes
+  nearbyInfrastructure?: InfrastructureType[] | null; // Added missing nearbyInfrastructure
   hasPhoto?: boolean;
   isNewBuilding?: boolean;
+  onlyNewBuilding?: boolean; // Added for compatibility
   hasParking?: boolean;
   hasFurniture?: boolean;
+  furnished?: boolean; // Added for compatibility
   hasBalcony?: boolean;
   hasElevator?: boolean;
   isCorner?: boolean;
   onlyTrustedSellers?: boolean;
   mortgageAvailable?: boolean;
   hasVirtualTour?: boolean;
+  isStudio?: boolean; // Added missing property
+  rentPeriodMin?: number; // Added missing rentPeriodMin
+  allowPets?: boolean; // Added missing allowPets
+  hasSeparateEntrance?: boolean; // Added missing hasSeparateEntrance
+  securityGuarded?: boolean; // Added missing securityGuarded
+  hasPlayground?: boolean; // Added missing hasPlayground
+  ceilingHeightRange?: { min: number | null; max: number | null }; // Added missing ceilingHeightRange
   sortBy: SortOption;
 }
 
