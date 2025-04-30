@@ -185,12 +185,12 @@ const TransportFilters = ({
   };
 
   const handleTransmissionToggle = (transmission: TransmissionType) => {
-    const currentTransmissions = filters.transmissions || [];
+    const currentTransmissions = filters.transmissionTypes || [];
     const newTransmissions = currentTransmissions.includes(transmission)
       ? currentTransmissions.filter(t => t !== transmission)
       : [...currentTransmissions, transmission];
     
-    onFilterChange({ transmissions: newTransmissions.length > 0 ? newTransmissions : null });
+    onFilterChange({ transmissionTypes: newTransmissions.length > 0 ? newTransmissions : null });
   };
 
   const handleDriveTypeToggle = (driveType: DriveType) => {
@@ -418,7 +418,7 @@ const TransportFilters = ({
                     <div key={transmission} className="flex items-center space-x-2 py-1">
                       <Checkbox 
                         id={`transmission-${transmission}`} 
-                        checked={(filters.transmissions || []).includes(transmission)}
+                        checked={(filters.transmissionTypes || []).includes(transmission)}
                         onCheckedChange={() => handleTransmissionToggle(transmission)}
                       />
                       <Label htmlFor={`transmission-${transmission}`} className="text-sm">
