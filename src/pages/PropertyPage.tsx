@@ -102,6 +102,19 @@ export function PropertyPage() {
     if (filters.districts && filters.districts.length > 0) {
       newListings = newListings.filter(listing => listing.districtId && filters.districts?.includes(listing.districtId));
     }
+    
+    // Фильтрация по новым полям
+    if (filters.regionId) {
+      newListings = newListings.filter(listing => listing.regionId === filters.regionId);
+    }
+    
+    if (filters.cityId) {
+      newListings = newListings.filter(listing => listing.cityId === filters.cityId);
+    }
+    
+    if (filters.microdistrictId) {
+      newListings = newListings.filter(listing => listing.microdistrictId === filters.microdistrictId);
+    }
 
     if (filters.sortBy) {
       switch (filters.sortBy) {

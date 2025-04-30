@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import {
   PropertyFilters,
@@ -62,7 +63,11 @@ const initialFilters: PropertyFilters = {
   utilityBillsIncluded: null,
   sortBy: null,
   viewTypes: null,
-  nearbyInfrastructure: null
+  nearbyInfrastructure: null,
+  // Новые поля для административных единиц
+  regionId: null,
+  cityId: null,
+  microdistrictId: null
 };
 
 export const usePropertyFiltersStore = create<PropertyFiltersState>()((set, get) => ({

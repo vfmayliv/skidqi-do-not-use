@@ -1,4 +1,3 @@
-
 export enum VehicleType {
   CAR = 'car',
   MOTORCYCLE = 'motorcycle',
@@ -197,6 +196,9 @@ export interface PropertyFilters {
   ceilingHeightRange?: { min: number | null; max: number | null }; // Added missing ceilingHeightRange
   utilityBillsIncluded?: boolean; // Added missing utilityBillsIncluded
   sortBy: SortOption;
+  regionId: string | null;
+  cityId: string | null;
+  microdistrictId: string | null;
 }
 
 export interface TransportFilters {
@@ -311,4 +313,25 @@ export interface Listing {
   hasFurniture?: boolean;
   hasBalcony?: boolean;
   hasElevator?: boolean;
+}
+
+export interface Region {
+  id: string;
+  name_ru: string;
+  name_kz: string;
+  is_city_level?: boolean; // Для определения особых регионов-городов (Алматы, Астана, Шымкент)
+}
+
+export interface City {
+  id: string;
+  name_ru: string;
+  name_kz: string;
+  region_id: string;
+}
+
+export interface Microdistrict {
+  id: string;
+  name_ru: string;
+  name_kz: string;
+  city_id: string;
 }
