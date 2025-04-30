@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -11,6 +12,7 @@ import { ListingStats } from '@/components/listing-detail/ListingStats';
 import { SellerInfo } from '@/components/listing-detail/SellerInfo';
 import { SafetyTips } from '@/components/listing-detail/SafetyTips';
 import { SimilarListings } from '@/components/listing-detail/SimilarListings';
+import LocationMap from '@/components/listing-detail/LocationMap';
 import { mockListings } from '@/data/mockListings';
 import { Listing } from '@/types/listingType';
 import { useAppWithTranslations } from '@/stores/useAppStore';
@@ -40,41 +42,54 @@ export default function ListingDetail() {
         .slice(0, 4);
       setSimilarListings(similar);
       
-      // Build breadcrumbs from the path or listing data
-      // The path structure would be /category/subcategory/subcategory.../listing
-      const pathSegments = location.pathname.split('/').filter(Boolean);
+      // Build improved breadcrumbs with category hierarchy
+      const categoryItems = [];
       
-      // Remove the last segment (listing ID)
-      const categoryPath = pathSegments.slice(0, -1);
-      
-      // Build breadcrumb items
-      const items = categoryPath.map((segment, index) => {
-        // Get the real name for the category if possible
-        let label = segment;
-        
-        // If this is a category ID, try to get its proper name
-        if (index === 0 && segment === 'category') {
-          label = language === 'ru' ? 'Категории' : 'Санаттар';
-        } else if (index === 1) {
-          // This would be the specific category
-          const config = getCategoryConfig(segment);
-          if (config) {
-            label = config.name[language] || segment;
-          }
-        }
-        
-        // Make a readable label by capitalizing and replacing hyphens
-        if (label === segment) {
-          label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-        }
-        
-        return {
-          label,
-          link: `/${categoryPath.slice(0, index + 1).join('/')}`
-        };
+      // Add Home
+      categoryItems.push({
+        label: language === 'ru' ? 'Главная' : 'Басты бет',
+        link: '/'
       });
       
-      setBreadcrumbItems(items);
+      // Add main category
+      if (foundListing.categoryId) {
+        const categoryConfig = getCategoryConfig(foundListing.categoryId);
+        if (categoryConfig) {
+          categoryItems.push({
+            label: categoryConfig.name[language] || foundListing.categoryId,
+            link: `/category/${foundListing.categoryId}`
+          });
+        }
+      }
+      
+      // Add subcategory if exists
+      if (foundListing.subcategoryId) {
+        // Format subcategory ID for display
+        const subcategoryLabel = foundListing.subcategoryId
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        
+        categoryItems.push({
+          label: subcategoryLabel,
+          link: `/category/${foundListing.categoryId}?subcategory=${foundListing.subcategoryId}`
+        });
+      }
+      
+      // Add sub-subcategory if exists (in real data structure)
+      if (foundListing.subSubcategoryId) {
+        const subSubcategoryLabel = foundListing.subSubcategoryId
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        
+        categoryItems.push({
+          label: subSubcategoryLabel,
+          link: `/category/${foundListing.categoryId}?subcategory=${foundListing.subcategoryId}&subSubcategory=${foundListing.subSubcategoryId}`
+        });
+      }
+      
+      setBreadcrumbItems(categoryItems);
     }
   }, [listingId, language, location.pathname]);
 
@@ -198,6 +213,11 @@ export default function ListingDetail() {
                 onShowPhone={handleShowPhone}
               />
               <SafetyTips language={language} />
+              <LocationMap 
+                city={listing.city[language]} 
+                coordinates={listing.coordinates}
+                language={language}
+              />
             </div>
           </div>
           

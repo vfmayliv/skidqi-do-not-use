@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { BreadcrumbNavigation } from '@/components/BreadcrumbNavigation';
 import TransportCard from '@/components/transport/TransportCard';
 import TransportMap from '@/components/transport/TransportMap';
 import TransportFilters from '@/components/transport/TransportFilters';
@@ -30,6 +31,7 @@ const TransportPage = () => {
   const [brandsSearchQuery, setBrandsSearchQuery] = useState('');
   const [transportListings, setTransportListings] = useState([]);
   const [activeTab, setActiveTab] = useState<string>('cars');
+  const [mapInitialized, setMapInitialized] = useState(false);
   
   useEffect(() => {
     // Filter listings to only show transport category
@@ -40,6 +42,14 @@ const TransportPage = () => {
     
     setTransportListings(filteredListings);
   }, []);
+  
+  // Force map re-initialization when map view is toggled
+  useEffect(() => {
+    if (isMapOpen) {
+      setMapInitialized(false);
+      setTimeout(() => setMapInitialized(true), 100);
+    }
+  }, [isMapOpen]);
   
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -85,10 +95,24 @@ const TransportPage = () => {
         : 'Нәтижелер таңдалған фильтрлерге сәйкес жаңартылды.'
     });
   };
+  
+  const handleListingClick = (listing) => {
+    // Navigate to listing detail page
+    window.location.href = `/listing/${listing.id}`;
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      <BreadcrumbNavigation 
+        items={[
+          {
+            label: language === 'ru' ? 'Категории' : 'Санаттар',
+            link: '/category'
+          }
+        ]}
+        currentPage={language === 'ru' ? 'Транспорт и запчасти' : 'Көлік және бөлшектер'}
+      />
       
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
@@ -245,11 +269,14 @@ const TransportPage = () => {
           )}
           
           <div className="lg:col-span-3">
-            {isMapOpen && (
+            {isMapOpen && mapInitialized && (
               <div className="w-full h-[400px] mb-6 rounded-lg overflow-hidden border">
                 <TransportMap 
                   listings={transportListings} 
-                  onListingClick={() => {}} 
+                  onListingClick={handleListingClick}
+                  language={language}
+                  showListToggle={true}
+                  onToggleFullscreen={() => {}}
                 />
               </div>
             )}
