@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -9,14 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, MapPin, Grid, List } from 'lucide-react';
+import { Search, Filter, MapPin, Grid, List, Car, Bike, Truck, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
-import { carBrands, motorcycleBrands } from '@/data/transportData';
+import { carBrands, motorcycleBrands, commercialTypes } from '@/data/transportData';
 import { mockListings } from '@/data/mockListings';
 import { useToast } from '@/hooks/useToast';
+import { VehicleType } from '@/types/listingType';
 
 const TransportPage = () => {
   const isMobile = useIsMobile();
@@ -26,16 +28,11 @@ const TransportPage = () => {
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [gridView, setGridView] = useState(true);
   const [brandsSearchQuery, setBrandsSearchQuery] = useState('');
-  const [availableBrands, setAvailableBrands] = useState<Array<string | any>>([]);
   const [transportListings, setTransportListings] = useState([]);
+  const [activeTab, setActiveTab] = useState<string>('cars');
   
   useEffect(() => {
-    // Combine car brands and motorcycle brands as the available brands
-    const allBrands = [...carBrands, ...motorcycleBrands];
-    setAvailableBrands(allBrands);
-    
     // Filter listings to only show transport category
-    // Fix: Use categoryId which exists in the Listing type
     const filteredListings = mockListings.filter(listing => 
       listing.categoryId === 'transport' || 
       (listing.category && listing.category === 'transport')
@@ -44,35 +41,41 @@ const TransportPage = () => {
     setTransportListings(filteredListings);
   }, []);
   
-  // Filtered brands based on search query
-  const filteredBrands = React.useMemo(() => {
-    return availableBrands.filter((brand) => {
-      if (!brandsSearchQuery) return true;
-      
-      // Handle string brands
-      if (typeof brand === 'string') {
-        return brand.toLowerCase().includes(brandsSearchQuery.toLowerCase());
-      }
-      
-      // Safely handle the BrandData object case with additional type safety
-      if (brand && typeof brand === 'object' && brand.name) {
-        // Case 1: brand.name is a string
-        if (typeof brand.name === 'string') {
-          return brand.name.toLowerCase().includes(brandsSearchQuery.toLowerCase());
-        }
-        // Case 2: brand.name is a LocalizedText object
-        else if (typeof brand.name === 'object' && brand.name && 'ru' in brand.name) {
-          const ruName = brand.name.ru;
-          if (typeof ruName === 'string') {
-            return ruName.toLowerCase().includes(brandsSearchQuery.toLowerCase());
-          }
-        }
-      }
-      
-      // Fallback for any unhandled cases
-      return false;
-    });
-  }, [availableBrands, brandsSearchQuery]);
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    
+    // Reset filters when changing tabs
+    resetFilters();
+    
+    // Set the vehicle type based on the selected tab
+    switch(value) {
+      case 'cars':
+        setFilters({ vehicleType: VehicleType.CAR });
+        break;
+      case 'motorcycles':
+        setFilters({ vehicleType: VehicleType.MOTORCYCLE });
+        break;
+      case 'commercial':
+        setFilters({ vehicleType: VehicleType.COMMERCIAL });
+        break;
+      case 'parts':
+        setFilters({ vehicleType: VehicleType.PARTS });
+        break;
+      default:
+        setFilters({ vehicleType: null });
+    }
+  };
+  
+  const getBrandsForActiveTab = () => {
+    switch(activeTab) {
+      case 'motorcycles':
+        return motorcycleBrands;
+      case 'cars':
+        return carBrands;
+      default:
+        return [];
+    }
+  };
   
   const handleApplyFilters = () => {
     toast({
@@ -141,8 +144,9 @@ const TransportPage = () => {
                       onFilterChange={setFilters}
                       onReset={resetFilters}
                       onSearch={handleApplyFilters}
-                      brands={availableBrands}
+                      brands={getBrandsForActiveTab()}
                       activeFiltersCount={activeFiltersCount}
+                      commercialTypes={activeTab === 'commercial' ? commercialTypes : []}
                     />
                   </div>
                   <DrawerFooter>
@@ -175,8 +179,9 @@ const TransportPage = () => {
                     onFilterChange={setFilters}
                     onReset={resetFilters}
                     onSearch={handleApplyFilters}
-                    brands={availableBrands}
+                    brands={getBrandsForActiveTab()}
                     activeFiltersCount={activeFiltersCount}
+                    commercialTypes={activeTab === 'commercial' ? commercialTypes : []}
                   />
                   <div className="flex justify-end space-x-2 pt-4">
                     <Button variant="outline" onClick={resetFilters}>
@@ -201,6 +206,28 @@ const TransportPage = () => {
           </div>
         </div>
         
+        {/* Category tabs */}
+        <Tabs defaultValue="cars" value={activeTab} onValueChange={handleTabChange} className="mb-6">
+          <TabsList className="w-full md:w-auto grid grid-cols-4 md:inline-flex">
+            <TabsTrigger value="cars" className="flex flex-col md:flex-row items-center gap-1">
+              <Car className="h-4 w-4" />
+              <span>{language === 'ru' ? 'Легковые' : 'Жеңіл'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="motorcycles" className="flex flex-col md:flex-row items-center gap-1">
+              <Bike className="h-4 w-4" />
+              <span>{language === 'ru' ? 'Мотоциклы' : 'Мотоциклдер'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="commercial" className="flex flex-col md:flex-row items-center gap-1">
+              <Truck className="h-4 w-4" />
+              <span>{language === 'ru' ? 'Коммерческие' : 'Коммерциялық'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="parts" className="flex flex-col md:flex-row items-center gap-1">
+              <Wrench className="h-4 w-4" />
+              <span>{language === 'ru' ? 'Запчасти' : 'Бөлшектер'}</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Показываем фильтры на десктопе всегда */}
           {!isMobile && (
@@ -210,8 +237,9 @@ const TransportPage = () => {
                 onFilterChange={setFilters}
                 onReset={resetFilters}
                 onSearch={handleApplyFilters}
-                brands={availableBrands}
+                brands={getBrandsForActiveTab()}
                 activeFiltersCount={activeFiltersCount}
+                commercialTypes={activeTab === 'commercial' ? commercialTypes : []}
               />
             </div>
           )}
