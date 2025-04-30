@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -23,12 +22,23 @@ export default function ListingDetail() {
   const location = useLocation();
   const [listing, setListing] = useState<Listing | null>(null);
   const [breadcrumbItems, setBreadcrumbItems] = useState<{label: string, link?: string}[]>([]);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isPhoneVisible, setIsPhoneVisible] = useState(false);
+  
+  // Find similar listings for the recommendation section
+  const [similarListings, setSimilarListings] = useState<Listing[]>([]);
 
   useEffect(() => {
     // In a real app, you would fetch the listing data from an API
     const foundListing = mockListings.find(item => item.id === listingId);
     if (foundListing) {
       setListing(foundListing);
+      
+      // Find similar listings (same category, different ID)
+      const similar = mockListings
+        .filter(item => item.categoryId === foundListing.categoryId && item.id !== foundListing.id)
+        .slice(0, 4);
+      setSimilarListings(similar);
       
       // Build breadcrumbs from the path or listing data
       // The path structure would be /category/subcategory/subcategory.../listing
@@ -68,6 +78,41 @@ export default function ListingDetail() {
     }
   }, [listingId, language, location.pathname]);
 
+  // Utility functions for formatting
+  const formatPrice = (price: number) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' ₸';
+  };
+  
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : 'kk-KZ', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(date);
+  };
+  
+  // Event handlers
+  const handleToggleFavorite = () => {
+    setIsFavorite(!isFavorite);
+  };
+  
+  const handleShare = () => {
+    // Share functionality would go here
+    if (navigator.share) {
+      navigator.share({
+        title: listing?.title[language] || '',
+        url: window.location.href
+      }).catch(err => {
+        console.error('Error sharing:', err);
+      });
+    }
+  };
+  
+  const handleShowPhone = () => {
+    setIsPhoneVisible(true);
+  };
+
   if (!listing) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -93,19 +138,74 @@ export default function ListingDetail() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <ListingGallery images={listing.images || [listing.imageUrl]} />
-              <ListingHeader listing={listing} />
-              <ListingPrice listing={listing} />
-              <ListingDescription listing={listing} />
-              <ListingStats listing={listing} />
+              <ListingGallery 
+                images={listing.images || [listing.imageUrl]} 
+                title={listing.title[language]}
+                language={language}
+              />
+              <ListingHeader 
+                title={listing.title[language]}
+                city={listing.city[language]}
+                createdAt={listing.createdAt}
+                views={listing.views}
+                id={listing.id}
+                price={listing.discountPrice}
+                originalPrice={listing.originalPrice}
+                discount={listing.discount}
+                isFeatured={listing.isFeatured || false}
+                isFavorite={isFavorite}
+                language={language}
+                formatPrice={formatPrice}
+                formatDate={formatDate}
+                onToggleFavorite={handleToggleFavorite}
+                onShare={handleShare}
+              />
+              <ListingPrice 
+                price={listing.discountPrice}
+                originalPrice={listing.originalPrice}
+                discount={listing.discount}
+                formatPrice={formatPrice}
+                isFavorite={isFavorite}
+                onToggleFavorite={handleToggleFavorite}
+                onShare={handleShare}
+              />
+              <ListingDescription 
+                description={listing.description[language]} 
+                language={language}
+              />
+              <ListingStats 
+                createdAt={listing.createdAt}
+                id={listing.id}
+                views={listing.views}
+                isFavorite={isFavorite}
+                language={language}
+                formatDate={formatDate}
+                onToggleFavorite={handleToggleFavorite}
+                onShare={handleShare}
+              />
             </div>
             <div>
-              <SellerInfo seller={listing.seller} />
-              <SafetyTips />
+              <SellerInfo 
+                name={listing.seller.name}
+                phone={listing.seller.phone}
+                rating={listing.seller.rating}
+                deals={listing.seller.reviews || 0}
+                memberSince="2022"
+                response={language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді'}
+                lastOnline={language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'}
+                isPhoneVisible={isPhoneVisible}
+                language={language}
+                onShowPhone={handleShowPhone}
+              />
+              <SafetyTips language={language} />
             </div>
           </div>
           
-          <SimilarListings categoryId={listing.categoryId} currentListingId={listing.id} />
+          <SimilarListings 
+            listings={similarListings}
+            language={language}
+            formatPrice={formatPrice}
+          />
         </div>
       </main>
       <Footer />

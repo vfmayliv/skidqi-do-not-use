@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 import {
@@ -102,3 +103,4 @@ export const BreadcrumbNavigation = ({
     </Breadcrumb>
   );
 };
+
