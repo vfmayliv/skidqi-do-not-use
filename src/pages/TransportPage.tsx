@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -36,9 +35,10 @@ const TransportPage = () => {
     setAvailableBrands(allBrands);
     
     // Filter listings to only show transport category
+    // Fix: Use categoryId which exists in the Listing type
     const filteredListings = mockListings.filter(listing => 
       listing.categoryId === 'transport' || 
-      listing.categoryPath?.includes('transport')
+      (listing.category && listing.category === 'transport')
     );
     
     setTransportListings(filteredListings);
