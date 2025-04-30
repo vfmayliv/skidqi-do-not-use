@@ -1,10 +1,8 @@
-
 import { create } from 'zustand';
 import {
   PropertyFilters,
   PropertyType,
   BuildingType,
-  ConditionType,
   SortOption
 } from '@/types/listingType';
 

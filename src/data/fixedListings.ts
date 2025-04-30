@@ -19,14 +19,12 @@ export const generateFixedListings = (): Listing[] => {
       discount: 16,
       imageUrl: 'https://via.placeholder.com/300x200?text=Samsung',
       category: 'electronics',
-      subcategory: 'phones',
       categoryId: 'electronics', // для совместимости
       subcategoryId: 'phones', // для совместимости
       city: cities[0],
       createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
       views: 542,
       isFeatured: true,
-      userId: 'user-1',
       seller: {
         name: 'Александр',
         phone: '+7 (777) 123-45-67',
@@ -48,14 +46,12 @@ export const generateFixedListings = (): Listing[] => {
       discount: 16,
       imageUrl: 'https://via.placeholder.com/300x200?text=MacBook',
       category: 'electronics',
-      subcategory: 'computers',
       categoryId: 'electronics', // для совместимости
       subcategoryId: 'computers', // для совместимости
       city: cities[1],
       createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
       views: 328,
       isFeatured: true,
-      userId: 'user-2',
       seller: {
         name: 'Марат',
         phone: '+7 (777) 234-56-78',
@@ -77,14 +73,12 @@ export const generateFixedListings = (): Listing[] => {
       discount: 12,
       imageUrl: 'https://via.placeholder.com/300x200?text=Apartment',
       category: 'property',
-      subcategory: 'apartments',
       categoryId: 'property', // для совместимости
       subcategoryId: 'apartments', // для совместимости
       city: cities[2],
       createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
       views: 712,
       isFeatured: false,
-      userId: 'user-3',
       seller: {
         name: 'Айгуль',
         phone: '+7 (777) 345-67-89',
@@ -106,14 +100,12 @@ export const generateFixedListings = (): Listing[] => {
       discount: 10,
       imageUrl: 'https://via.placeholder.com/300x200?text=Toyota',
       category: 'transport',
-      subcategory: 'cars',
       categoryId: 'transport', // для совместимости
       subcategoryId: 'cars', // для совместимости
       city: cities[0],
       createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
       views: 492,
       isFeatured: true,
-      userId: 'user-4',
       seller: {
         name: 'Дмитрий',
         phone: '+7 (777) 456-78-90',
@@ -135,14 +127,12 @@ export const generateFixedListings = (): Listing[] => {
       discount: 28,
       imageUrl: 'https://via.placeholder.com/300x200?text=Sofa',
       category: 'home',
-      subcategory: 'furniture',
       categoryId: 'home', // для совместимости 
       subcategoryId: undefined, // для совместимости
       city: cities[3],
       createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
       views: 215,
       isFeatured: false,
-      userId: 'user-5',
       seller: {
         name: 'Анна',
         phone: '+7 (777) 567-89-01',
@@ -164,14 +154,12 @@ export const generateFixedListings = (): Listing[] => {
       discount: 25,
       imageUrl: 'https://via.placeholder.com/300x200?text=DogFood',
       category: 'pets',
-      subcategory: 'pet-food',
       categoryId: 'pets', // для совместимости
       subcategoryId: undefined, // для совместимости
       city: cities[1],
       createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       views: 87,
       isFeatured: false,
-      userId: 'user-6',
       seller: {
         name: 'Елена',
         phone: '+7 (777) 678-90-12',
@@ -193,14 +181,12 @@ export const generateFixedListings = (): Listing[] => {
       discount: 21,
       imageUrl: 'https://via.placeholder.com/300x200?text=Bicycle',
       category: 'hobby',
-      subcategory: 'sports',
       categoryId: 'hobby', // для совместимости
       subcategoryId: undefined, // для совместимости
       city: cities[4],
       createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
       views: 342,
       isFeatured: true,
-      userId: 'user-7',
       seller: {
         name: 'Тимур',
         phone: '+7 (777) 789-01-23',
@@ -222,14 +208,12 @@ export const generateFixedListings = (): Listing[] => {
       discount: 44,
       imageUrl: 'https://via.placeholder.com/300x200?text=Jacket',
       category: 'fashion',
-      subcategory: 'clothing',
       categoryId: 'fashion', // для совместимости
       subcategoryId: undefined, // для совместимости
       city: cities[1],
       createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
       views: 178,
       isFeatured: false,
-      userId: 'user-8',
       seller: {
         name: 'Олег',
         phone: '+7 (777) 890-12-34',

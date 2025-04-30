@@ -49,6 +49,11 @@ export enum SortOption {
   AREA_ASC = 'area_asc',
   AREA_DESC = 'area_desc',
   VIEWS_DESC = 'views_desc',
+  // Adding missing sort options
+  YEAR_DESC = 'year_desc',
+  YEAR_ASC = 'year_asc',
+  MILEAGE_ASC = 'mileage_asc',
+  MILEAGE_DESC = 'mileage_desc',
 }
 
 export enum DealType {
@@ -120,6 +125,8 @@ export enum BodyType {
   COUPE = 'coupe',
   PICKUP = 'pickup',
   CABRIOLET = 'cabriolet',
+  VAN = 'van', // Added missing VAN type
+  LIMOUSINE = 'limousine', // Added missing LIMOUSINE type
 }
 
 export enum ConditionType {
@@ -148,6 +155,7 @@ export enum VehicleFeature {
   PARKING_SENSORS = 'parking_sensors',
   REAR_VIEW_CAMERA = 'rear_view_camera',
   SUNROOF = 'sunroof',
+  AIRBAGS = 'airbags', // Added missing AIRBAGS feature
 }
 
 // Interface for filters
@@ -187,14 +195,15 @@ export interface PropertyFilters {
   securityGuarded?: boolean; // Added missing securityGuarded
   hasPlayground?: boolean; // Added missing hasPlayground
   ceilingHeightRange?: { min: number | null; max: number | null }; // Added missing ceilingHeightRange
+  utilityBillsIncluded?: boolean; // Added missing utilityBillsIncluded
   sortBy: SortOption;
 }
 
 export interface TransportFilters {
-  vehicleType: VehicleType;
+  vehicleType?: VehicleType | null;
   priceRange: { min: number | null; max: number | null };
   brands: string[];
-  models: string[];
+  models?: string[] | null;
   yearRange: { min: number | null; max: number | null };
   mileageRange: { min: number | null; max: number | null };
   engineTypes?: EngineType[] | null;
@@ -213,7 +222,13 @@ export interface TransportFilters {
   hasVideo?: boolean;
   onlyTrustedSellers?: boolean;
   exchangePossible?: boolean;
-  sortBy: SortOption;
+  sortBy?: SortOption | null;
+  commercialType?: string | null; // Added missing commercialType
+  steeringWheel?: SteeringWheelType | null; // Added missing steeringWheel
+  customsCleared?: boolean | null; // Added missing customsCleared
+  inStock?: boolean | null; // Added missing inStock
+  withoutAccidents?: boolean | null; // Added missing withoutAccidents
+  withServiceHistory?: boolean | null; // Added missing withServiceHistory
 }
 
 export interface PropertyFilterConfig {

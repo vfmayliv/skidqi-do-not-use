@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { 
   TransportFilters,
@@ -33,23 +32,23 @@ const initialFilters: TransportFilters = {
   mileageRange: { min: null, max: null },
   engineVolumeRange: { min: null, max: null },
   engineTypes: null,
-  transmissions: null,
+  transmissionTypes: null, // Fixed property name from transmissions to transmissionTypes
   driveTypes: null,
   bodyTypes: null,
-  condition: null,
-  steeringWheel: null,
-  customsCleared: null,
-  inStock: null,
-  exchangePossible: null,
-  withoutAccidents: null,
-  withServiceHistory: null,
-  hasPhoto: null,
-  features: null,
-  sortBy: null,
-  commercialType: null,
+  conditionTypes: null, // Fixed property name from condition to conditionTypes
+  steeringWheelTypes: null, // Fixed property name
   colors: null,
-  city: null,
-  exchange: null
+  features: null,
+  cities: null,
+  hasPhoto: null,
+  commercialType: null, // Added missing property
+  steeringWheel: null, // Added missing property
+  customsCleared: null, // Added missing property
+  inStock: null, // Added missing property
+  exchangePossible: null,
+  withoutAccidents: null, // Added missing property
+  withServiceHistory: null, // Added missing property
+  sortBy: null
 };
 
 export const useTransportFiltersStore = create<TransportFiltersState>()((set, get) => ({

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -259,6 +258,7 @@ const CreateListing = () => {
         ru: language === 'ru' ? description : description,
         kz: language === 'kz' ? description : description
       },
+      categoryId: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].id : '',
       category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].id : '',
       city: {
         ru: language === 'ru' ? city : city,
