@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -27,11 +28,20 @@ const TransportPage = () => {
   const [gridView, setGridView] = useState(true);
   const [brandsSearchQuery, setBrandsSearchQuery] = useState('');
   const [availableBrands, setAvailableBrands] = useState<Array<string | any>>([]);
+  const [transportListings, setTransportListings] = useState([]);
   
   useEffect(() => {
     // Combine car brands and motorcycle brands as the available brands
     const allBrands = [...carBrands, ...motorcycleBrands];
     setAvailableBrands(allBrands);
+    
+    // Filter listings to only show transport category
+    const filteredListings = mockListings.filter(listing => 
+      listing.categoryId === 'transport' || 
+      listing.categoryPath?.includes('transport')
+    );
+    
+    setTransportListings(filteredListings);
   }, []);
   
   // Filtered brands based on search query
@@ -80,7 +90,7 @@ const TransportPage = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <h1 className="text-2xl font-bold mb-4 md:mb-0">
-            {language === 'ru' ? 'Транспорт' : 'Көлік'}
+            {language === 'ru' ? 'Транспорт и запчасти' : 'Көлік және бөлшектер'}
           </h1>
           
           <div className="flex items-center space-x-4">
@@ -125,7 +135,7 @@ const TransportPage = () => {
                       {language === 'ru' ? 'Фильтры' : 'Фильтрлер'}
                     </DrawerTitle>
                   </DrawerHeader>
-                  <div className="px-4 pb-4">
+                  <div className="px-4 pb-4 overflow-y-auto max-h-[70vh]">
                     <TransportFilters 
                       filters={filters}
                       onFilterChange={setFilters}
@@ -191,24 +201,52 @@ const TransportPage = () => {
           </div>
         </div>
         
-        {isMapOpen ? (
-          <div className="w-full h-[500px] mb-6 rounded-lg overflow-hidden border">
-            <TransportMap 
-              listings={mockListings} 
-              onListingClick={() => {}} 
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Показываем фильтры на десктопе всегда */}
+          {!isMobile && (
+            <div className="hidden lg:block">
+              <TransportFilters 
+                filters={filters}
+                onFilterChange={setFilters}
+                onReset={resetFilters}
+                onSearch={handleApplyFilters}
+                brands={availableBrands}
+                activeFiltersCount={activeFiltersCount}
+              />
+            </div>
+          )}
+          
+          <div className="lg:col-span-3">
+            {isMapOpen && (
+              <div className="w-full h-[400px] mb-6 rounded-lg overflow-hidden border">
+                <TransportMap 
+                  listings={transportListings} 
+                  onListingClick={() => {}} 
+                />
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {transportListings.map((listing) => (
+                <TransportCard 
+                  key={listing.id} 
+                  listing={listing} 
+                  variant="default"
+                  viewMode={gridView ? 'grid' : 'list'}
+                />
+              ))}
+              
+              {transportListings.length === 0 && (
+                <div className="col-span-full text-center py-10">
+                  <p className="text-gray-500">
+                    {language === 'ru' 
+                      ? 'Объявления не найдены' 
+                      : 'Хабарландырулар табылмады'}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        ) : null}
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {mockListings.map((listing) => (
-            <TransportCard 
-              key={listing.id} 
-              listing={listing} 
-              variant="default"
-              viewMode={gridView ? 'grid' : 'list'}
-            />
-          ))}
         </div>
       </div>
       
