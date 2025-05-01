@@ -24,6 +24,20 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   const { language, t } = useAppContext();
   
+  // Ensure title is a string
+  const title = typeof listing.title === 'string'
+    ? listing.title
+    : (listing.title && typeof listing.title === 'object' && listing.title[language])
+      ? listing.title[language]
+      : '';
+
+  // Ensure city is a string
+  const city = typeof listing.city === 'string'
+    ? listing.city
+    : (listing.city && typeof listing.city === 'object' && listing.city[language])
+      ? listing.city[language]
+      : '';
+  
   const formatPrice = (price: number) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' ' + t('tenge');
   };
@@ -59,7 +73,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         <div className="relative w-full sm:w-1/3 aspect-[4/3]">
           <img 
             src={listing.imageUrl} 
-            alt={listing.title[language]} 
+            alt={title} 
             className="w-full h-full object-cover"
           />
           {listing.isFeatured && (
@@ -100,7 +114,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </div>
             
             <h2 className="font-medium mb-1 line-clamp-1">
-              {listing.title[language]}
+              {title}
             </h2>
             
             <div className="flex flex-wrap gap-x-4 gap-y-1 mb-2">
@@ -125,7 +139,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             
             <div className="flex items-center text-sm text-muted-foreground mb-2">
               <MapPin className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
-              <span className="line-clamp-1">{listing.address || listing.city[language]}</span>
+              <span className="line-clamp-1">{listing.address || city}</span>
             </div>
           </div>
           
@@ -150,7 +164,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           <div className="relative aspect-[4/3]">
             <img 
               src={listing.imageUrl} 
-              alt={listing.title[language]} 
+              alt={title} 
               className="w-full h-full object-cover"
             />
             {listing.isFeatured && (
@@ -192,7 +206,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             
             <div className="flex items-center text-xs text-muted-foreground">
               <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-              <span className="line-clamp-1">{listing.address || listing.city[language]}</span>
+              <span className="line-clamp-1">{listing.address || city}</span>
             </div>
           </div>
         </div>
@@ -207,7 +221,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         <div className="relative aspect-[4/3]">
           <img 
             src={listing.imageUrl} 
-            alt={listing.title[language]} 
+            alt={title} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           {listing.isFeatured && (
@@ -251,7 +265,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           </div>
           
           <h2 className="font-medium mb-2 line-clamp-2">
-            {listing.title[language]}
+            {title}
           </h2>
           
           <div className="flex flex-wrap gap-x-4 gap-y-1 mb-2">
@@ -276,7 +290,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           
           <div className="flex items-center text-sm text-muted-foreground mt-auto">
             <MapPin className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
-            <span className="line-clamp-1">{listing.address || listing.city[language]}</span>
+            <span className="line-clamp-1">{listing.address || city}</span>
           </div>
         </div>
       </div>

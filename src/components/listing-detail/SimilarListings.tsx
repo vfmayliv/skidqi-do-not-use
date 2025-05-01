@@ -16,23 +16,32 @@ export const SimilarListings = ({ listings, language, formatPrice }: SimilarList
       </h3>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {listings.map((item) => (
-          <Link key={item.id} to={`/listing/${item.id}`} className="group">
-            <div className="aspect-square rounded-md overflow-hidden mb-2">
-              <img 
-                src={item.imageUrl} 
-                alt={item.title[language]} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-              />
-            </div>
-            <div className="font-medium text-sm line-clamp-2 mb-1">
-              {item.title[language]}
-            </div>
-            <div className="text-primary font-bold">
-              {formatPrice(item.discountPrice)}
-            </div>
-          </Link>
-        ))}
+        {listings.map((item) => {
+          // Ensure title is a string
+          const title = typeof item.title === 'string'
+            ? item.title
+            : (item.title && typeof item.title === 'object' && item.title[language])
+              ? item.title[language]
+              : '';
+              
+          return (
+            <Link key={item.id} to={`/listing/${item.id}`} className="group">
+              <div className="aspect-square rounded-md overflow-hidden mb-2">
+                <img 
+                  src={item.imageUrl} 
+                  alt={title} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                />
+              </div>
+              <div className="font-medium text-sm line-clamp-2 mb-1">
+                {title}
+              </div>
+              <div className="text-primary font-bold">
+                {formatPrice(item.discountPrice)}
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

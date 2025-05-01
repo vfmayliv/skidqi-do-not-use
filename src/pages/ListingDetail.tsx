@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -141,16 +142,30 @@ export default function ListingDetail() {
     );
   }
 
-  // Extract description text based on language to avoid passing object directly
+  // Extract and ensure title and description are strings
+  const title = typeof listing.title === 'string' 
+    ? listing.title 
+    : (listing.title && typeof listing.title === 'object' && listing.title[language]) 
+      ? listing.title[language] 
+      : '';
+      
+  const city = typeof listing.city === 'string' 
+    ? listing.city 
+    : (listing.city && typeof listing.city === 'object' && listing.city[language]) 
+      ? listing.city[language] 
+      : '';
+      
   const descriptionText = listing.description ? 
-    (typeof listing.description === 'string' ? listing.description : listing.description[language]) : '';
+    (typeof listing.description === 'string' ? listing.description : 
+     (typeof listing.description === 'object' ? listing.description[language] || '' : '')) 
+    : '';
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <BreadcrumbNavigation 
         items={breadcrumbItems} 
-        currentPage={listing.title[language]} 
+        currentPage={title} 
       />
       <main className="flex-1 py-6">
         <div className="container mx-auto px-4">
@@ -158,12 +173,12 @@ export default function ListingDetail() {
             <div className="lg:col-span-2">
               <ListingGallery 
                 images={listing.images || [listing.imageUrl]} 
-                title={listing.title[language]}
+                title={title}
                 language={language}
               />
               <ListingHeader 
-                title={listing.title[language]}
-                city={listing.city[language]}
+                title={title}
+                city={city}
                 createdAt={listing.createdAt}
                 views={listing.views}
                 id={listing.id}
@@ -217,7 +232,7 @@ export default function ListingDetail() {
               />
               <SafetyTips language={language} />
               <LocationMap 
-                city={listing.city[language]} 
+                city={city} 
                 coordinates={listing.coordinates}
                 language={language}
               />
