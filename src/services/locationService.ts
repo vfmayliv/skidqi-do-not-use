@@ -68,16 +68,21 @@ export async function getMicrodistrictsByCity(cityId: string): Promise<Microdist
 
 // Получение специальных регионов-городов (Алматы, Астана, Шымкент)
 export async function getSpecialCityRegions(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from('regions')
-    .select('id')
-    .eq('is_city_level', true);
+  try {
+    const { data, error } = await supabase
+      .from('regions')
+      .select('id')
+      .eq('is_city_level', true);
 
-  if (error) {
+    if (error) {
+      console.error('Error fetching special city regions:', error);
+      return [];
+    }
+
+    // Convert number ids to strings
+    return data.map(region => String(region.id));
+  } catch (error) {
     console.error('Error fetching special city regions:', error);
     return [];
   }
-
-  // Convert number ids to strings
-  return data.map(region => String(region.id));
 }

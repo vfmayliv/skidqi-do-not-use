@@ -104,15 +104,21 @@ export function PropertyPage() {
     
     // Фильтрация по административным единицам
     if (filters.regionId) {
-      newListings = newListings.filter(listing => (listing.regionId ?? '') === filters.regionId);
+      newListings = newListings.filter(listing => {
+        return (listing.regionId ?? '') === filters.regionId;
+      });
     }
     
     if (filters.cityId) {
-      newListings = newListings.filter(listing => (listing.cityId ?? '') === filters.cityId);
+      newListings = newListings.filter(listing => {
+        return (listing.cityId ?? '') === filters.cityId;
+      });
     }
     
     if (filters.microdistrictId) {
-      newListings = newListings.filter(listing => (listing.microdistrictId ?? '') === filters.microdistrictId);
+      newListings = newListings.filter(listing => {
+        return (listing.microdistrictId ?? '') === filters.microdistrictId;
+      });
     }
 
     if (filters.sortBy) {
