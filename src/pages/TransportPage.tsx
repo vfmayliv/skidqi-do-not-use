@@ -32,6 +32,20 @@ export function TransportPage() {
         : [...prev, id]
     );
   };
+
+  // Mock brands for the TransportFilters component
+  const mockBrands = [
+    { id: 'toyota', name: { ru: 'Тойота', kz: 'Тойота' } },
+    { id: 'bmw', name: { ru: 'БМВ', kz: 'БМВ' } },
+    { id: 'mercedes', name: { ru: 'Мерседес', kz: 'Мерседес' } },
+    { id: 'audi', name: { ru: 'Ауди', kz: 'Ауди' } }
+  ];
+
+  // Handle search button click
+  const handleSearch = () => {
+    console.log('Search with filters:', filters);
+    // In a real app, this would trigger an API call or filter update
+  };
   
   // Apply filters when they change
   useEffect(() => {
@@ -40,7 +54,7 @@ export function TransportPage() {
     // Apply brand filter
     if (filters.brands && filters.brands.length > 0) {
       filtered = filtered.filter(listing => 
-        listing.brand && filters.brands.includes(listing.brand)
+        listing.brand && filters.brands!.includes(listing.brand)
       );
     }
     
@@ -165,6 +179,8 @@ export function TransportPage() {
             filters={filters}
             onFilterChange={setFilters}
             onReset={resetFilters}
+            onSearch={handleSearch}
+            brands={mockBrands}
             activeFiltersCount={activeFiltersCount}
           />
           

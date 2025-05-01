@@ -23,6 +23,18 @@ export interface Listing {
   isFeatured: boolean;
   views: number;
   
+  // Transport-specific properties
+  vehicleType?: string;
+  brand?: string;
+  model?: string;
+  year?: number;
+  mileage?: number;
+  engineType?: string;
+  transmission?: string;
+  driveType?: string;
+  bodyType?: string;
+  condition?: string;
+  
   // Administrative division properties
   regionId: string;
   cityId: string;

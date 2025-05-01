@@ -21,7 +21,7 @@ import OwnerPanel from '@/pages/OwnerPanel';
 import ConfirmEmail from '@/pages/ConfirmEmail';
 import { AuthProtection } from '@/components/AuthProtection';
 import { PropertyPage } from '@/pages/PropertyPage';
-import TransportPage from '@/pages/TransportPage';
+import { TransportPage } from '@/pages/TransportPage';
 import { AppProvider } from '@/contexts/AppContext';
 import { SearchProvider } from '@/contexts/SearchContext';
 
