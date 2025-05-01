@@ -84,13 +84,12 @@ const App: React.FC = () => {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             
-            {/* Admin routes */}
+            {/* Admin routes - only owner is kept */}
             <Route path="/owner" element={
               <AuthProtection requiredRole="admin">
                 <OwnerPanel />
               </AuthProtection>
             } />
-            <Route path="/admin" element={<Navigate to="/owner" replace />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
