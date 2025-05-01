@@ -79,8 +79,8 @@ export async function getSpecialCityRegions(): Promise<string[]> {
       return [];
     }
 
-    // Return string IDs directly without recursive mapping
-    return (data || []).map(item => String(item.id));
+    // Fixed: Use explicit type annotation to prevent deep instantiation
+    return (data || []).map((item: {id: number}) => String(item.id));
   } catch (error) {
     console.error('Error fetching special city regions:', error);
     return [];
