@@ -22,6 +22,9 @@ export const AuthProtection: React.FC<AuthProtectionProps> = ({
       (userRole === 'user' || userRole === 'admin') : 
       userRole === 'admin'
   );
+
+  // For debugging only - remove in production
+  console.log('AuthProtection', { isAuthenticated, userRole, requiredRole, hasAccess });
   
   useEffect(() => {
     if (!isAuthenticated) {

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import Index from '@/pages/Index';
 import { CategoryPage } from '@/pages/CategoryPage';
@@ -90,11 +90,7 @@ const App: React.FC = () => {
                 <OwnerPanel />
               </AuthProtection>
             } />
-            <Route path="/admin" element={
-              <AuthProtection requiredRole="admin">
-                <OwnerPanel />
-              </AuthProtection>
-            } />
+            <Route path="/admin" element={<Navigate to="/owner" replace />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

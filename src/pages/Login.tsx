@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAppContext } from '@/contexts/AppContext';
@@ -20,6 +19,12 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Reset form when switching between admin and user login
+    setEmail('');
+    setPassword('');
+  }, [isAdminLogin]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +59,8 @@ const Login = () => {
         });
         
         // Redirect to admin panel
-        navigate('/admin');
+        console.log('Redirecting to owner panel');
+        navigate('/owner');
       } else {
         toast({
           title: language === 'ru' ? 'Ошибка' : 'Қате',
@@ -63,6 +69,8 @@ const Login = () => {
             : 'Әкімшінің жарамсыз тіркелгі деректері',
           variant: 'destructive'
         });
+        setIsSubmitting(false);
+        return;
       }
     } else {
       // Regular user login - In a real app, this would verify against saved users
@@ -95,6 +103,8 @@ const Login = () => {
                 : 'Қате email немесе құпия сөз',
               variant: 'destructive'
             });
+            setIsSubmitting(false);
+            return;
           }
         } catch (error) {
           toast({
@@ -104,6 +114,8 @@ const Login = () => {
               : 'Кіру кезінде қате орын алды',
             variant: 'destructive'
           });
+          setIsSubmitting(false);
+          return;
         }
       } else {
         // For demo purposes, allow login without registration
