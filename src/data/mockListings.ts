@@ -1,3 +1,4 @@
+
 import { Listing } from '../types/listingType';
 import { generateFixedListings } from './fixedListings';
 import { getAdditionalFixedListings } from './additionalListings';
@@ -20,30 +21,25 @@ export const generateMockListings = (count: number): Listing[] => {
   return allFixedListings.slice(0, count);
 };
 
-// Add this at the top of the file, after imports
-// This ensures the mock listings have the required properties
+// First, export the mockListings
+export const mockListings = generateMockListings(30);
+export type { Listing } from '../types/listingType';
 
-// Add to the existing mockListings array to ensure all listing objects 
-// include the new administrative division fields
-export function addAdministrativeDivisionFields() {
-  // This will run once when the file is imported
-  mockListings.forEach(listing => {
-    // Only add if not already present
-    if (listing.regionId === undefined) {
+// Add administrative division fields to all listings
+// Define the function to add admin fields, but don't run it immediately
+function addAdministrativeDivisionFields(listings: Listing[]): void {
+  listings.forEach(listing => {
+    if (!('regionId' in listing)) {
       listing.regionId = '';
     }
-    if (listing.cityId === undefined) {
+    if (!('cityId' in listing)) {
       listing.cityId = '';
     }
-    if (listing.microdistrictId === undefined) {
+    if (!('microdistrictId' in listing)) {
       listing.microdistrictId = '';
     }
   });
 }
 
-// Run the function immediately
-addAdministrativeDivisionFields();
-
-// Export a set of mock listings and re-export the Listing type
-export const mockListings = generateMockListings(30);
-export type { Listing } from '../types/listingType';
+// Now run the function after mockListings is defined
+addAdministrativeDivisionFields(mockListings);

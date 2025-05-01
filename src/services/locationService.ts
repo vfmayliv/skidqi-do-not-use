@@ -79,8 +79,8 @@ export async function getSpecialCityRegions(): Promise<string[]> {
       return [];
     }
 
-    // Convert number ids to strings
-    return data.map(region => String(region.id));
+    // Fixed: Convert number ids to strings without recursive type instantiation
+    return (data || []).map(region => String(region.id));
   } catch (error) {
     console.error('Error fetching special city regions:', error);
     return [];
