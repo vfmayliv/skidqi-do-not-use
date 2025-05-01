@@ -28,7 +28,7 @@ export const AuthProtection: React.FC<AuthProtectionProps> = ({
   
   useEffect(() => {
     if (!isAuthenticated) {
-      // Ensure we're passing strings for title and description
+      // Show login required message
       const title = language === 'ru' ? 'Доступ запрещен' : 'Қол жеткізу тыйым салынған';
       const description = language === 'ru' 
         ? 'Пожалуйста, войдите в систему для доступа к этой странице' 
@@ -40,7 +40,7 @@ export const AuthProtection: React.FC<AuthProtectionProps> = ({
         variant: "destructive"
       });
     } else if (!hasAccess) {
-      // Ensure we're passing strings for title and description
+      // Show insufficient permissions message
       const title = language === 'ru' ? 'Недостаточно прав' : 'Құқықтар жеткіліксіз';
       const description = language === 'ru' 
         ? 'У вас нет необходимых прав для доступа к этой странице' 
@@ -55,8 +55,10 @@ export const AuthProtection: React.FC<AuthProtectionProps> = ({
   }, [isAuthenticated, hasAccess, toast, language]);
   
   if (!isAuthenticated) {
-    // Redirect to login page
-    return <Navigate to="/login" replace />;
+    // Redirect to the appropriate login page based on required role
+    return requiredRole === 'admin' ? 
+      <Navigate to="/login?owner=true" replace /> :
+      <Navigate to="/login" replace />;
   }
   
   if (!hasAccess) {

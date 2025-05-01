@@ -84,7 +84,7 @@ const App: React.FC = () => {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             
-            {/* Admin routes - only owner is kept */}
+            {/* Owner panel route */}
             <Route path="/owner" element={
               <AuthProtection requiredRole="admin">
                 <OwnerPanel />

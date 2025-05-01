@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { mockListings, Listing } from '@/data/mockListings';
+import { mockListings } from '@/data/mockListings';
 import { useAppContext } from '@/contexts/AppContext';
 import { ListingCard } from '@/components/ListingCard';
 import { uploadImage } from '@/utils/imageUtils';
@@ -25,7 +25,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { Navigate, Link } from 'react-router-dom';
 import { categories } from '@/data/categories';
 import { Badge } from '@/components/ui/badge';
@@ -37,14 +37,22 @@ const mockImageUpload = async (blob: Blob, filename: string): Promise<string> =>
 };
 
 const OwnerPanel = () => {
-  const { language, isAuthenticated } = useAppContext();
+  const { language, isAuthenticated, userRole } = useAppContext();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [expandedListing, setExpandedListing] = useState<string | null>(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
   
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+  // Check if user is authenticated and has admin role
+  if (!isAuthenticated || userRole !== 'admin') {
+    toast({
+      title: language === 'ru' ? 'Доступ запрещен' : 'Қол жеткізу тыйым салынған',
+      description: language === 'ru' 
+        ? 'У вас нет прав для доступа к этой странице' 
+        : 'Бұл бетке кіру үшін сізде құқық жоқ',
+      variant: 'destructive'
+    });
+    return <Navigate to="/login?owner=true" />;
   }
   
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -584,7 +592,7 @@ const OwnerPanel = () => {
               </div>
               
               <Button className="w-full">
-                {language === 'ru' ? 'Применить тему' : 'Тақырыпты қолда��у'}
+                {language === 'ru' ? 'Применить тему' : 'Тақырыпты қолдану'}
               </Button>
             </CardContent>
           </Card>
@@ -744,117 +752,3 @@ const OwnerPanel = () => {
                 {language === 'ru' ? 'Push уведомления' : 'Push хабарламалары'}
               </label>
               <Button variant="outline" size="sm">
-                {language === 'ru' ? 'Отключено' : 'Өшірілген'}
-              </Button>
-            </div>
-            
-            <Button className="w-full">
-              {language === 'ru' ? 'Сохранить изменения' : 'Өзгерістерді сақтау'}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return renderDashboard();
-      case 'listings':
-        return renderListings();
-      case 'users':
-        return renderUsers();
-      case 'appearance':
-        return renderAppearance();
-      case 'media':
-        return renderMedia();
-      case 'settings':
-        return renderSettings();
-      default:
-        return renderDashboard();
-    }
-  };
-  
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      
-      <main className="flex-1 container py-8">
-        <h1 className="text-2xl font-bold mb-6">
-          {language === 'ru' ? 'Панель управления' : 'Басқару тақтасы'}
-        </h1>
-        
-        <div className="flex flex-col md:flex-row gap-6">
-          <aside className="w-full md:w-64 space-y-1">
-            <Card>
-              <CardContent className="p-0">
-                <Button 
-                  onClick={() => setActiveTab('dashboard')}
-                  variant={activeTab === 'dashboard' ? 'default' : 'ghost'} 
-                  className="w-full justify-start rounded-none"
-                >
-                  <Layers className="mr-2" />
-                  {language === 'ru' ? 'Обзор' : 'Шолу'}
-                </Button>
-                
-                <Button 
-                  onClick={() => setActiveTab('listings')}
-                  variant={activeTab === 'listings' ? 'default' : 'ghost'} 
-                  className="w-full justify-start rounded-none"
-                >
-                  <Layout className="mr-2" />
-                  {language === 'ru' ? 'Объявления' : 'Хабарландырулар'}
-                </Button>
-                
-                <Button 
-                  onClick={() => setActiveTab('users')}
-                  variant={activeTab === 'users' ? 'default' : 'ghost'} 
-                  className="w-full justify-start rounded-none"
-                >
-                  <Users className="mr-2" />
-                  {language === 'ru' ? 'Пользователи' : 'Пайдаланушылар'}
-                </Button>
-                
-                <Button 
-                  onClick={() => setActiveTab('appearance')}
-                  variant={activeTab === 'appearance' ? 'default' : 'ghost'} 
-                  className="w-full justify-start rounded-none"
-                >
-                  <Palette className="mr-2" />
-                  {language === 'ru' ? 'Внешний вид' : 'Сыртқы түрі'}
-                </Button>
-                
-                <Button 
-                  onClick={() => setActiveTab('media')}
-                  variant={activeTab === 'media' ? 'default' : 'ghost'} 
-                  className="w-full justify-start rounded-none"
-                >
-                  <FileImage className="mr-2" />
-                  {language === 'ru' ? 'Медиафайлы' : 'Медиа файлдар'}
-                </Button>
-                
-                <Button 
-                  onClick={() => setActiveTab('settings')}
-                  variant={activeTab === 'settings' ? 'default' : 'ghost'} 
-                  className="w-full justify-start rounded-none"
-                >
-                  <Settings className="mr-2" />
-                  {language === 'ru' ? 'Настройки' : 'Параметрлер'}
-                </Button>
-              </CardContent>
-            </Card>
-          </aside>
-          
-          <div className="flex-1">
-            {renderContent()}
-          </div>
-        </div>
-      </main>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default OwnerPanel;

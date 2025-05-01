@@ -32,38 +32,57 @@ const useToast = (): UseToastReturn => {
       else if (props && typeof props === 'object') {
         const safeProps = { ...props } as Record<string, any>;
         
-        // Ensure title is a string or valid React element
-        let titleToUse: string | React.ReactNode = '';
-        if (safeProps.title !== undefined) {
+        // Extract title and ensure it's a string or ReactNode
+        let title: string | React.ReactNode = '';
+        if ('title' in safeProps && safeProps.title !== undefined) {
           if (typeof safeProps.title === 'string' || React.isValidElement(safeProps.title)) {
-            titleToUse = safeProps.title;
-          } else if (safeProps.title && typeof safeProps.title === 'object') {
-            titleToUse = JSON.stringify(safeProps.title);
+            title = safeProps.title;
+          } else {
+            title = String(safeProps.title);
           }
         }
         
-        // Ensure description is a string or valid React element
-        let descriptionToUse: string | React.ReactNode | undefined = undefined;
-        if (safeProps.description !== undefined) {
+        // Extract description and ensure it's a string or ReactNode
+        let description: string | React.ReactNode | undefined = undefined;
+        if ('description' in safeProps && safeProps.description !== undefined) {
           if (typeof safeProps.description === 'string' || React.isValidElement(safeProps.description)) {
-            descriptionToUse = safeProps.description;
-          } else if (safeProps.description && typeof safeProps.description === 'object') {
-            descriptionToUse = JSON.stringify(safeProps.description);
+            description = safeProps.description;
+          } else {
+            description = String(safeProps.description);
           }
         }
         
-        // Extract the properties we need for sonner toast
-        const { title, description, action, variant, ...rest } = safeProps;
+        // Extract action
+        const action = 'action' in safeProps ? safeProps.action as React.ReactNode : undefined;
+        
+        // Extract variant
+        const variant = 'variant' in safeProps ? safeProps.variant as string : undefined;
+        
+        // Prepare toast options
+        const toastOptions: Record<string, any> = {};
+        
+        if (description !== undefined) {
+          toastOptions.description = description;
+        }
+        
+        if (action !== undefined) {
+          toastOptions.action = action;
+        }
+        
+        // Only include variant if it exists
+        if (variant !== undefined) {
+          toastOptions.variant = variant;
+        }
+        
+        // Add any other properties from safeProps, excluding those we've already processed
+        Object.keys(safeProps).forEach(key => {
+          if (!['title', 'description', 'action', 'variant'].includes(key)) {
+            toastOptions[key] = safeProps[key];
+          }
+        });
         
         // Call sonner toast with proper parameters
-        sonnerToast(titleToUse, {
-          description: descriptionToUse,
-          action: action as React.ReactNode,
-          // Only include variant if it exists and is valid
-          ...(variant ? { variant } : {}),
-          // Pass any additional properties
-          ...rest
-        });
+        sonnerToast(title, toastOptions);
       } else {
         // Fallback for any other types
         sonnerToast(String(props));
