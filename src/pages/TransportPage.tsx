@@ -5,7 +5,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAppStore } from '@/stores/useAppStore';
 import { mockListings } from '@/data/mockListings';
-import { TransportFilters } from '@/components/transport/TransportFilters';
+import TransportFilters from '@/components/transport/TransportFilters';
 import TransportCard from '@/components/transport/TransportCard';
 import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
 import { Listing } from '@/types/listingType';
