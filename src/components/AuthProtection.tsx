@@ -28,19 +28,27 @@ export const AuthProtection: React.FC<AuthProtectionProps> = ({
   
   useEffect(() => {
     if (!isAuthenticated) {
+      // Ensure we're passing strings for title and description
+      const title = language === 'ru' ? 'Доступ запрещен' : 'Қол жеткізу тыйым салынған';
+      const description = language === 'ru' 
+        ? 'Пожалуйста, войдите в систему для доступа к этой странице' 
+        : 'Бұл бетке кіру үшін жүйеге кіріңіз';
+      
       toast({
-        title: language === 'ru' ? 'Доступ запрещен' : 'Қол жеткізу тыйым салынған',
-        description: language === 'ru' 
-          ? 'Пожалуйста, войдите в систему для доступа к этой странице' 
-          : 'Бұл бетке кіру үшін жүйеге кіріңіз',
+        title,
+        description,
         variant: "destructive"
       });
     } else if (!hasAccess) {
+      // Ensure we're passing strings for title and description
+      const title = language === 'ru' ? 'Недостаточно прав' : 'Құқықтар жеткіліксіз';
+      const description = language === 'ru' 
+        ? 'У вас нет необходимых прав для доступа к этой странице' 
+        : 'Бұл бетке кіру үшін қажетті құқықтарыңыз жоқ';
+      
       toast({
-        title: language === 'ru' ? 'Недостаточно прав' : 'Құқықтар жеткіліксіз',
-        description: language === 'ru' 
-          ? 'У вас нет необходимых прав для доступа к этой странице' 
-          : 'Бұл бетке кіру үшін қажетті құқықтарыңыз жоқ',
+        title,
+        description,
         variant: "destructive"
       });
     }
