@@ -242,6 +242,15 @@ export interface PropertyFilterConfig {
   yearBuiltMax?: number;
   priceRangeMin?: number;
   priceRangeMax?: number;
+  dealTypes?: { id: string; label: { ru: string; kz: string } }[]; // Added dealTypes
+  segments?: { 
+    id: string; 
+    label: { ru: string; kz: string };
+    types: any[];
+  }[];
+  residentialFilters?: any[];
+  commercialFilters?: any[];
+  generalFilters?: any[];
 }
 
 export interface Listing {

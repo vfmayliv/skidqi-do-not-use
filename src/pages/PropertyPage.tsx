@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -103,17 +102,17 @@ export function PropertyPage() {
       newListings = newListings.filter(listing => listing.districtId && filters.districts?.includes(listing.districtId));
     }
     
-    // Фильтрация по новым полям
+    // Фильтрация по административным единицам
     if (filters.regionId) {
-      newListings = newListings.filter(listing => listing.regionId === filters.regionId);
+      newListings = newListings.filter(listing => (listing.regionId ?? '') === filters.regionId);
     }
     
     if (filters.cityId) {
-      newListings = newListings.filter(listing => listing.cityId === filters.cityId);
+      newListings = newListings.filter(listing => (listing.cityId ?? '') === filters.cityId);
     }
     
     if (filters.microdistrictId) {
-      newListings = newListings.filter(listing => listing.microdistrictId === filters.microdistrictId);
+      newListings = newListings.filter(listing => (listing.microdistrictId ?? '') === filters.microdistrictId);
     }
 
     if (filters.sortBy) {

@@ -1,3 +1,4 @@
+
 export interface Listing {
   id: string;
   title: {
@@ -22,8 +23,9 @@ export interface Listing {
   isFeatured: boolean;
   views: number;
   
-  // Добавляем поля для административного деления
+  // Административное деление
   regionId?: string;
   cityId?: string;
   microdistrictId?: string;
+  districtId?: string; // Сохраняем для обратной совместимости
 }

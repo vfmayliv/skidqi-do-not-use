@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { useAppWithTranslations } from "@/stores/useAppStore";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronDown, MapPin } from "lucide-react";
+import { Check, ChevronDown, MapPin, X } from "lucide-react";
 import {
   Popover,
   PopoverContent,
