@@ -20,7 +20,7 @@ export interface Listing {
   subcategoryId?: string;
   createdAt: string;
   imageUrl: string;
-  isFeatured: boolean;
+  isFeatured?: boolean; // Made optional to match listingType.ts
   views: number;
   
   // Add seller property to match listingType.ts Listing interface

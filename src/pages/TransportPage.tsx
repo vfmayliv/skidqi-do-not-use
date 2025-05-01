@@ -7,22 +7,17 @@ import { mockListings } from '@/data/mockListings';
 import TransportFilters from '@/components/transport/TransportFilters';
 import TransportCard from '@/components/transport/TransportCard';
 import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
-import { Listing as ListingType } from '@/types/listingType';
+import { Listing as ListingType, 
+  EngineType, 
+  TransmissionType, 
+  DriveType, 
+  BodyType,
+  ConditionType
+} from '@/types/listingType';
 import { Listing } from '@/types/listing';
 
-// Import BrandData from the correct location to ensure type compatibility
+// Import BrandData from the data file, not declaring it locally
 import { BrandData } from '@/data/transportData';
-
-// Определим тип Brand для корректной типизации
-interface BrandData {
-  id: string;
-  name: {
-    ru: string;
-    kz: string;
-  };
-  models?: string[];
-  toLowerCase?: () => string;
-}
 
 export function TransportPage() {
   const { language } = useAppStore();
@@ -48,7 +43,7 @@ export function TransportPage() {
   };
 
   // Mock brands for the TransportFilters component
-  // Make sure they match the expected type
+  // Make sure they comply with the BrandData interface from transportData.ts
   const mockBrands: BrandData[] = [
     { 
       id: 'toyota', 
@@ -136,38 +131,38 @@ export function TransportPage() {
       );
     }
     
-    // Apply engine types filter
+    // Apply engine types filter - Use proper casting to EngineType
     if (filters.engineTypes && filters.engineTypes.length > 0) {
       filtered = filtered.filter(listing => 
-        listing.engineType && filters.engineTypes!.includes(listing.engineType)
+        listing.engineType && filters.engineTypes!.includes(listing.engineType as EngineType)
       );
     }
     
-    // Apply transmission types filter
+    // Apply transmission types filter - Use proper casting to TransmissionType
     if (filters.transmissionTypes && filters.transmissionTypes.length > 0) {
       filtered = filtered.filter(listing => 
-        listing.transmission && filters.transmissionTypes!.includes(listing.transmission)
+        listing.transmission && filters.transmissionTypes!.includes(listing.transmission as TransmissionType)
       );
     }
     
-    // Apply drive types filter
+    // Apply drive types filter - Use proper casting to DriveType
     if (filters.driveTypes && filters.driveTypes.length > 0) {
       filtered = filtered.filter(listing => 
-        listing.driveType && filters.driveTypes!.includes(listing.driveType)
+        listing.driveType && filters.driveTypes!.includes(listing.driveType as DriveType)
       );
     }
     
-    // Apply body types filter
+    // Apply body types filter - Use proper casting to BodyType
     if (filters.bodyTypes && filters.bodyTypes.length > 0) {
       filtered = filtered.filter(listing => 
-        listing.bodyType && filters.bodyTypes!.includes(listing.bodyType)
+        listing.bodyType && filters.bodyTypes!.includes(listing.bodyType as BodyType)
       );
     }
     
-    // Apply condition types filter
+    // Apply condition types filter - Use proper casting to ConditionType
     if (filters.conditionTypes && filters.conditionTypes.length > 0) {
       filtered = filtered.filter(listing => 
-        listing.condition && filters.conditionTypes!.includes(listing.condition)
+        listing.condition && filters.conditionTypes!.includes(listing.condition as ConditionType)
       );
     }
     
