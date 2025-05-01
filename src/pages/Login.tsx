@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
   const { language, login, setUserRole } = useAppContext();
@@ -31,11 +32,14 @@ const Login = () => {
     
     // Simple validation
     if (!email || !password) {
+      const title = language === 'ru' ? 'Ошибка' : 'Қате';
+      const description = language === 'ru' 
+        ? 'Пожалуйста, заполните все поля' 
+        : 'Барлық өрістерді толтырыңыз';
+        
       toast({
-        title: language === 'ru' ? 'Ошибка' : 'Қате',
-        description: language === 'ru' 
-          ? 'Пожалуйста, заполните все поля' 
-          : 'Барлық өрістерді толтырыңыз',
+        title,
+        description,
         variant: 'destructive'
       });
       return;
@@ -51,22 +55,28 @@ const Login = () => {
         login();
         setUserRole('admin');
         
+        const title = language === 'ru' ? 'Успешно' : 'Сәтті';
+        const description = language === 'ru' 
+          ? 'Вы успешно вошли как администратор' 
+          : 'Сіз әкімші ретінде сәтті кірдіңіз';
+          
         toast({
-          title: language === 'ru' ? 'Успешно' : 'Сәтті',
-          description: language === 'ru' 
-            ? 'Вы успешно вошли как администратор' 
-            : 'Сіз әкімші ретінде сәтті кірдіңіз'
+          title,
+          description
         });
         
         // Redirect to admin panel
         console.log('Redirecting to owner panel');
         navigate('/owner');
       } else {
+        const title = language === 'ru' ? 'Ошибка' : 'Қате';
+        const description = language === 'ru' 
+          ? 'Неверные учетные данные администратора' 
+          : 'Әкімшінің жарамсыз тіркелгі деректері';
+          
         toast({
-          title: language === 'ru' ? 'Ошибка' : 'Қате',
-          description: language === 'ru' 
-            ? 'Неверные учетные данные администратора' 
-            : 'Әкімшінің жарамсыз тіркелгі деректері',
+          title,
+          description,
           variant: 'destructive'
         });
         setIsSubmitting(false);
@@ -86,32 +96,41 @@ const Login = () => {
             login();
             setUserRole('user');
             
+            const title = language === 'ru' ? 'Успешно' : 'Сәтті';
+            const description = language === 'ru' 
+              ? 'Вы успешно вошли в аккаунт' 
+              : 'Сіз аккаунтқа сәтті кірдіңіз';
+              
             toast({
-              title: language === 'ru' ? 'Успешно' : 'Сәтті',
-              description: language === 'ru' 
-                ? 'Вы успешно вошли в аккаунт' 
-                : 'Сіз аккаунтқа сәтті кірдіңіз'
+              title,
+              description
             });
             
             // Redirect to profile
             navigate('/profile');
           } else {
+            const title = language === 'ru' ? 'Ошибка' : 'Қате';
+            const description = language === 'ru' 
+              ? 'Неверный email или пароль' 
+              : 'Қате email немесе құпия сөз';
+              
             toast({
-              title: language === 'ru' ? 'Ошибка' : 'Қате',
-              description: language === 'ru' 
-                ? 'Неверный email или пароль' 
-                : 'Қате email немесе құпия сөз',
+              title,
+              description,
               variant: 'destructive'
             });
             setIsSubmitting(false);
             return;
           }
         } catch (error) {
+          const title = language === 'ru' ? 'Ошибка' : 'Қате';
+          const description = language === 'ru' 
+            ? 'Произошла ошибка при входе' 
+            : 'Кіру кезінде қате орын алды';
+            
           toast({
-            title: language === 'ru' ? 'Ошибка' : 'Қате',
-            description: language === 'ru' 
-              ? 'Произошла ошибка при входе' 
-              : 'Кіру кезінде қате орын алды',
+            title,
+            description,
             variant: 'destructive'
           });
           setIsSubmitting(false);
@@ -123,11 +142,14 @@ const Login = () => {
         login();
         setUserRole('user');
         
+        const title = language === 'ru' ? 'Демо режим' : 'Демо режимі';
+        const description = language === 'ru' 
+          ? 'Вход выполнен в демонстрационном режиме' 
+          : 'Кіру демонстрациялық режимде жасалды';
+          
         toast({
-          title: language === 'ru' ? 'Демо режим' : 'Демо режимі',
-          description: language === 'ru' 
-            ? 'Вход выполнен в демонстрационном режиме' 
-            : 'Кіру демонстрациялық режимде жасалды'
+          title,
+          description
         });
         
         navigate('/profile');

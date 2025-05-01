@@ -28,7 +28,7 @@ const useToast = (): UseToastReturn => {
         sonnerToast(props);
       } else if (props && typeof props === 'object') {
         // Make sure we're passing strings or valid React elements for title and description
-        const safeProps = { ...props };
+        const safeProps = { ...props } as Record<string, any>;
         
         // Handle title
         if (safeProps.title && typeof safeProps.title === 'object' && !React.isValidElement(safeProps.title)) {
