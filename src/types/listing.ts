@@ -23,9 +23,9 @@ export interface Listing {
   isFeatured: boolean;
   views: number;
   
-  // Административное деление
-  regionId?: string;
-  cityId?: string;
-  microdistrictId?: string;
-  districtId?: string; // Сохраняем для обратной совместимости
+  // Administrative division properties
+  regionId: string;
+  cityId: string;
+  microdistrictId: string;
+  districtId?: string; // Keeping for backward compatibility
 }

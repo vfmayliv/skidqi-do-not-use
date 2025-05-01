@@ -242,7 +242,7 @@ export interface PropertyFilterConfig {
   yearBuiltMax?: number;
   priceRangeMin?: number;
   priceRangeMax?: number;
-  dealTypes?: { id: string; label: { ru: string; kz: string } }[]; // Added dealTypes
+  dealTypes?: { id: string; label: { ru: string; kz: string } }[];
   segments?: { 
     id: string; 
     label: { ru: string; kz: string };
@@ -318,6 +318,9 @@ export interface Listing {
   yearBuilt?: number;
   address?: string;
   districtId?: string;
+  regionId?: string;
+  cityId?: string;
+  microdistrictId?: string;
   hasParking?: boolean;
   hasFurniture?: boolean;
   hasBalcony?: boolean;

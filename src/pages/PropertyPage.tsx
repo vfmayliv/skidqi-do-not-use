@@ -28,7 +28,25 @@ export const propertyFilterConfig: PropertyFilterConfig = {
   areaRangeMax: 500,
   floorRangeMin: 1,
   floorRangeMax: 30,
-  // All properties are optional according to the updated interface
+  dealTypes: [
+    { id: 'sale', label: { ru: 'Продажа', kz: 'Сату' } },
+    { id: 'rent', label: { ru: 'Аренда', kz: 'Жалға алу' } }
+  ],
+  segments: [
+    { 
+      id: 'residential', 
+      label: { ru: 'Жилая недвижимость', kz: 'Тұрғын үй' },
+      types: []
+    },
+    { 
+      id: 'commercial', 
+      label: { ru: 'Коммерческая недвижимость', kz: 'Коммерциялық жылжымайтын мүлік' },
+      types: []
+    }
+  ],
+  residentialFilters: [],
+  commercialFilters: [],
+  generalFilters: []
 };
 
 export function PropertyPage() {
@@ -105,19 +123,19 @@ export function PropertyPage() {
     // Фильтрация по административным единицам
     if (filters.regionId) {
       newListings = newListings.filter(listing => {
-        return (listing.regionId ?? '') === filters.regionId;
+        return listing.regionId === filters.regionId;
       });
     }
     
     if (filters.cityId) {
       newListings = newListings.filter(listing => {
-        return (listing.cityId ?? '') === filters.cityId;
+        return listing.cityId === filters.cityId;
       });
     }
     
     if (filters.microdistrictId) {
       newListings = newListings.filter(listing => {
-        return (listing.microdistrictId ?? '') === filters.microdistrictId;
+        return listing.microdistrictId === filters.microdistrictId;
       });
     }
 

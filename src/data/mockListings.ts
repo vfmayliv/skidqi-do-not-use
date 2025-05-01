@@ -26,17 +26,19 @@ export const mockListings = generateMockListings(30);
 export type { Listing } from '../types/listingType';
 
 // Add administrative division fields to all listings
-// Define the function to add admin fields, but don't run it immediately
 function addAdministrativeDivisionFields(listings: Listing[]): void {
   listings.forEach(listing => {
-    if (!('regionId' in listing)) {
-      listing.regionId = '';
+    // Use type assertion to add properties safely
+    const listingWithAdmin = listing as Listing & { regionId?: string; cityId?: string; microdistrictId?: string };
+    
+    if (!listingWithAdmin.regionId) {
+      listingWithAdmin.regionId = '';
     }
-    if (!('cityId' in listing)) {
-      listing.cityId = '';
+    if (!listingWithAdmin.cityId) {
+      listingWithAdmin.cityId = '';
     }
-    if (!('microdistrictId' in listing)) {
-      listing.microdistrictId = '';
+    if (!listingWithAdmin.microdistrictId) {
+      listingWithAdmin.microdistrictId = '';
     }
   });
 }
