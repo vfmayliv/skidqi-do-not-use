@@ -57,7 +57,7 @@ export const AuthProtection: React.FC<AuthProtectionProps> = ({
   if (!isAuthenticated) {
     // Redirect to the appropriate login page based on required role
     return requiredRole === 'admin' ? 
-      <Navigate to="/login?owner=true" replace /> :
+      <Navigate to="/owner" replace /> :
       <Navigate to="/login" replace />;
   }
   
