@@ -116,6 +116,20 @@ const TransportCard = ({
       return createdAt.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'kk-KZ');
     }
   };
+
+  // Ensure title is a string
+  const title = typeof listing.title === 'string'
+    ? listing.title
+    : (listing.title && typeof listing.title === 'object' && listing.title[language])
+      ? listing.title[language]
+      : '';
+
+  // Ensure city is a string
+  const city = typeof listing.city === 'string'
+    ? listing.city
+    : (listing.city && typeof listing.city === 'object' && listing.city[language])
+      ? listing.city[language]
+      : '';
   
   if (variant === 'horizontal') {
     return (
@@ -124,7 +138,7 @@ const TransportCard = ({
           <div className="w-[130px] h-full relative">
             <img
               src={listing.imageUrl || '/placeholder.svg'}
-              alt={listing.title[language]}
+              alt={title}
               className="w-full h-full object-cover"
             />
             {listing.discount > 0 && (
@@ -175,7 +189,7 @@ const TransportCard = ({
               </p>
               
               <div className="text-xs text-muted-foreground">
-                {listing.city[language]}
+                {city}
               </div>
             </div>
           </CardContent>
@@ -190,7 +204,7 @@ const TransportCard = ({
         <div className="h-48 relative">
           <img
             src={listing.imageUrl || '/placeholder.svg'}
-            alt={listing.title[language]}
+            alt={title}
             className="w-full h-full object-cover"
           />
           {listing.discount > 0 && (
@@ -234,7 +248,7 @@ const TransportCard = ({
             </p>
             <span className="text-xs text-muted-foreground">•</span>
             <p className="text-xs text-muted-foreground">
-              {listing.city[language]}
+              {city}
             </p>
           </div>
           
