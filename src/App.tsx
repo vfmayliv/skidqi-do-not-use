@@ -83,11 +83,19 @@ const App: React.FC = () => {
             <Route path="/help" element={<Help />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            
+            {/* Admin routes */}
             <Route path="/owner" element={
               <AuthProtection requiredRole="admin">
                 <OwnerPanel />
               </AuthProtection>
             } />
+            <Route path="/admin" element={
+              <AuthProtection requiredRole="admin">
+                <OwnerPanel />
+              </AuthProtection>
+            } />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />

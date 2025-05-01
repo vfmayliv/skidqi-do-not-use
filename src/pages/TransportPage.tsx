@@ -8,7 +8,18 @@ import { mockListings } from '@/data/mockListings';
 import TransportFilters from '@/components/transport/TransportFilters';
 import TransportCard from '@/components/transport/TransportCard';
 import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
-import { Listing } from '@/types/listingType';
+import { Listing } from '@/types/listing';
+
+// Определим тип Brand для корректной типизации
+interface BrandData {
+  id: string;
+  name: {
+    ru: string;
+    kz: string;
+  };
+  models?: string[];
+  toLowerCase?: () => string;
+}
 
 export function TransportPage() {
   const { language } = useAppStore();
@@ -34,7 +45,7 @@ export function TransportPage() {
   };
 
   // Mock brands for the TransportFilters component
-  const mockBrands = [
+  const mockBrands: BrandData[] = [
     { id: 'toyota', name: { ru: 'Тойота', kz: 'Тойота' } },
     { id: 'bmw', name: { ru: 'БМВ', kz: 'БМВ' } },
     { id: 'mercedes', name: { ru: 'Мерседес', kz: 'Мерседес' } },
