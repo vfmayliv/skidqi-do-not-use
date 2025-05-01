@@ -28,7 +28,7 @@ const useToast = (): UseToastReturn => {
         sonnerToast(props);
       } else if (props && typeof props === 'object') {
         // Make sure we're passing strings or valid React elements for title and description
-        const safeProps = { ...props } as Record<string, any>;
+        const safeProps = { ...props };
         
         // Handle title
         if (safeProps.title && typeof safeProps.title === 'object' && !React.isValidElement(safeProps.title)) {
@@ -40,7 +40,19 @@ const useToast = (): UseToastReturn => {
           safeProps.description = JSON.stringify(safeProps.description);
         }
         
-        sonnerToast(safeProps);
+        // The issue is here - we need to pass title and description separately,
+        // not the entire object to sonnerToast
+        sonnerToast(safeProps.title as string | React.ReactNode, {
+          description: safeProps.description,
+          action: safeProps.action,
+          variant: safeProps.variant,
+          // Pass any additional properties
+          ...Object.fromEntries(
+            Object.entries(safeProps).filter(
+              ([key]) => !['title', 'description', 'action', 'variant'].includes(key)
+            )
+          )
+        });
       } else {
         // Fallback for any other types
         sonnerToast(String(props));
