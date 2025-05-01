@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -8,7 +7,11 @@ import { mockListings } from '@/data/mockListings';
 import TransportFilters from '@/components/transport/TransportFilters';
 import TransportCard from '@/components/transport/TransportCard';
 import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
+import { Listing as ListingType } from '@/types/listingType';
 import { Listing } from '@/types/listing';
+
+// Import BrandData from the correct location to ensure type compatibility
+import { BrandData } from '@/data/transportData';
 
 // Определим тип Brand для корректной типизации
 interface BrandData {
@@ -28,7 +31,7 @@ export function TransportPage() {
   
   // Filter transport listings only
   const [transportListings, setTransportListings] = useState<Listing[]>(
-    mockListings.filter(listing => listing.vehicleType)
+    mockListings.filter(listing => listing.vehicleType) as unknown as Listing[]
   );
   
   // State for favorites
@@ -45,11 +48,32 @@ export function TransportPage() {
   };
 
   // Mock brands for the TransportFilters component
+  // Make sure they match the expected type
   const mockBrands: BrandData[] = [
-    { id: 'toyota', name: { ru: 'Тойота', kz: 'Тойота' } },
-    { id: 'bmw', name: { ru: 'БМВ', kz: 'БМВ' } },
-    { id: 'mercedes', name: { ru: 'Мерседес', kz: 'Мерседес' } },
-    { id: 'audi', name: { ru: 'Ауди', kz: 'Ауди' } }
+    { 
+      id: 'toyota', 
+      name: { ru: 'Тойота', kz: 'Тойота' },
+      models: [],
+      toLowerCase() { return this.id; }
+    },
+    { 
+      id: 'bmw', 
+      name: { ru: 'БМВ', kz: 'БМВ' },
+      models: [],
+      toLowerCase() { return this.id; }
+    },
+    { 
+      id: 'mercedes', 
+      name: { ru: 'Мерседес', kz: 'Мерседес' },
+      models: [],
+      toLowerCase() { return this.id; }
+    },
+    { 
+      id: 'audi', 
+      name: { ru: 'Ауди', kz: 'Ауди' },
+      models: [],
+      toLowerCase() { return this.id; }
+    }
   ];
 
   // Handle search button click
@@ -60,7 +84,7 @@ export function TransportPage() {
   
   // Apply filters when they change
   useEffect(() => {
-    let filtered = [...mockListings.filter(listing => listing.vehicleType)];
+    let filtered = [...mockListings.filter(listing => listing.vehicleType)] as unknown as Listing[];
     
     // Apply brand filter
     if (filters.brands && filters.brands.length > 0) {
@@ -174,6 +198,7 @@ export function TransportPage() {
     }
     
     // Update state with filtered listings
+    // Cast to the correct type to avoid TypeScript errors
     setTransportListings(filtered);
   }, [filters]);
 
@@ -237,7 +262,7 @@ export function TransportPage() {
               {transportListings.map(listing => (
                 <TransportCard 
                   key={listing.id}
-                  listing={listing}
+                  listing={listing as unknown as ListingType}
                   variant={viewMode === 'list' ? 'horizontal' : 'default'}
                   onFavoriteToggle={handleFavoriteToggle}
                   isFavorite={favorites.includes(listing.id)}

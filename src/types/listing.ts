@@ -23,6 +23,14 @@ export interface Listing {
   isFeatured: boolean;
   views: number;
   
+  // Add seller property to match listingType.ts Listing interface
+  seller?: {
+    name: string;
+    phone: string;
+    rating: number;
+    reviews?: number;
+  };
+  
   // Transport-specific properties
   vehicleType?: string;
   brand?: string;
