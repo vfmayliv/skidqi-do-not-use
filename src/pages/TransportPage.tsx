@@ -1,313 +1,237 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { BreadcrumbNavigation } from '@/components/BreadcrumbNavigation';
-import TransportCard from '@/components/transport/TransportCard';
-import TransportMap from '@/components/transport/TransportMap';
-import TransportFilters from '@/components/transport/TransportFilters';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, MapPin, Grid, List, Car, Bike, Truck, Wrench } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useAppWithTranslations } from '@/stores/useAppStore';
-import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
-import { carBrands, motorcycleBrands, commercialTypes } from '@/data/transportData';
+import { useAppStore } from '@/stores/useAppStore';
 import { mockListings } from '@/data/mockListings';
-import { useToast } from '@/hooks/useToast';
-import { VehicleType } from '@/types/listingType';
+import { TransportFilters } from '@/components/transport/TransportFilters';
+import TransportCard from '@/components/transport/TransportCard';
+import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
+import { Listing } from '@/types/listingType';
 
-const TransportPage = () => {
-  const isMobile = useIsMobile();
-  const { language } = useAppWithTranslations();
+export function TransportPage() {
+  const { language } = useAppStore();
   const { filters, setFilters, resetFilters, activeFiltersCount } = useTransportFiltersStore();
-  const { toast } = useToast();
-  const [isMapOpen, setIsMapOpen] = useState(false);
-  const [gridView, setGridView] = useState(true);
-  const [brandsSearchQuery, setBrandsSearchQuery] = useState('');
-  const [transportListings, setTransportListings] = useState([]);
-  const [activeTab, setActiveTab] = useState<string>('cars');
-  const [mapInitialized, setMapInitialized] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   
-  useEffect(() => {
-    // Filter listings to only show transport category
-    const filteredListings = mockListings.filter(listing => 
-      listing.categoryId === 'transport' || 
-      (listing.category && listing.category === 'transport')
+  // Filter transport listings only
+  const [transportListings, setTransportListings] = useState<Listing[]>(
+    mockListings.filter(listing => listing.vehicleType)
+  );
+  
+  // State for favorites
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  // Handle favorite toggle
+  const handleFavoriteToggle = (id: string) => {
+    setFavorites(prev => 
+      prev.includes(id) 
+        ? prev.filter(favId => favId !== id) 
+        : [...prev, id]
     );
-    
-    setTransportListings(filteredListings);
-  }, []);
+  };
   
-  // Force map re-initialization when map view is toggled
+  // Apply filters when they change
   useEffect(() => {
-    if (isMapOpen) {
-      setMapInitialized(false);
-      setTimeout(() => setMapInitialized(true), 100);
-    }
-  }, [isMapOpen]);
-  
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
+    let filtered = [...mockListings.filter(listing => listing.vehicleType)];
     
-    // Reset filters when changing tabs
-    resetFilters();
+    // Apply brand filter
+    if (filters.brands && filters.brands.length > 0) {
+      filtered = filtered.filter(listing => 
+        listing.brand && filters.brands.includes(listing.brand)
+      );
+    }
     
-    // Set the vehicle type based on the selected tab
-    switch(value) {
-      case 'cars':
-        setFilters({ vehicleType: VehicleType.CAR });
-        break;
-      case 'motorcycles':
-        setFilters({ vehicleType: VehicleType.MOTORCYCLE });
-        break;
-      case 'commercial':
-        setFilters({ vehicleType: VehicleType.COMMERCIAL });
-        break;
-      case 'parts':
-        setFilters({ vehicleType: VehicleType.PARTS });
-        break;
-      default:
-        setFilters({ vehicleType: null });
+    // Apply price range filter
+    if (filters.priceRange.min) {
+      filtered = filtered.filter(listing => 
+        listing.discountPrice >= filters.priceRange.min!
+      );
     }
-  };
-  
-  const getBrandsForActiveTab = () => {
-    switch(activeTab) {
-      case 'motorcycles':
-        return motorcycleBrands;
-      case 'cars':
-        return carBrands;
-      default:
-        return [];
+    if (filters.priceRange.max) {
+      filtered = filtered.filter(listing => 
+        listing.discountPrice <= filters.priceRange.max!
+      );
     }
-  };
-  
-  const handleApplyFilters = () => {
-    toast({
-      title: language === 'ru' ? 'Фильтры применены' : 'Фильтрлер қолданылды',
-      description: language === 'ru' 
-        ? 'Результаты обновлены в соответствии с выбранными фильтрами.' 
-        : 'Нәтижелер таңдалған фильтрлерге сәйкес жаңартылды.'
-    });
-  };
-  
-  const handleListingClick = (listing) => {
-    // Navigate to listing detail page
-    window.location.href = `/listing/${listing.id}`;
-  };
+    
+    // Apply year range filter
+    if (filters.yearRange.min) {
+      filtered = filtered.filter(listing => 
+        listing.year && listing.year >= filters.yearRange.min!
+      );
+    }
+    if (filters.yearRange.max) {
+      filtered = filtered.filter(listing => 
+        listing.year && listing.year <= filters.yearRange.max!
+      );
+    }
+    
+    // Apply mileage range filter
+    if (filters.mileageRange.min) {
+      filtered = filtered.filter(listing => 
+        listing.mileage && listing.mileage >= filters.mileageRange.min!
+      );
+    }
+    if (filters.mileageRange.max) {
+      filtered = filtered.filter(listing => 
+        listing.mileage && listing.mileage <= filters.mileageRange.max!
+      );
+    }
+    
+    // Apply vehicle type filter
+    if (filters.vehicleType) {
+      filtered = filtered.filter(listing => 
+        listing.vehicleType === filters.vehicleType
+      );
+    }
+    
+    // Apply engine types filter
+    if (filters.engineTypes && filters.engineTypes.length > 0) {
+      filtered = filtered.filter(listing => 
+        listing.engineType && filters.engineTypes!.includes(listing.engineType)
+      );
+    }
+    
+    // Apply transmission types filter
+    if (filters.transmissionTypes && filters.transmissionTypes.length > 0) {
+      filtered = filtered.filter(listing => 
+        listing.transmission && filters.transmissionTypes!.includes(listing.transmission)
+      );
+    }
+    
+    // Apply drive types filter
+    if (filters.driveTypes && filters.driveTypes.length > 0) {
+      filtered = filtered.filter(listing => 
+        listing.driveType && filters.driveTypes!.includes(listing.driveType)
+      );
+    }
+    
+    // Apply body types filter
+    if (filters.bodyTypes && filters.bodyTypes.length > 0) {
+      filtered = filtered.filter(listing => 
+        listing.bodyType && filters.bodyTypes!.includes(listing.bodyType)
+      );
+    }
+    
+    // Apply condition types filter
+    if (filters.conditionTypes && filters.conditionTypes.length > 0) {
+      filtered = filtered.filter(listing => 
+        listing.condition && filters.conditionTypes!.includes(listing.condition)
+      );
+    }
+    
+    // Apply sort
+    if (filters.sortBy) {
+      switch (filters.sortBy) {
+        case 'price_asc':
+          filtered.sort((a, b) => a.discountPrice - b.discountPrice);
+          break;
+        case 'price_desc':
+          filtered.sort((a, b) => b.discountPrice - a.discountPrice);
+          break;
+        case 'year_asc':
+          filtered.sort((a, b) => (a.year || 0) - (b.year || 0));
+          break;
+        case 'year_desc':
+          filtered.sort((a, b) => (b.year || 0) - (a.year || 0));
+          break;
+        case 'mileage_asc':
+          filtered.sort((a, b) => (a.mileage || 0) - (b.mileage || 0));
+          break;
+        case 'mileage_desc':
+          filtered.sort((a, b) => (b.mileage || 0) - (a.mileage || 0));
+          break;
+        default:
+          break;
+      }
+    }
+    
+    // Update state with filtered listings
+    setTransportListings(filtered);
+  }, [filters]);
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <BreadcrumbNavigation 
-        items={[
-          {
-            label: language === 'ru' ? 'Категории' : 'Санаттар',
-            link: '/category'
-          }
-        ]}
-        currentPage={language === 'ru' ? 'Транспорт и запчасти' : 'Көлік және бөлшектер'}
-      />
-      
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold mb-4 md:mb-0">
-            {language === 'ru' ? 'Транспорт и запчасти' : 'Көлік және бөлшектер'}
+      <main className="flex-1">
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-2xl font-bold mb-6">
+            {language === 'ru' ? 'Транспорт' : 'Көлік'}
           </h1>
           
-          <div className="flex items-center space-x-4">
-            <div className="relative w-full md:w-auto">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input 
-                type="search" 
-                placeholder={language === 'ru' ? 'Поиск...' : 'Іздеу...'} 
-                className="pl-10 w-full md:w-64"
-              />
-            </div>
-            
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={() => setGridView(true)}
-                className={cn("h-9 w-9", gridView ? "bg-blue-50" : "")}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={() => setGridView(false)}
-                className={cn("h-9 w-9", !gridView ? "bg-blue-50" : "")}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            {isMobile ? (
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-9 w-9">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <DrawerHeader>
-                    <DrawerTitle>
-                      {language === 'ru' ? 'Фильтры' : 'Фильтрлер'}
-                    </DrawerTitle>
-                  </DrawerHeader>
-                  <div className="px-4 pb-4 overflow-y-auto max-h-[70vh]">
-                    <TransportFilters 
-                      filters={filters}
-                      onFilterChange={setFilters}
-                      onReset={resetFilters}
-                      onSearch={handleApplyFilters}
-                      brands={getBrandsForActiveTab()}
-                      activeFiltersCount={activeFiltersCount}
-                      commercialTypes={activeTab === 'commercial' ? commercialTypes : []}
-                    />
-                  </div>
-                  <DrawerFooter>
-                    <Button onClick={handleApplyFilters}>
-                      {language === 'ru' ? 'Применить' : 'Қолдану'}
-                    </Button>
-                    <DrawerClose asChild>
-                      <Button variant="outline">
-                        {language === 'ru' ? 'Отмена' : 'Болдырмау'}
-                      </Button>
-                    </DrawerClose>
-                  </DrawerFooter>
-                </DrawerContent>
-              </Drawer>
-            ) : (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="icon" className="h-9 w-9">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {language === 'ru' ? 'Фильтры' : 'Фильтрлер'}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <TransportFilters 
-                    filters={filters}
-                    onFilterChange={setFilters}
-                    onReset={resetFilters}
-                    onSearch={handleApplyFilters}
-                    brands={getBrandsForActiveTab()}
-                    activeFiltersCount={activeFiltersCount}
-                    commercialTypes={activeTab === 'commercial' ? commercialTypes : []}
-                  />
-                  <div className="flex justify-end space-x-2 pt-4">
-                    <Button variant="outline" onClick={resetFilters}>
-                      {language === 'ru' ? 'Сбросить' : 'Қайтару'}
-                    </Button>
-                    <Button onClick={handleApplyFilters}>
-                      {language === 'ru' ? 'Применить' : 'Қолдану'}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
-            
-            <Button 
-              variant="outline"
-              size="icon"
-              onClick={() => setIsMapOpen(!isMapOpen)}
-              className={cn("h-9 w-9", isMapOpen ? "bg-blue-50" : "")}
-            >
-              <MapPin className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        
-        {/* Category tabs */}
-        <Tabs defaultValue="cars" value={activeTab} onValueChange={handleTabChange} className="mb-6">
-          <TabsList className="w-full md:w-auto grid grid-cols-4 md:inline-flex">
-            <TabsTrigger value="cars" className="flex flex-col md:flex-row items-center gap-1">
-              <Car className="h-4 w-4" />
-              <span>{language === 'ru' ? 'Легковые' : 'Жеңіл'}</span>
-            </TabsTrigger>
-            <TabsTrigger value="motorcycles" className="flex flex-col md:flex-row items-center gap-1">
-              <Bike className="h-4 w-4" />
-              <span>{language === 'ru' ? 'Мотоциклы' : 'Мотоциклдер'}</span>
-            </TabsTrigger>
-            <TabsTrigger value="commercial" className="flex flex-col md:flex-row items-center gap-1">
-              <Truck className="h-4 w-4" />
-              <span>{language === 'ru' ? 'Коммерческие' : 'Коммерциялық'}</span>
-            </TabsTrigger>
-            <TabsTrigger value="parts" className="flex flex-col md:flex-row items-center gap-1">
-              <Wrench className="h-4 w-4" />
-              <span>{language === 'ru' ? 'Запчасти' : 'Бөлшектер'}</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Показываем фильтры на десктопе всегда */}
-          {!isMobile && (
-            <div className="hidden lg:block">
-              <TransportFilters 
-                filters={filters}
-                onFilterChange={setFilters}
-                onReset={resetFilters}
-                onSearch={handleApplyFilters}
-                brands={getBrandsForActiveTab()}
-                activeFiltersCount={activeFiltersCount}
-                commercialTypes={activeTab === 'commercial' ? commercialTypes : []}
-              />
-            </div>
-          )}
+          <TransportFilters 
+            filters={filters}
+            onFilterChange={setFilters}
+            onReset={resetFilters}
+            activeFiltersCount={activeFiltersCount}
+          />
           
-          <div className="lg:col-span-3">
-            {isMapOpen && mapInitialized && (
-              <div className="w-full h-[400px] mb-6 rounded-lg overflow-hidden border">
-                <TransportMap 
-                  listings={transportListings} 
-                  onListingClick={handleListingClick}
-                  language={language}
-                  showListToggle={true}
-                  onToggleFullscreen={() => {}}
-                />
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-sm text-muted-foreground">
+                {transportListings.length} {language === 'ru' ? 'объявлений' : 'хабарландыру'}
               </div>
-            )}
+              
+              <div className="flex items-center space-x-2">
+                <button 
+                  className={`p-2 rounded ${viewMode === 'grid' ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}
+                  onClick={() => setViewMode('grid')}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                  </svg>
+                </button>
+                
+                <button 
+                  className={`p-2 rounded ${viewMode === 'list' ? 'bg-primary/10 text-primary' : 'hover:bg-muted'}`}
+                  onClick={() => setViewMode('list')}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {transportListings.map((listing) => (
+            <div className={viewMode === 'grid' 
+              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' 
+              : 'space-y-4'
+            }>
+              {transportListings.map(listing => (
                 <TransportCard 
-                  key={listing.id} 
-                  listing={listing} 
-                  variant="default"
-                  viewMode={gridView ? 'grid' : 'list'}
+                  key={listing.id}
+                  listing={listing}
+                  variant={viewMode === 'list' ? 'horizontal' : 'default'}
+                  onFavoriteToggle={handleFavoriteToggle}
+                  isFavorite={favorites.includes(listing.id)}
+                  viewMode={viewMode}
                 />
               ))}
               
               {transportListings.length === 0 && (
-                <div className="col-span-full text-center py-10">
-                  <p className="text-gray-500">
+                <div className="col-span-full py-12 text-center">
+                  <p className="text-lg text-muted-foreground">
                     {language === 'ru' 
-                      ? 'Объявления не найдены' 
-                      : 'Хабарландырулар табылмады'}
+                      ? 'Нет объявлений, соответствующих вашему запросу' 
+                      : 'Сіздің сұранысыңызға сәйкес хабарландырулар жоқ'}
                   </p>
                 </div>
               )}
             </div>
           </div>
         </div>
-      </div>
-      
+      </main>
       <Footer />
     </div>
   );
-};
-
-export default TransportPage;
+}
