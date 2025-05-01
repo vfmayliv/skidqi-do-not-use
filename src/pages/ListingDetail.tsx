@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -142,6 +141,10 @@ export default function ListingDetail() {
     );
   }
 
+  // Extract description text based on language to avoid passing object directly
+  const descriptionText = listing.description ? 
+    (typeof listing.description === 'string' ? listing.description : listing.description[language]) : '';
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -185,7 +188,7 @@ export default function ListingDetail() {
                 onShare={handleShare}
               />
               <ListingDescription 
-                description={listing.description[language]} 
+                description={descriptionText} 
                 language={language}
               />
               <ListingStats 

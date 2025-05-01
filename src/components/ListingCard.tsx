@@ -26,13 +26,27 @@ export function ListingCard({ listing }: ListingCardProps) {
     }).format(date);
   };
 
+  // Ensure we get a string for title, even if somehow it comes in as an object
+  const title = typeof listing.title === 'string' 
+    ? listing.title 
+    : (listing.title && typeof listing.title === 'object' && listing.title[language]) 
+      ? listing.title[language] 
+      : '';
+
+  // Ensure we get a string for city, even if somehow it comes in as an object
+  const city = typeof listing.city === 'string' 
+    ? listing.city 
+    : (listing.city && typeof listing.city === 'object' && listing.city[language]) 
+      ? listing.city[language] 
+      : '';
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <Link to={`/listing/${listing.id}`}>
         <div className="relative aspect-[4/3] overflow-hidden">
           <img
             src={listing.imageUrl}
-            alt={listing.title[language]}
+            alt={title}
             className="w-full h-full object-cover transition-transform hover:scale-105"
           />
           
@@ -50,7 +64,7 @@ export function ListingCard({ listing }: ListingCardProps) {
         </div>
         
         <CardContent className="p-4">
-          <h3 className="font-medium line-clamp-2 h-12">{listing.title[language]}</h3>
+          <h3 className="font-medium line-clamp-2 h-12">{title}</h3>
           
           <div className="mt-2 space-y-1">
             <div className="flex flex-col">
@@ -66,7 +80,7 @@ export function ListingCard({ listing }: ListingCardProps) {
             
             <div className="flex items-center text-sm text-muted-foreground">
               <MapPin className="h-3 w-3 mr-1" />
-              <span>{listing.city[language]}</span>
+              <span>{city}</span>
             </div>
           </div>
         </CardContent>

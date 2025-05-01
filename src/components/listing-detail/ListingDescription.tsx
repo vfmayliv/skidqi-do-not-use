@@ -4,7 +4,7 @@ import { MapPin, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface ListingDescriptionProps {
-  description: string;
+  description: string; // Changed to string type to ensure we're not passing an object
   language: string;
 }
 
