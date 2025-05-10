@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppContext } from '@/contexts/AppContext';
 import { useToast } from '@/hooks/useToast';
-import { Link, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 
 // Компонент панели администратора
 const OwnerPanel = () => {
@@ -17,19 +16,6 @@ const OwnerPanel = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLoginForm, setShowLoginForm] = useState(!isAuthenticated || userRole !== 'admin');
   const { toast } = useToast();
-  
-  // Используем навигацию для редиректа при прямом доступе
-  const navigate = useNavigate();
-  
-  // Блок для защиты админ-панели от индексации
-  useEffect(() => {
-    // Проверка, есть ли реферер - если есть, значит человек пришел по ссылке с другой страницы
-    // Это простой способ проверить, что страница открыта напрямую через URL
-    if (document.referrer && !document.referrer.includes('ownerpanel')) {
-      // Если пришли не с OwnerPanel, редиректим на главную
-      navigate('/');
-    }
-  }, [navigate]);
   
   // Обработчик входа в админ-панель
   const handleLogin = (e: React.FormEvent) => {
@@ -47,7 +33,7 @@ const OwnerPanel = () => {
     setIsSubmitting(true);
     
     // Проверка учетных данных администратора
-    if (password === 'world2025/') {
+    if (password === 'admin123') {
       login();
       setUserRole('admin');
       
@@ -72,27 +58,6 @@ const OwnerPanel = () => {
     setIsSubmitting(false);
   };
   
-  // Добавляем мета-теги для запрета индексации
-  useEffect(() => {
-    // Создаем мета-теги для запрета индексации
-    const metaRobots = document.createElement('meta');
-    metaRobots.name = 'robots';
-    metaRobots.content = 'noindex, nofollow';
-    document.head.appendChild(metaRobots);
-    
-    // Добавляем X-Robots-Tag для дополнительной защиты
-    const linkCanonical = document.createElement('meta');
-    linkCanonical.httpEquiv = 'X-Robots-Tag';
-    linkCanonical.content = 'noindex, nofollow';
-    document.head.appendChild(linkCanonical);
-    
-    // Удаляем мета-теги при размонтировании компонента
-    return () => {
-      document.head.removeChild(metaRobots);
-      document.head.removeChild(linkCanonical);
-    };
-  }, []);
-
   // Форма авторизации администратора
   if (showLoginForm) {
     return (

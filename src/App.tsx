@@ -85,11 +85,8 @@ const App: React.FC = () => {
             <Route path="/privacy" element={<PrivacyPolicy />} />
             
             {/* Owner panel route */}
-            <Route path="/owner" element={
-              <AuthProtection requiredRole="admin">
-                <OwnerPanel />
-              </AuthProtection>
-            } />
+            <Route path="/owner" element={<OwnerPanel />} />
+            <Route path="/ownerpanel" element={<OwnerPanel />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -8,8 +8,8 @@ import { mockListings } from '@/data/mockListings';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 
 export function EnhancedFeaturedListings() {
-  const { t } = useAppWithTranslations();
-  const [activeTab, setActiveTab] = useState('featured');
+  const { t, language } = useAppWithTranslations();
+  const [activeTab, setActiveTab] = useState<string>('featured');
   
   const featuredListings = mockListings.filter(listing => listing.isFeatured);
   const latestListings = [...mockListings].sort((a, b) => 
@@ -24,12 +24,21 @@ export function EnhancedFeaturedListings() {
       <Tabs defaultValue="featured" onValueChange={setActiveTab} value={activeTab}>
         <div className="flex justify-between items-center mb-6">
           <TabsList>
-            <TabsTrigger value="featured">{t('featuredAds')}</TabsTrigger>
-            <TabsTrigger value="latest">{t('latestAds')}</TabsTrigger>
+            <TabsTrigger value="featured">
+              <span className="hidden md:inline">{t('featuredAds')}</span>
+              <span className="md:hidden">{language === 'ru' ? 'Избранные' : 'Таңдаулы'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="latest">
+              <span className="hidden md:inline">{t('latestAds')}</span>
+              <span className="md:hidden">{language === 'ru' ? 'Новые' : 'Жаңа'}</span>
+            </TabsTrigger>
           </TabsList>
           
           <Button variant="link" asChild>
-            <Link to="/search">{t('allAds')}</Link>
+            <Link to="/search">
+              <span className="hidden md:inline">{t('allAds')}</span>
+              <span className="md:hidden">{language === 'ru' ? 'Все' : 'Барлық'}</span>
+            </Link>
           </Button>
         </div>
         
