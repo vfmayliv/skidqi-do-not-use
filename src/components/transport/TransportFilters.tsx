@@ -1,687 +1,470 @@
 import React, { useState } from 'react';
-import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { ArrowDownUp, Car, Check, Search } from 'lucide-react';
-import { 
-  TransportFilters as TransportFiltersType,
-  VehicleType,
-  EngineType,
-  TransmissionType,
-  DriveType,
-  BodyType,
-  ConditionType,
-  SteeringWheelType,
-  VehicleFeature,
-  SortOption 
-} from '@/types/listingType';
-import { BrandData, CommercialType } from '@/data/transportData';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Card, CardContent } from '@/components/ui/card';
+import { useTranslation } from '@/hooks/use-translation';
+import { transportConfig } from '@/categories/transport/config';
 
-type TransportFiltersProps = {
-  filters: TransportFiltersType;
-  onFilterChange: (newFilters: Partial<TransportFiltersType>) => void;
-  onReset: () => void;
-  onSearch: () => void;
-  brands: BrandData[];
-  activeFiltersCount: number;
-  commercialTypes?: CommercialType[];
-};
+export interface TransportFiltersProps {
+  vehicleType?: string;
+  onFilterChange?: (filters: any) => void;
+  availableFilters?: {
+    brands?: string[];
+    models?: Record<string, string[]>;
+    years?: number[];
+    bodyTypes?: string[];
+  };
+}
 
-const TransportFilters = ({
-  filters,
+const TransportFilters: React.FC<TransportFiltersProps> = ({
+  vehicleType = 'passenger',
   onFilterChange,
-  onReset,
-  onSearch,
-  brands,
-  activeFiltersCount,
-  commercialTypes = []
-}: TransportFiltersProps) => {
-  const { language } = useAppContext();
-  const [expandedFilters, setExpandedFilters] = useState<boolean>(false);
+  availableFilters
+}) => {
+  const { t } = useTranslation();
+  const [selectedCategory, setSelectedCategory] = useState(vehicleType);
+  const [selectedFilters, setSelectedFilters] = useState({
+    brand: '',
+    model: '',
+    yearFrom: '',
+    yearTo: '',
+    priceFrom: '',
+    priceTo: '',
+    bodyType: '',
+    transmission: '',
+    engine: '',
+    drive: '',
+    condition: 'all',
+    withPhoto: true,
+    mileageFrom: '',
+    mileageTo: ''
+  });
+
+  // Получаем конфигурацию фильтров из общего конфига
+  const filterConfig = transportConfig.filterConfig || {};
   
-  // Price slider values
-  const [priceValues, setPriceValues] = useState<number[]>([
-    filters.priceRange.min || 0,
-    filters.priceRange.max || 50000000
-  ]);
+  // Находим выбранную категорию
+  const categories = filterConfig.categories || [];
+  const currentCategory = categories.find(c => c.id === selectedCategory) || categories[0];
   
-  // Year slider values
-  const [yearValues, setYearValues] = useState<number[]>([
-    filters.yearRange.min || 1980,
-    filters.yearRange.max || new Date().getFullYear()
-  ]);
-  
-  // Mileage slider values
-  const [mileageValues, setMileageValues] = useState<number[]>([
-    filters.mileageRange.min || 0,
-    filters.mileageRange.max || 300000
-  ]);
-  
-  // Engine volume slider values
-  const [engineVolumeValues, setEngineVolumeValues] = useState<number[]>([
-    filters.engineVolumeRange.min || 0.8,
-    filters.engineVolumeRange.max || 6.0
-  ]);
-  
-  // Apply price filter
-  const handlePriceChange = (values: number[]) => {
-    setPriceValues(values);
-    onFilterChange({
-      priceRange: {
-        min: values[0] > 0 ? values[0] : null,
-        max: values[1] < 50000000 ? values[1] : null
-      }
-    });
-  };
-  
-  // Apply year filter
-  const handleYearChange = (values: number[]) => {
-    setYearValues(values);
-    onFilterChange({
-      yearRange: {
-        min: values[0] > 1980 ? values[0] : null,
-        max: values[1] < new Date().getFullYear() ? values[1] : null
-      }
-    });
-  };
-  
-  // Apply mileage filter
-  const handleMileageChange = (values: number[]) => {
-    setMileageValues(values);
-    onFilterChange({
-      mileageRange: {
-        min: values[0] > 0 ? values[0] : null,
-        max: values[1] < 300000 ? values[1] : null
-      }
-    });
-  };
-  
-  // Apply engine volume filter
-  const handleEngineVolumeChange = (values: number[]) => {
-    setEngineVolumeValues(values);
-    onFilterChange({
-      engineVolumeRange: {
-        min: values[0] > 0.8 ? values[0] : null,
-        max: values[1] < 6.0 ? values[1] : null
-      }
-    });
-  };
-  
-  // Toggle brand selection
-  const handleBrandToggle = (brandId: string) => {
-    const currentBrands = filters.brands || [];
-    const newBrands = currentBrands.includes(brandId)
-      ? currentBrands.filter(id => id !== brandId)
-      : [...currentBrands, brandId];
+  // Получаем подкатегории для текущей категории
+  const subcategories = currentCategory?.subcategories || [];
+
+  // Годы для фильтра
+  const years = Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i);
+
+  // Обработчик изменения фильтров
+  const handleFilterChange = (key: string, value: any) => {
+    const newFilters = { ...selectedFilters, [key]: value };
+    setSelectedFilters(newFilters);
     
-    onFilterChange({ brands: newBrands.length > 0 ? newBrands : null });
-  };
-  
-  // Handle commercial type selection
-  const handleCommercialTypeChange = (typeId: string) => {
-    onFilterChange({ commercialType: typeId === 'all' ? null : typeId });
-  };
-  
-  // Format price for display
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat(language === 'ru' ? 'ru-RU' : 'kk-KZ').format(price);
-  };
-  
-  // Get the appropriate filter sections based on vehicle type
-  const renderVehicleTypeSpecificFilters = () => {
-    if (filters.vehicleType === VehicleType.COMMERCIAL && commercialTypes.length > 0) {
-      return (
-        <AccordionItem value="commercial-type">
-          <AccordionTrigger className="py-2">
-            {language === 'ru' ? 'Тип коммерческого транспорта' : 'Коммерциялық көлік түрі'}
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-2 pt-2">
-              <RadioGroup 
-                value={filters.commercialType || 'all'} 
-                onValueChange={handleCommercialTypeChange}
-              >
-                <div className="flex items-center space-x-2 py-1">
-                  <RadioGroupItem value="all" id="commercial-all" />
-                  <Label htmlFor="commercial-all">
-                    {language === 'ru' ? 'Все типы' : 'Барлық түрлері'}
-                  </Label>
-                </div>
-                
-                {commercialTypes.map(type => (
-                  <div key={type.id} className="flex items-center space-x-2 py-1">
-                    <RadioGroupItem value={type.id} id={`commercial-${type.id}`} />
-                    <Label htmlFor={`commercial-${type.id}`}>
-                      {type.name[language]}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      );
+    if (onFilterChange) {
+      onFilterChange(newFilters);
     }
-    
-    return null;
-  };
-  
-  // Add missing handler functions
-  const handleEngineTypeToggle = (engineType: EngineType) => {
-    const currentTypes = filters.engineTypes || [];
-    const newTypes = currentTypes.includes(engineType)
-      ? currentTypes.filter(type => type !== engineType)
-      : [...currentTypes, engineType];
-    
-    onFilterChange({ engineTypes: newTypes.length > 0 ? newTypes : null });
   };
 
-  const handleTransmissionToggle = (transmission: TransmissionType) => {
-    const currentTransmissions = filters.transmissionTypes || [];
-    const newTransmissions = currentTransmissions.includes(transmission)
-      ? currentTransmissions.filter(t => t !== transmission)
-      : [...currentTransmissions, transmission];
+  // Обработчик сброса всех фильтров
+  const handleReset = () => {
+    setSelectedFilters({
+      brand: '',
+      model: '',
+      yearFrom: '',
+      yearTo: '',
+      priceFrom: '',
+      priceTo: '',
+      bodyType: '',
+      transmission: '',
+      engine: '',
+      drive: '',
+      condition: 'all',
+      withPhoto: true,
+      mileageFrom: '',
+      mileageTo: ''
+    });
     
-    onFilterChange({ transmissionTypes: newTransmissions.length > 0 ? newTransmissions : null });
+    if (onFilterChange) {
+      onFilterChange({});
+    }
   };
 
-  const handleDriveTypeToggle = (driveType: DriveType) => {
-    const currentDriveTypes = filters.driveTypes || [];
-    const newDriveTypes = currentDriveTypes.includes(driveType)
-      ? currentDriveTypes.filter(t => t !== driveType)
-      : [...currentDriveTypes, driveType];
-    
-    onFilterChange({ driveTypes: newDriveTypes.length > 0 ? newDriveTypes : null });
-  };
-
-  const handleBodyTypeToggle = (bodyType: BodyType) => {
-    const currentBodyTypes = filters.bodyTypes || [];
-    const newBodyTypes = currentBodyTypes.includes(bodyType)
-      ? currentBodyTypes.filter(t => t !== bodyType)
-      : [...currentBodyTypes, bodyType];
-    
-    onFilterChange({ bodyTypes: newBodyTypes.length > 0 ? newBodyTypes : null });
-  };
-
-  const handleFeatureToggle = (feature: VehicleFeature) => {
-    const currentFeatures = filters.features || [];
-    const newFeatures = currentFeatures.includes(feature)
-      ? currentFeatures.filter(f => f !== feature)
-      : [...currentFeatures, feature];
-    
-    onFilterChange({ features: newFeatures.length > 0 ? newFeatures : null });
+  // Функция для подсчета количества активных фильтров
+  const countActiveFilters = () => {
+    return Object.entries(selectedFilters).filter(([key, value]) => {
+      if (key === 'withPhoto' && value === true) return true;
+      if (key === 'condition' && value !== 'all') return true;
+      return value !== '' && value !== false;
+    }).length;
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg p-4">
-      <div className="flex flex-col space-y-4">
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">
-              {language === 'ru' ? 'Фильтры' : 'Сүзгілер'}
-              {activeFiltersCount > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {activeFiltersCount}
-                </Badge>
-              )}
-            </h3>
+    <div className="transport-filters">
+      {/* Выбор категории транспорта */}
+      <Tabs 
+        defaultValue={selectedCategory} 
+        onValueChange={setSelectedCategory} 
+        className="mb-6"
+      >
+        <TabsList className="w-full flex overflow-x-auto space-x-1 mb-6">
+          {categories.map((category) => (
+            <TabsTrigger 
+              key={category.id}
+              value={category.id} 
+              className={`flex-1 py-3 px-6 rounded-md ${selectedCategory === category.id ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+            >
+              {t(category.label.ru)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {categories.map((category) => (
+          <TabsContent key={category.id} value={category.id} className="mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {category.subcategories?.map((subcat) => (
+                <Button 
+                  key={subcat.id}
+                  variant="outline" 
+                  className={`justify-start hover:bg-blue-50 ${
+                    selectedFilters.bodyType === subcat.id ? 'bg-blue-100 text-blue-600 border-blue-300' : ''
+                  }`}
+                  onClick={() => handleFilterChange('bodyType', subcat.id)}
+                >
+                  {t(subcat.label.ru)}
+                </Button>
+              ))}
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
+
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          {/* Основные фильтры - состояние, марка, модель */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">{t('condition')}</label>
+              <div className="flex rounded-md overflow-hidden">
+                <Button 
+                  variant={selectedFilters.condition === 'all' ? 'default' : 'outline'}
+                  className="flex-1 rounded-none border-r-0" 
+                  onClick={() => handleFilterChange('condition', 'all')}
+                >
+                  {t('all')}
+                </Button>
+                <Button 
+                  variant={selectedFilters.condition === 'new' ? 'default' : 'outline'}
+                  className="flex-1 rounded-none border-r-0 border-l-0" 
+                  onClick={() => handleFilterChange('condition', 'new')}
+                >
+                  {t('new')}
+                </Button>
+                <Button 
+                  variant={selectedFilters.condition === 'used' ? 'default' : 'outline'}
+                  className="flex-1 rounded-none border-l-0" 
+                  onClick={() => handleFilterChange('condition', 'used')}
+                >
+                  {t('used')}
+                </Button>
+              </div>
+            </div>
             
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={onReset}>
-                {language === 'ru' ? 'Сбросить' : 'Тазалау'}
-              </Button>
-              <Button size="sm" onClick={onSearch}>
-                <Search className="h-4 w-4 mr-1" />
-                {language === 'ru' ? 'Показать' : 'Көрсету'}
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">{t('brand')}</label>
+              <Select 
+                value={selectedFilters.brand} 
+                onValueChange={(value) => handleFilterChange('brand', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('all.brands')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{t('all.brands')}</SelectItem>
+                  {availableFilters?.brands?.map((brand) => (
+                    <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">{t('model')}</label>
+              <Select 
+                value={selectedFilters.model} 
+                onValueChange={(value) => handleFilterChange('model', value)}
+                disabled={!selectedFilters.brand}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('all.models')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{t('all.models')}</SelectItem>
+                  {selectedFilters.brand && availableFilters?.models?.[selectedFilters.brand]?.map((model) => (
+                    <SelectItem key={model} value={model}>{model}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Дополнительные фильтры в зависимости от категории */}
+          {selectedCategory === 'passenger' && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">{t('body.type')}</label>
+                <Select 
+                  value={selectedFilters.bodyType} 
+                  onValueChange={(value) => handleFilterChange('bodyType', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('all.types')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t('all.types')}</SelectItem>
+                    {filterConfig.bodyTypes?.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>{t(type.label.ru)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">{t('transmission')}</label>
+                <Select 
+                  value={selectedFilters.transmission} 
+                  onValueChange={(value) => handleFilterChange('transmission', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('all')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t('all')}</SelectItem>
+                    {filterConfig.transmissions?.map((trans) => (
+                      <SelectItem key={trans.id} value={trans.id}>{t(trans.label.ru)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">{t('engine')}</label>
+                <Select 
+                  value={selectedFilters.engine} 
+                  onValueChange={(value) => handleFilterChange('engine', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('all')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t('all')}</SelectItem>
+                    {filterConfig.engineTypes?.map((engine) => (
+                      <SelectItem key={engine.id} value={engine.id}>{t(engine.label.ru)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">{t('drive')}</label>
+                <Select 
+                  value={selectedFilters.drive} 
+                  onValueChange={(value) => handleFilterChange('drive', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('all')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t('all')}</SelectItem>
+                    {filterConfig.driveTypes?.map((drive) => (
+                      <SelectItem key={drive.id} value={drive.id}>{t(drive.label.ru)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          {selectedCategory === 'commercial' && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">{t('weight')}</label>
+                <div className="flex space-x-2">
+                  {filterConfig.weightCategories?.map((weight) => (
+                    <Button 
+                      key={weight.id}
+                      variant={selectedFilters.bodyType === weight.id ? 'default' : 'outline'} 
+                      className="flex-1"
+                      onClick={() => handleFilterChange('bodyType', weight.id)}
+                    >
+                      {t(weight.label.ru)}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Общие фильтры для всех категорий */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">{t('price')}</label>
+              <div className="flex space-x-2">
+                <Input 
+                  type="text" 
+                  placeholder={t('from')} 
+                  value={selectedFilters.priceFrom}
+                  onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
+                />
+                <Input 
+                  type="text" 
+                  placeholder={t('to')} 
+                  value={selectedFilters.priceTo}
+                  onChange={(e) => handleFilterChange('priceTo', e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 mb-1 block">{t('year')}</label>
+              <div className="flex space-x-2">
+                <Select 
+                  value={selectedFilters.yearFrom} 
+                  onValueChange={(value) => handleFilterChange('yearFrom', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('from')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t('from')}</SelectItem>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select 
+                  value={selectedFilters.yearTo} 
+                  onValueChange={(value) => handleFilterChange('yearTo', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('to')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">{t('to')}</SelectItem>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {selectedFilters.condition === 'used' && (
+            <div className="mb-6">
+              <label className="text-sm text-gray-500 mb-1 block">{t('mileage')}</label>
+              <div className="flex space-x-2">
+                <Input 
+                  type="text" 
+                  placeholder={t('from')} 
+                  value={selectedFilters.mileageFrom}
+                  onChange={(e) => handleFilterChange('mileageFrom', e.target.value)}
+                />
+                <Input 
+                  type="text" 
+                  placeholder={t('to')} 
+                  value={selectedFilters.mileageTo}
+                  onChange={(e) => handleFilterChange('mileageTo', e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <Checkbox 
+                id="withPhoto" 
+                checked={selectedFilters.withPhoto}
+                onCheckedChange={(checked) => 
+                  handleFilterChange('withPhoto', checked === true)
+                }
+              />
+              <label htmlFor="withPhoto" className="ml-2 text-sm">{t('with.photo')}</label>
+            </div>
+            
+            <div className="flex space-x-2">
+              {countActiveFilters() > 0 && (
+                <Button variant="outline" onClick={handleReset}>
+                  {t('reset.filters')}
+                </Button>
+              )}
+              
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                {t('show.results')}
               </Button>
             </div>
           </div>
 
-          <Accordion type="multiple" defaultValue={['price', 'brand', 'year']} className="w-full">
-            {/* Commercial Type filter (only shown for VehicleType.COMMERCIAL) */}
-            {renderVehicleTypeSpecificFilters()}
-            
-            {/* Price Range */}
-            <AccordionItem value="price">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Цена' : 'Баға'}
+          {/* Дополнительные фильтры (раскрывающийся аккордеон) */}
+          <Accordion type="single" collapsible className="mt-6">
+            <AccordionItem value="additional-filters">
+              <AccordionTrigger className="text-blue-600 hover:text-blue-800">
+                {t('additional.filters')}
               </AccordionTrigger>
               <AccordionContent>
-                <div className="space-y-4 pt-2">
-                  <Slider
-                    value={priceValues}
-                    min={0}
-                    max={50000000}
-                    step={100000}
-                    onValueChange={handlePriceChange}
-                  />
-                  <div className="flex justify-between">
-                    <span className="text-sm">
-                      {language === 'ru' ? 'От' : 'Бастап'}: {formatPrice(priceValues[0])} ₸
-                    </span>
-                    <span className="text-sm">
-                      {language === 'ru' ? 'До' : 'Дейін'}: {formatPrice(priceValues[1])} ₸
-                    </span>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Brand */}
-            <AccordionItem value="brand">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Марка' : 'Маркасы'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2 pt-2">
-                  <div className="max-h-80 overflow-y-auto pr-2">
-                    <div className="grid grid-cols-2">
-                      {brands.map(brand => (
-                        <div key={brand.id} className="flex items-center space-x-2 py-1">
-                          <Checkbox 
-                            id={`brand-${brand.id}`} 
-                            checked={(filters.brands || []).includes(brand.id)}
-                            onCheckedChange={() => handleBrandToggle(brand.id)}
-                          />
-                          <Label htmlFor={`brand-${brand.id}`} className="text-sm">
-                            {brand.name[language]}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Year Range */}
-            <AccordionItem value="year">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Год выпуска' : 'Шығарылған жылы'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4 pt-2">
-                  <Slider
-                    value={yearValues}
-                    min={1980}
-                    max={new Date().getFullYear()}
-                    step={1}
-                    onValueChange={handleYearChange}
-                  />
-                  <div className="flex justify-between">
-                    <span className="text-sm">
-                      {language === 'ru' ? 'От' : 'Бастап'}: {yearValues[0]}
-                    </span>
-                    <span className="text-sm">
-                      {language === 'ru' ? 'До' : 'Дейін'}: {yearValues[1]}
-                    </span>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Mileage */}
-            <AccordionItem value="mileage">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Пробег' : 'Жүріп өткен жолы'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4 pt-2">
-                  <Slider
-                    value={mileageValues}
-                    min={0}
-                    max={300000}
-                    step={5000}
-                    onValueChange={handleMileageChange}
-                  />
-                  <div className="flex justify-between">
-                    <span className="text-sm">
-                      {language === 'ru' ? 'От' : 'Бастап'}: {mileageValues[0].toLocaleString()} км
-                    </span>
-                    <span className="text-sm">
-                      {language === 'ru' ? 'До' : 'Дейін'}: {mileageValues[1].toLocaleString()} км
-                    </span>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Engine Type */}
-            <AccordionItem value="engine">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Двигатель' : 'Қозғалтқыш'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2 pt-2">
-                  <div className="grid grid-cols-2">
-                    {Object.values(EngineType).map(engineType => (
-                      <div key={engineType} className="flex items-center space-x-2 py-1">
-                        <Checkbox 
-                          id={`engine-${engineType}`} 
-                          checked={(filters.engineTypes || []).includes(engineType)}
-                          onCheckedChange={() => handleEngineTypeToggle(engineType)}
-                        />
-                        <Label htmlFor={`engine-${engineType}`} className="text-sm">
-                          {engineType === EngineType.PETROL && (language === 'ru' ? 'Бензин' : 'Бензин')}
-                          {engineType === EngineType.DIESEL && (language === 'ru' ? 'Дизель' : 'Дизель')}
-                          {engineType === EngineType.GAS && (language === 'ru' ? 'Газ' : 'Газ')}
-                          {engineType === EngineType.HYBRID && (language === 'ru' ? 'Гибрид' : 'Гибрид')}
-                          {engineType === EngineType.ELECTRIC && (language === 'ru' ? 'Электро' : 'Электр')}
-                          {engineType === EngineType.PETROL_GAS && (language === 'ru' ? 'Бензин/Газ' : 'Бензин/Газ')}
-                        </Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+                  {selectedCategory === 'passenger' && (
+                    <>
+                      <div>
+                        <label className="text-sm text-gray-500 mb-1 block">{t('color')}</label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('all')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">{t('all')}</SelectItem>
+                            <SelectItem value="black">{t('black')}</SelectItem>
+                            <SelectItem value="white">{t('white')}</SelectItem>
+                            <SelectItem value="silver">{t('silver')}</SelectItem>
+                            <SelectItem value="red">{t('red')}</SelectItem>
+                            <SelectItem value="blue">{t('blue')}</SelectItem>
+                            <SelectItem value="green">{t('green')}</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                    ))}
-                  </div>
+                      
+                      <div>
+                        <label className="text-sm text-gray-500 mb-1 block">{t('number.of.seats')}</label>
+                        <div className="flex space-x-2">
+                          <Input type="text" placeholder={t('from')} />
+                          <Input type="text" placeholder={t('to')} />
+                        </div>
+                      </div>
+                    </>
+                  )}
                   
-                  <Separator className="my-3" />
-                  
-                  <div className="space-y-4">
-                    <h4 className="text-sm font-medium">
-                      {language === 'ru' ? 'Объем двигателя (л)' : 'Қозғалтқыш көлемі (л)'}
-                    </h4>
-                    <Slider
-                      value={engineVolumeValues}
-                      min={0.8}
-                      max={6.0}
-                      step={0.1}
-                      onValueChange={handleEngineVolumeChange}
-                    />
-                    <div className="flex justify-between">
-                      <span className="text-sm">
-                        {language === 'ru' ? 'От' : 'Бастап'}: {engineVolumeValues[0].toFixed(1)} л
-                      </span>
-                      <span className="text-sm">
-                        {language === 'ru' ? 'До' : 'Дейін'}: {engineVolumeValues[1].toFixed(1)} ��
-                      </span>
-                    </div>
+                  <div>
+                    <label className="text-sm text-gray-500 mb-1 block">{t('region')}</label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('all.regions')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">{t('all.regions')}</SelectItem>
+                        <SelectItem value="almaty">{t('almaty')}</SelectItem>
+                        <SelectItem value="astana">{t('astana')}</SelectItem>
+                        <SelectItem value="shymkent">{t('shymkent')}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Transmission */}
-            <AccordionItem value="transmission">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Коробка передач' : 'Беріліс қорабы'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2 pt-2">
-                  {Object.values(TransmissionType).map(transmission => (
-                    <div key={transmission} className="flex items-center space-x-2 py-1">
-                      <Checkbox 
-                        id={`transmission-${transmission}`} 
-                        checked={(filters.transmissionTypes || []).includes(transmission)}
-                        onCheckedChange={() => handleTransmissionToggle(transmission)}
-                      />
-                      <Label htmlFor={`transmission-${transmission}`} className="text-sm">
-                        {transmission === TransmissionType.MANUAL && (language === 'ru' ? 'Механика' : 'Механика')}
-                        {transmission === TransmissionType.AUTOMATIC && (language === 'ru' ? 'Автомат' : 'Автомат')}
-                        {transmission === TransmissionType.ROBOT && (language === 'ru' ? 'Робот' : 'Робот')}
-                        {transmission === TransmissionType.VARIATOR && (language === 'ru' ? 'Вариатор' : 'Вариатор')}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Drive Type */}
-            <AccordionItem value="drive">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Привод' : 'Жетек'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2 pt-2">
-                  {Object.values(DriveType).map(driveType => (
-                    <div key={driveType} className="flex items-center space-x-2 py-1">
-                      <Checkbox 
-                        id={`drive-${driveType}`} 
-                        checked={(filters.driveTypes || []).includes(driveType)}
-                        onCheckedChange={() => handleDriveTypeToggle(driveType)}
-                      />
-                      <Label htmlFor={`drive-${driveType}`} className="text-sm">
-                        {driveType === DriveType.FRONT && (language === 'ru' ? 'Передний' : 'Алдыңғы')}
-                        {driveType === DriveType.REAR && (language === 'ru' ? 'Задний' : 'Артқы')}
-                        {driveType === DriveType.ALL_WHEEL && (language === 'ru' ? 'Полный' : 'Толық')}
-                        {driveType === DriveType.FULL && (language === 'ru' ? '4WD' : '4WD')}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Body Type */}
-            <AccordionItem value="body">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Тип кузова' : 'Шанақ түрі'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2 pt-2 grid grid-cols-2">
-                  {Object.values(BodyType).map(bodyType => (
-                    <div key={bodyType} className="flex items-center space-x-2 py-1">
-                      <Checkbox 
-                        id={`body-${bodyType}`} 
-                        checked={(filters.bodyTypes || []).includes(bodyType)}
-                        onCheckedChange={() => handleBodyTypeToggle(bodyType)}
-                      />
-                      <Label htmlFor={`body-${bodyType}`} className="text-sm">
-                        {bodyType === BodyType.SEDAN && (language === 'ru' ? 'Седан' : 'Седан')}
-                        {bodyType === BodyType.HATCHBACK && (language === 'ru' ? 'Хэтчбек' : 'Хэтчбек')}
-                        {bodyType === BodyType.SUV && (language === 'ru' ? 'Внедорожник' : 'Жол талғамайтын')}
-                        {bodyType === BodyType.PICKUP && (language === 'ru' ? 'Пикап' : 'Пикап')}
-                        {bodyType === BodyType.MINIVAN && (language === 'ru' ? 'Минивэн' : 'Минивэн')}
-                        {bodyType === BodyType.VAN && (language === 'ru' ? 'Фургон' : 'Фургон')}
-                        {bodyType === BodyType.COUPE && (language === 'ru' ? 'Купе' : 'Купе')}
-                        {bodyType === BodyType.CABRIOLET && (language === 'ru' ? 'Кабриолет' : 'Кабриолет')}
-                        {bodyType === BodyType.WAGON && (language === 'ru' ? 'Универсал' : 'Универсал')}
-                        {bodyType === BodyType.LIMOUSINE && (language === 'ru' ? 'Лимузин' : 'Лимузин')}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Steering Wheel */}
-            <AccordionItem value="steering">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Руль' : 'Руль'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2 pt-2">
-                  <RadioGroup 
-                    value={filters.steeringWheel || 'any'} 
-                    onValueChange={(value) => onFilterChange({ steeringWheel: value === 'any' ? null : value as SteeringWheelType })}
-                  >
-                    <div className="flex items-center space-x-2 py-1">
-                      <RadioGroupItem value={SteeringWheelType.LEFT} id="steering-left" />
-                      <Label htmlFor="steering-left">
-                        {language === 'ru' ? 'Левый руль' : 'Сол жақ руль'}
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 py-1">
-                      <RadioGroupItem value={SteeringWheelType.RIGHT} id="steering-right" />
-                      <Label htmlFor="steering-right">
-                        {language === 'ru' ? 'Правый руль' : 'Оң жақ руль'}
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 py-1">
-                      <RadioGroupItem value="any" id="steering-any" />
-                      <Label htmlFor="steering-any">
-                        {language === 'ru' ? 'Любой' : 'Кез келген'}
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Additional Options */}
-            <AccordionItem value="additional">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Дополнительно' : 'Қосымша'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="customs-cleared">
-                      {language === 'ru' ? 'Растаможен' : 'Кедендік тазартылған'}
-                    </Label>
-                    <Switch 
-                      id="customs-cleared" 
-                      checked={filters.customsCleared === true}
-                      onCheckedChange={(checked) => onFilterChange({ customsCleared: checked ? true : null })}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="in-stock">
-                      {language === 'ru' ? 'В наличии' : 'Қолда бар'}
-                    </Label>
-                    <Switch 
-                      id="in-stock" 
-                      checked={filters.inStock === true}
-                      onCheckedChange={(checked) => onFilterChange({ inStock: checked ? true : null })}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="exchange-possible">
-                      {language === 'ru' ? 'Возможен обмен' : 'Айырбас мүмкін'}
-                    </Label>
-                    <Switch 
-                      id="exchange-possible" 
-                      checked={filters.exchangePossible === true}
-                      onCheckedChange={(checked) => onFilterChange({ exchangePossible: checked ? true : null })}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="without-accidents">
-                      {language === 'ru' ? 'Без ДТП' : 'Апатсыз'}
-                    </Label>
-                    <Switch 
-                      id="without-accidents" 
-                      checked={filters.withoutAccidents === true}
-                      onCheckedChange={(checked) => onFilterChange({ withoutAccidents: checked ? true : null })}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="with-service-history">
-                      {language === 'ru' ? 'С сервисной историей' : 'Қызмет тарихымен'}
-                    </Label>
-                    <Switch 
-                      id="with-service-history" 
-                      checked={filters.withServiceHistory === true}
-                      onCheckedChange={(checked) => onFilterChange({ withServiceHistory: checked ? true : null })}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="has-photo">
-                      {language === 'ru' ? 'С фото' : 'Фотосымен'}
-                    </Label>
-                    <Switch 
-                      id="has-photo" 
-                      checked={filters.hasPhoto === true}
-                      onCheckedChange={(checked) => onFilterChange({ hasPhoto: checked ? true : null })}
-                    />
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Features */}
-            <AccordionItem value="features">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Комплектация' : 'Жинақтама'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2 pt-2 grid grid-cols-2">
-                  {Object.values(VehicleFeature).map(feature => (
-                    <div key={feature} className="flex items-center space-x-2 py-1">
-                      <Checkbox 
-                        id={`feature-${feature}`} 
-                        checked={(filters.features || []).includes(feature)}
-                        onCheckedChange={() => handleFeatureToggle(feature)}
-                      />
-                      <Label htmlFor={`feature-${feature}`} className="text-sm">
-                        {feature === VehicleFeature.ABS && 'ABS'}
-                        {feature === VehicleFeature.ESP && 'ESP'}
-                        {feature === VehicleFeature.AIRBAGS && (language === 'ru' ? 'Подушки безопасности' : 'Қауіпсіздік жастықтары')}
-                        {feature === VehicleFeature.CLIMATE_CONTROL && (language === 'ru' ? 'Климат-контроль' : 'Климат-бақылау')}
-                        {feature === VehicleFeature.HEATED_SEATS && (language === 'ru' ? 'Подогрев сидений' : 'Орындықтар жылыту')}
-                        {feature === VehicleFeature.CRUISE_CONTROL && (language === 'ru' ? 'Круиз-контроль' : 'Круиз-бақылау')}
-                        {feature === VehicleFeature.PARKING_SENSORS && (language === 'ru' ? 'Парктроники' : 'Парктрониктер')}
-                        {feature === VehicleFeature.REAR_VIEW_CAMERA && (language === 'ru' ? 'Камера заднего вида' : 'Артқы көрініс камерасы')}
-                        {feature === VehicleFeature.NAVIGATION && (language === 'ru' ? 'Навигация' : 'Навигация')}
-                        {feature === VehicleFeature.LEATHER_INTERIOR && (language === 'ru' ? 'Кожаный салон' : 'Былғары салон')}
-                        {feature === VehicleFeature.SUNROOF && (language === 'ru' ? 'Люк' : 'Төбедегі люк')}
-                        {feature === VehicleFeature.ALLOY_WHEELS && (language === 'ru' ? 'Легкосплавные диски' : 'Жеңіл қорытпалы дискілер')}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            {/* Sort By */}
-            <AccordionItem value="sort">
-              <AccordionTrigger className="py-2">
-                {language === 'ru' ? 'Сортировка' : 'Сұрыптау'}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2 pt-2">
-                  <Select
-                    value={filters.sortBy || ''}
-                    onValueChange={(value) => onFilterChange({ sortBy: value ? value as SortOption : null })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={language === 'ru' ? 'Выберите сортировку' : 'Сұрыптауды таңдаңыз'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="default">
-                        {language === 'ru' ? 'По умолчанию' : 'Әдепкі бойы��ша'}
-                      </SelectItem>
-                      <SelectItem value={SortOption.PRICE_ASC}>
-                        {language === 'ru' ? 'Сначала дешевле' : 'Алдымен арзан'}
-                      </SelectItem>
-                      <SelectItem value={SortOption.PRICE_DESC}>
-                        {language === 'ru' ? 'Сначала дороже' : 'Алдымен қымбат'}
-                      </SelectItem>
-                      <SelectItem value={SortOption.DATE_DESC}>
-                        {language === 'ru' ? 'Сначала новые' : 'Алдымен жаңа'}
-                      </SelectItem>
-                      <SelectItem value={SortOption.YEAR_DESC}>
-                        {language === 'ru' ? 'Сначала новые авто' : 'Алдымен жаңа көліктер'}
-                      </SelectItem>
-                      <SelectItem value={SortOption.YEAR_ASC}>
-                        {language === 'ru' ? 'Сначала старые авто' : 'Алдымен ескі көліктер'}
-                      </SelectItem>
-                      <SelectItem value={SortOption.MILEAGE_ASC}>
-                        {language === 'ru' ? 'По возрастанию пробега' : 'Жүрілген жол бойынша өсу'}
-                      </SelectItem>
-                      <SelectItem value={SortOption.MILEAGE_DESC}>
-                        {language === 'ru' ? 'По убыванию пробега' : 'Жүрілген жол бойынша кему'}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
