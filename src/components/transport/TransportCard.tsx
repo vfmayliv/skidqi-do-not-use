@@ -1,261 +1,223 @@
-
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useAppContext } from '@/contexts/AppContext';
-import { Listing, VehicleType, TransmissionType, EngineType, DriveType } from '@/types/listingType';
+import { Button } from '@/components/ui/button';
+import { Heart, MapPin, Phone } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from '@/hooks/use-translation';
 
-type TransportCardProps = {
-  listing: Listing;
-  variant?: 'default' | 'horizontal';
+export interface TransportListing {
+  id: string;
+  title: string;
+  description?: string;
+  price: number;
+  currency: string;
+  location: string;
+  year: number;
+  mileage?: number;
+  images: string[];
+  category: string;
+  subcategory?: string;
+  brand: string;
+  model: string;
+  bodyType?: string;
+  engine?: {
+    type: string;
+    power?: number;
+    volume?: number;
+  };
+  transmission?: string;
+  driveType?: string;
+  condition: 'new' | 'used';
+  createdAt: Date;
+  seller: {
+    name: string;
+    rating?: number;
+    verified?: boolean;
+    type: 'dealer' | 'private';
+  };
+  features?: string[];
+}
+
+export interface TransportCardProps {
+  listing: TransportListing;
+  favorited?: boolean;
   onFavoriteToggle?: (id: string) => void;
-  isFavorite?: boolean;
-  viewMode?: 'grid' | 'list';
-};
+  onClick?: (listing: TransportListing) => void;
+  showContactButton?: boolean;
+}
 
-const TransportCard = ({ 
-  listing, 
-  variant = 'default', 
-  onFavoriteToggle, 
-  isFavorite = false,
-  viewMode = 'grid'
-}: TransportCardProps) => {
-  const { language } = useAppContext();
+const TransportCard: React.FC<TransportCardProps> = ({
+  listing,
+  favorited = false,
+  onFavoriteToggle,
+  onClick,
+  showContactButton = true,
+}) => {
+  const { t } = useTranslation();
   
-  // Helper to format discount price
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat(language === 'ru' ? 'ru-RU' : 'kk-KZ').format(price);
-  };
+  const {
+    id,
+    title,
+    price,
+    currency,
+    location,
+    year,
+    mileage,
+    brand,
+    model,
+    images,
+    bodyType,
+    engine,
+    transmission,
+    condition,
+    seller
+  } = listing;
+
+  // Форматируем цену для отображения
+  const formattedPrice = new Intl.NumberFormat('ru-RU').format(price);
   
-  // Get engine type label
-  const getEngineTypeLabel = () => {
-    if (!listing.engineType) return '';
-    
-    const labels = {
-      [EngineType.PETROL]: { ru: 'Бензин', kz: 'Бензин' },
-      [EngineType.DIESEL]: { ru: 'Дизель', kz: 'Дизель' },
-      [EngineType.GAS]: { ru: 'Газ', kz: 'Газ' },
-      [EngineType.HYBRID]: { ru: 'Гибрид', kz: 'Гибрид' },
-      [EngineType.ELECTRIC]: { ru: 'Электро', kz: 'Электр' },
-      [EngineType.PETROL_GAS]: { ru: 'Бензин/Газ', kz: 'Бензин/Газ' },
-    };
-    
-    return labels[listing.engineType][language];
-  };
-  
-  // Get transmission label
-  const getTransmissionLabel = () => {
-    if (!listing.transmission) return '';
-    
-    const labels = {
-      [TransmissionType.MANUAL]: { ru: 'Механика', kz: 'Механика' },
-      [TransmissionType.AUTOMATIC]: { ru: 'Автомат', kz: 'Автомат' },
-      [TransmissionType.ROBOT]: { ru: 'Робот', kz: 'Робот' },
-      [TransmissionType.VARIATOR]: { ru: 'Вариатор', kz: 'Вариатор' },
-    };
-    
-    return labels[listing.transmission][language];
-  };
-  
-  // Get drive type label
-  const getDriveTypeLabel = () => {
-    if (!listing.driveType) return '';
-    
-    const labels = {
-      [DriveType.FRONT]: { ru: 'Передний', kz: 'Алдыңғы' },
-      [DriveType.REAR]: { ru: 'Задний', kz: 'Артқы' },
-      [DriveType.ALL_WHEEL]: { ru: 'Полный', kz: 'Толық' },
-      [DriveType.FULL]: { ru: '4WD', kz: '4WD' },
-    };
-    
-    return labels[listing.driveType][language];
-  };
-  
-  // Get vehicle details string
-  const getVehicleDetails = () => {
-    const details = [];
-    
-    if (listing.engineVolume) {
-      details.push(`${listing.engineVolume.toFixed(1)} ${language === 'ru' ? 'л' : 'л'}`);
-    }
-    
-    if (listing.engineType) {
-      details.push(getEngineTypeLabel());
-    }
-    
-    if (listing.transmission) {
-      details.push(getTransmissionLabel());
-    }
-    
-    if (listing.driveType) {
-      details.push(getDriveTypeLabel());
-    }
-    
-    return details.join(', ');
-  };
-  
-  // Get time since listing posted
-  const getTimeSince = () => {
-    const createdAt = new Date(listing.createdAt);
-    const now = new Date();
-    const diffInDays = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diffInDays === 0) {
-      const diffInHours = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60));
-      if (diffInHours === 0) {
-        return language === 'ru' ? 'Только что' : 'Жаңа ғана';
-      }
-      return `${diffInHours} ${language === 'ru' ? 'ч назад' : 'сағат бұрын'}`;
-    } else if (diffInDays === 1) {
-      return language === 'ru' ? 'Вчера' : 'Кеше';
-    } else if (diffInDays < 7) {
-      return `${diffInDays} ${language === 'ru' ? 'дн назад' : 'күн бұрын'}`;
-    } else {
-      return createdAt.toLocaleDateString(language === 'ru' ? 'ru-RU' : 'kk-KZ');
+  // Форматируем пробег для отображения
+  const formattedMileage = mileage ? new Intl.NumberFormat('ru-RU').format(mileage) : null;
+
+  // Обработчики событий
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onFavoriteToggle) {
+      onFavoriteToggle(id);
     }
   };
 
-  // Ensure title is a string
-  const title = typeof listing.title === 'string'
-    ? listing.title
-    : (listing.title && typeof listing.title === 'object' && listing.title[language])
-      ? listing.title[language]
-      : '';
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick(listing);
+    }
+  };
 
-  // Ensure city is a string
-  const city = typeof listing.city === 'string'
-    ? listing.city
-    : (listing.city && typeof listing.city === 'object' && listing.city[language])
-      ? listing.city[language]
-      : '';
-  
-  if (variant === 'horizontal') {
-    return (
-      <Card className="overflow-hidden h-[130px]">
-        <div className="flex h-full">
-          <div className="w-[130px] h-full relative">
-            <img
-              src={listing.imageUrl || '/placeholder.svg'}
-              alt={title}
+  return (
+    <Link to={`/transport/${listing.category}/${id}`}>
+      <Card 
+        className="transport-card overflow-hidden hover:shadow-md transition-shadow duration-300 mb-4"
+        onClick={handleCardClick}
+      >
+        <div className="flex flex-col md:flex-row">
+          {/* Изображение транспортного средства */}
+          <div className="relative md:w-1/3 h-60 md:h-auto">
+            <img 
+              src={images[0] || '/images/no-image.png'} 
+              alt={`${brand} ${model}`} 
               className="w-full h-full object-cover"
             />
-            {listing.discount > 0 && (
-              <Badge className="absolute top-2 left-2 bg-red-500">
-                -{listing.discount}%
+            
+            {/* Индикатор числа фотографий */}
+            {images.length > 1 && (
+              <span className="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                {images.length} {t('photos')}
+              </span>
+            )}
+            
+            {/* Кнопка добавления в избранное */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`absolute top-2 right-2 rounded-full ${favorited ? 'text-red-500' : 'text-white'} bg-black bg-opacity-40 hover:bg-opacity-60`}
+              onClick={handleFavoriteClick}
+            >
+              <Heart className={`h-5 w-5 ${favorited ? 'fill-current' : ''}`} />
+            </Button>
+            
+            {/* Если объявление от проверенного продавца или дилера */}
+            {seller.verified && (
+              <Badge className="absolute top-2 left-2 bg-blue-600">
+                {t('verified.seller')}
               </Badge>
             )}
-            {listing.isFeatured && (
-              <Badge variant="outline" className="absolute bottom-2 left-2 bg-blue-500 text-white border-none">
-                {language === 'ru' ? 'Премиум' : 'Премиум'}
+            
+            {seller.type === 'dealer' && (
+              <Badge className="absolute top-2 left-2 bg-green-600">
+                {t('dealer')}
               </Badge>
             )}
           </div>
           
-          <CardContent className="flex flex-col justify-between p-3 flex-1 overflow-hidden">
-            <div>
-              <div className="flex justify-between items-start">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-sm truncate">
-                    {listing.brand} {listing.model} {listing.year}
-                  </h3>
-                  <p className="text-xs text-muted-foreground truncate mb-1">
-                    {getVehicleDetails()}
-                  </p>
-                </div>
-                
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onFavoriteToggle?.(listing.id);
-                  }}
-                  className="ml-2 text-muted-foreground hover:text-primary"
-                >
-                  <Heart className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                </button>
-              </div>
-              
-              <div className="flex items-center mt-1 mb-1">
-                <p className="text-muted-foreground text-xs">
-                  {listing.mileage?.toLocaleString()} {language === 'ru' ? 'км' : 'км'}
+          {/* Информация о транспортном средстве */}
+          <CardContent className="md:w-2/3 p-4 flex flex-col">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-bold mb-1 line-clamp-2">
+                  {title || `${brand} ${model}`}
+                </h2>
+                <p className="text-2xl font-bold text-gray-900 mb-4">
+                  {formattedPrice} {currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '₸'}
                 </p>
               </div>
+              
+              {condition === 'new' && (
+                <Badge className="bg-green-600 text-white">
+                  {t('new')}
+                </Badge>
+              )}
             </div>
             
-            <div className="flex items-center justify-between mt-auto pt-1">
-              <p className="font-bold">
-                {formatPrice(listing.discountPrice)} ₸
-              </p>
+            {/* Основные характеристики */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-3 text-sm text-gray-600">
+              <div className="flex items-center">
+                <span className="mr-2 w-4">📅</span> {year}
+              </div>
               
-              <div className="text-xs text-muted-foreground">
-                {city}
+              {mileage !== undefined && (
+                <div className="flex items-center">
+                  <span className="mr-2 w-4">🛣️</span>
+                  {formattedMileage} {t('km')}
+                </div>
+              )}
+              
+              {bodyType && (
+                <div className="flex items-center">
+                  <span className="mr-2 w-4">🚘</span>
+                  {bodyType}
+                </div>
+              )}
+              
+              {engine?.type && (
+                <div className="flex items-center">
+                  <span className="mr-2 w-4">⚙️</span>
+                  {engine.type} {engine.volume && `${engine.volume} ${t('l')}`} 
+                  {engine.power && `(${engine.power} ${t('hp')})`}
+                </div>
+              )}
+              
+              {transmission && (
+                <div className="flex items-center">
+                  <span className="mr-2 w-4">🔄</span>
+                  {transmission}
+                </div>
+              )}
+            </div>
+            
+            {/* Местоположение и время публикации */}
+            <div className="mt-auto">
+              <div className="flex items-center text-sm text-gray-500 mb-2">
+                <MapPin className="h-4 w-4 mr-1" />
+                {location}
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-400">
+                  {new Date(listing.createdAt).toLocaleString()}
+                </span>
+                
+                {showContactButton && (
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                    <Phone className="h-4 w-4 mr-2" />
+                    {t('contact.seller')}
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
         </div>
-      </Card>
-    );
-  }
-  
-  return (
-    <Link to={`/listing/${listing.id}`}>
-      <Card className="overflow-hidden h-full transition-shadow hover:shadow-md">
-        <div className="h-48 relative">
-          <img
-            src={listing.imageUrl || '/placeholder.svg'}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
-          {listing.discount > 0 && (
-            <Badge className="absolute top-2 left-2 bg-red-500">
-              -{listing.discount}%
-            </Badge>
-          )}
-          {listing.isFeatured && (
-            <Badge variant="outline" className="absolute top-2 right-2 bg-blue-500 text-white border-none">
-              {language === 'ru' ? 'Премиум' : 'Премиум'}
-            </Badge>
-          )}
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              onFavoriteToggle?.(listing.id);
-            }}
-            className="absolute bottom-2 right-2 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center text-muted-foreground hover:text-primary"
-          >
-            <Heart className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-          </button>
-        </div>
-        
-        <CardContent className="p-3">
-          <div className="flex justify-between items-start">
-            <h3 className="font-medium truncate">
-              {listing.brand} {listing.model} {listing.year}
-            </h3>
-            <p className="font-bold text-right ml-2">
-              {formatPrice(listing.discountPrice)} ₸
-            </p>
-          </div>
-          
-          <p className="text-sm text-muted-foreground mt-1">
-            {getVehicleDetails()}
-          </p>
-          
-          <div className="flex items-center mt-2 gap-2">
-            <p className="text-xs text-muted-foreground">
-              {listing.mileage?.toLocaleString()} {language === 'ru' ? 'км' : 'км'}
-            </p>
-            <span className="text-xs text-muted-foreground">•</span>
-            <p className="text-xs text-muted-foreground">
-              {city}
-            </p>
-          </div>
-          
-          <div className="mt-2 text-xs text-muted-foreground">
-            {getTimeSince()}
-          </div>
-        </CardContent>
       </Card>
     </Link>
   );
