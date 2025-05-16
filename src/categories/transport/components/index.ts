@@ -1,2 +1,1 @@
-
-// Export all components from the transport category
+export { default as TransportCategoryPage } from './TransportCategoryPage';
