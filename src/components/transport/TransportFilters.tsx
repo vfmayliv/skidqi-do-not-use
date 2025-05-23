@@ -8,10 +8,17 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import { transportConfig } from '@/categories/transport/config';
+import { TransportFilters as TransportFiltersType } from '@/types/listingType';
+import { BrandData } from '@/data/transportData';
 
 export interface TransportFiltersProps {
+  filters?: TransportFiltersType;
+  onFilterChange?: (filters: Partial<TransportFiltersType>) => void;
+  onReset?: () => void;
+  onSearch?: () => void;
+  brands?: BrandData[];
+  activeFiltersCount?: number;
   vehicleType?: string;
-  onFilterChange?: (filters: any) => void;
   availableFilters?: {
     brands?: string[];
     models?: Record<string, string[]>;
@@ -21,8 +28,13 @@ export interface TransportFiltersProps {
 }
 
 const TransportFilters: React.FC<TransportFiltersProps> = ({
-  vehicleType = 'passenger',
+  filters,
   onFilterChange,
+  onReset,
+  onSearch,
+  brands = [],
+  activeFiltersCount = 0,
+  vehicleType = 'passenger',
   availableFilters
 }) => {
   const { t } = useTranslation();

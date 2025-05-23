@@ -1,15 +1,16 @@
-
 import { ReactElement } from 'react';
 
 export interface CategoryConfig {
   id: string;
-  name: { ru: string; kz: string };
-  filtersComponent: React.FC<any>;
-  cardComponent: React.FC<any>;
-  styles: string; // Путь к CSS-файлу категории
-  filterConfig: {
-    [key: string]: any; // Специфичные настройки фильтров для категории
+  name: {
+    ru: string;
+    kz: string;
   };
+  filtersComponent: React.ComponentType<any>;
+  cardComponent: React.ComponentType<any>;
+  pageComponent?: React.ComponentType<any>;
+  styles?: string;
+  filterConfig?: any;
 }
 
 export interface CategoryComponentProps {

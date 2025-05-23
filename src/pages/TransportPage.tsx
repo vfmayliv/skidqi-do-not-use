@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -5,7 +6,7 @@ import { Footer } from '@/components/Footer';
 import { useAppStore } from '@/stores/useAppStore';
 import { mockListings } from '@/data/mockListings';
 import TransportFilters from '@/components/transport/TransportFilters';
-import TransportCard from '@/components/transport/TransportCard';
+import TransportCard, { TransportListing } from '@/components/transport/TransportCard';
 import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
 import { Listing as ListingType, 
   EngineType, 
@@ -257,7 +258,7 @@ export function TransportPage() {
               {transportListings.map(listing => (
                 <TransportCard 
                   key={listing.id}
-                  listing={listing as unknown as ListingType}
+                  listing={listing}
                   variant={viewMode === 'list' ? 'horizontal' : 'default'}
                   onFavoriteToggle={handleFavoriteToggle}
                   isFavorite={favorites.includes(listing.id)}

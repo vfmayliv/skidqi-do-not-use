@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, MapPin, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '@/hooks/use-translation';
+import { Listing } from '@/types/listing';
 
 export interface TransportListing {
   id: string;
@@ -40,11 +41,14 @@ export interface TransportListing {
 }
 
 export interface TransportCardProps {
-  listing: TransportListing;
+  listing: TransportListing | Listing;
   favorited?: boolean;
   onFavoriteToggle?: (id: string) => void;
-  onClick?: (listing: TransportListing) => void;
+  onClick?: (listing: TransportListing | Listing) => void;
   showContactButton?: boolean;
+  variant?: 'default' | 'horizontal';
+  isFavorite?: boolean;
+  viewMode?: 'grid' | 'list';
 }
 
 const TransportCard: React.FC<TransportCardProps> = ({
@@ -53,8 +57,53 @@ const TransportCard: React.FC<TransportCardProps> = ({
   onFavoriteToggle,
   onClick,
   showContactButton = true,
+  variant = 'default',
+  isFavorite = false,
+  viewMode = 'grid'
 }) => {
   const { t } = useTranslation();
+  
+  // Helper function to adapt Listing to TransportListing format
+  const adaptListing = (listing: any): TransportListing => {
+    // If it's a standard listing from our app, convert it to TransportListing format
+    if ('discountPrice' in listing) {
+      return {
+        id: listing.id,
+        title: listing.title?.[typeof listing.title === 'object' ? 'ru' : ''] || `${listing.brand || ''} ${listing.model || ''}`,
+        description: typeof listing.description === 'object' ? listing.description.ru : listing.description,
+        price: listing.discountPrice || 0,
+        currency: 'KZT',
+        location: typeof listing.city === 'object' ? listing.city.ru : (listing.city || ''),
+        year: listing.year || new Date().getFullYear(),
+        mileage: listing.mileage,
+        images: listing.images || [listing.imageUrl],
+        category: listing.categoryId || '',
+        subcategory: listing.subcategoryId,
+        brand: listing.brand || '',
+        model: listing.model || '',
+        bodyType: listing.bodyType,
+        engine: {
+          type: listing.engineType || '',
+          volume: listing.engineVolume
+        },
+        transmission: listing.transmission,
+        driveType: listing.driveType,
+        condition: listing.condition || 'used',
+        createdAt: new Date(listing.createdAt),
+        seller: {
+          name: listing.seller?.name || '',
+          rating: listing.seller?.rating,
+          verified: false,
+          type: 'private'
+        }
+      };
+    }
+    
+    // If it already has the right format, just return it
+    return listing as TransportListing;
+  };
+  
+  const adaptedListing = adaptListing(listing);
   
   const {
     id,
@@ -72,7 +121,7 @@ const TransportCard: React.FC<TransportCardProps> = ({
     transmission,
     condition,
     seller
-  } = listing;
+  } = adaptedListing;
 
   // Форматируем цену для отображения
   const formattedPrice = new Intl.NumberFormat('ru-RU').format(price);
