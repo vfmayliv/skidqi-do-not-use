@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
-import { transportConfig } from '@/categories/transport/config';
+import { transportFilterConfig } from '@/categories/transport/filterConfig';
 import { 
   TransportFilters as TransportFiltersType,
   BodyType,
@@ -62,7 +62,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
   });
 
   // Получаем конфигурацию фильтров из общего конфига
-  const filterConfig = transportConfig.filterConfig || {};
+  const filterConfig = transportFilterConfig || {};
   
   // Находим выбранную категорию
   const categories = filterConfig.categories || [];
