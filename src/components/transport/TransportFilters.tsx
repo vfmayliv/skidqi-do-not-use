@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -75,7 +76,69 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     setSelectedFilters(newFilters);
     
     if (onFilterChange) {
-      onFilterChange(newFilters);
+      // Convert the selected filters to the format expected by TransportFiltersType
+      const convertedFilters: Partial<TransportFiltersType> = {};
+      
+      // Convert brand selection to brands array
+      if (newFilters.brand) {
+        convertedFilters.brands = [newFilters.brand];
+      }
+      
+      // Convert price range
+      if (newFilters.priceFrom || newFilters.priceTo) {
+        convertedFilters.priceRange = {
+          min: newFilters.priceFrom ? Number(newFilters.priceFrom) : null,
+          max: newFilters.priceTo ? Number(newFilters.priceTo) : null
+        };
+      }
+      
+      // Convert year range
+      if (newFilters.yearFrom || newFilters.yearTo) {
+        convertedFilters.yearRange = {
+          min: newFilters.yearFrom ? Number(newFilters.yearFrom) : null,
+          max: newFilters.yearTo ? Number(newFilters.yearTo) : null
+        };
+      }
+      
+      // Convert mileage range
+      if (newFilters.mileageFrom || newFilters.mileageTo) {
+        convertedFilters.mileageRange = {
+          min: newFilters.mileageFrom ? Number(newFilters.mileageFrom) : null,
+          max: newFilters.mileageTo ? Number(newFilters.mileageTo) : null
+        };
+      }
+      
+      // Convert body type
+      if (newFilters.bodyType) {
+        convertedFilters.bodyTypes = [newFilters.bodyType];
+      }
+      
+      // Convert transmission
+      if (newFilters.transmission) {
+        convertedFilters.transmissionTypes = [newFilters.transmission];
+      }
+      
+      // Convert engine type
+      if (newFilters.engine) {
+        convertedFilters.engineTypes = [newFilters.engine];
+      }
+      
+      // Convert drive type
+      if (newFilters.drive) {
+        convertedFilters.driveTypes = [newFilters.drive];
+      }
+      
+      // Convert condition
+      if (newFilters.condition !== 'all') {
+        convertedFilters.conditionTypes = [newFilters.condition];
+      }
+      
+      // Convert with photo
+      if (newFilters.withPhoto) {
+        convertedFilters.hasPhoto = true;
+      }
+      
+      onFilterChange(convertedFilters);
     }
   };
 
@@ -98,8 +161,8 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
       mileageTo: ''
     });
     
-    if (onFilterChange) {
-      onFilterChange({});
+    if (onReset) {
+      onReset();
     }
   };
 
@@ -413,7 +476,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
                 </Button>
               )}
               
-              <Button className="bg-blue-600 hover:bg-blue-700">
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={onSearch}>
                 {t('show.results')}
               </Button>
             </div>

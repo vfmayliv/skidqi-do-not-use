@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -312,9 +313,9 @@ export const TransportCategoryPage: React.FC = () => {
           </div>
           
           <Button className="bg-blue-600 hover:bg-blue-700">
-            {activeTab === 'passenger' && t('show.results', { count: '737,240' })}
-            {activeTab === 'moto' && t('show.results', { count: '12,560' })}
-            {activeTab === 'commercial' && t('show.results', { count: '25,391' })}
+            {activeTab === 'passenger' ? t('show.results') : 
+             activeTab === 'moto' ? t('show.results') : 
+             t('show.results')}
           </Button>
         </div>
       </Card>

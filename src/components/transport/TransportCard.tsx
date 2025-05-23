@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -144,8 +145,12 @@ const TransportCard: React.FC<TransportCardProps> = ({
     }
   };
 
+  // Determine the category path from the adaptedListing
+  const categoryPath = adaptedListing.category || 
+                      ('categoryId' in listing ? listing.categoryId : 'transport');
+
   return (
-    <Link to={`/transport/${listing.category}/${id}`}>
+    <Link to={`/transport/${categoryPath}/${id}`}>
       <Card 
         className="transport-card overflow-hidden hover:shadow-md transition-shadow duration-300 mb-4"
         onClick={handleCardClick}

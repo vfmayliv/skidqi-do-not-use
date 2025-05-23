@@ -208,7 +208,16 @@ export function TransportPage() {
           </h1>
           
           <TransportFilters 
-            filters={filters}
+            // Pass filters prop in the correct format
+            availableFilters={{
+              brands: ['Toyota', 'BMW', 'Mercedes', 'Audi'],
+              models: {
+                'Toyota': ['Camry', 'Corolla', 'Land Cruiser'],
+                'BMW': ['X5', 'X6', '5 Series'],
+                'Mercedes': ['C-Class', 'E-Class', 'GLE'],
+                'Audi': ['A4', 'Q5', 'Q7'],
+              }
+            }}
             onFilterChange={setFilters}
             onReset={resetFilters}
             onSearch={handleSearch}
