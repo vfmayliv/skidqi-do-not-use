@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -9,11 +8,17 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import { transportConfig } from '@/categories/transport/config';
-import { TransportFilters as TransportFiltersType } from '@/types/listingType';
+import { 
+  TransportFilters as TransportFiltersType,
+  BodyType,
+  TransmissionType,
+  EngineType,
+  DriveType,
+  ConditionType 
+} from '@/types/listingType';
 import { BrandData } from '@/data/transportData';
 
 export interface TransportFiltersProps {
-  filters?: TransportFiltersType;
   onFilterChange?: (filters: Partial<TransportFiltersType>) => void;
   onReset?: () => void;
   onSearch?: () => void;
@@ -29,7 +34,6 @@ export interface TransportFiltersProps {
 }
 
 const TransportFilters: React.FC<TransportFiltersProps> = ({
-  filters,
   onFilterChange,
   onReset,
   onSearch,
@@ -77,7 +81,13 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     
     if (onFilterChange) {
       // Convert the selected filters to the format expected by TransportFiltersType
-      const convertedFilters: Partial<TransportFiltersType> = {};
+      const convertedFilters: Partial<TransportFiltersType> = {
+        priceRange: { min: null, max: null },
+        yearRange: { min: null, max: null },
+        mileageRange: { min: null, max: null },
+        engineVolumeRange: { min: null, max: null },
+        brands: []
+      };
       
       // Convert brand selection to brands array
       if (newFilters.brand) {
@@ -108,29 +118,29 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
         };
       }
       
-      // Convert body type
+      // Convert body type with proper type casting
       if (newFilters.bodyType) {
-        convertedFilters.bodyTypes = [newFilters.bodyType];
+        convertedFilters.bodyTypes = [newFilters.bodyType as BodyType];
       }
       
-      // Convert transmission
+      // Convert transmission with proper type casting
       if (newFilters.transmission) {
-        convertedFilters.transmissionTypes = [newFilters.transmission];
+        convertedFilters.transmissionTypes = [newFilters.transmission as TransmissionType];
       }
       
-      // Convert engine type
+      // Convert engine type with proper type casting
       if (newFilters.engine) {
-        convertedFilters.engineTypes = [newFilters.engine];
+        convertedFilters.engineTypes = [newFilters.engine as EngineType];
       }
       
-      // Convert drive type
+      // Convert drive type with proper type casting
       if (newFilters.drive) {
-        convertedFilters.driveTypes = [newFilters.drive];
+        convertedFilters.driveTypes = [newFilters.drive as DriveType];
       }
       
-      // Convert condition
+      // Convert condition with proper type casting
       if (newFilters.condition !== 'all') {
-        convertedFilters.conditionTypes = [newFilters.condition];
+        convertedFilters.conditionTypes = [newFilters.condition as ConditionType];
       }
       
       // Convert with photo
