@@ -61,14 +61,9 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     mileageTo: ''
   });
 
-  // Получаем конфигурацию фильтров из общего конфига
-  const filterConfig = transportFilterConfig || {};
-  
-  // Находим выбранную категорию
-  const categories = filterConfig.categories || [];
+  // Use the imported transportFilterConfig directly
+  const categories = transportFilterConfig.categories || [];
   const currentCategory = categories.find(c => c.id === selectedCategory) || categories[0];
-  
-  // Получаем подкатегории для текущей категории
   const subcategories = currentCategory?.subcategories || [];
 
   // Годы для фильтра
@@ -308,7 +303,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">{t('all.types')}</SelectItem>
-                    {filterConfig.bodyTypes?.map((type) => (
+                    {transportFilterConfig.bodyTypes?.map((type) => (
                       <SelectItem key={type.id} value={type.id}>{t(type.label.ru)}</SelectItem>
                     ))}
                   </SelectContent>
@@ -326,7 +321,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">{t('all')}</SelectItem>
-                    {filterConfig.transmissions?.map((trans) => (
+                    {transportFilterConfig.transmissions?.map((trans) => (
                       <SelectItem key={trans.id} value={trans.id}>{t(trans.label.ru)}</SelectItem>
                     ))}
                   </SelectContent>
@@ -344,7 +339,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">{t('all')}</SelectItem>
-                    {filterConfig.engineTypes?.map((engine) => (
+                    {transportFilterConfig.engineTypes?.map((engine) => (
                       <SelectItem key={engine.id} value={engine.id}>{t(engine.label.ru)}</SelectItem>
                     ))}
                   </SelectContent>
@@ -362,7 +357,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">{t('all')}</SelectItem>
-                    {filterConfig.driveTypes?.map((drive) => (
+                    {transportFilterConfig.driveTypes?.map((drive) => (
                       <SelectItem key={drive.id} value={drive.id}>{t(drive.label.ru)}</SelectItem>
                     ))}
                   </SelectContent>
@@ -376,7 +371,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
               <div>
                 <label className="text-sm text-gray-500 mb-1 block">{t('weight')}</label>
                 <div className="flex space-x-2">
-                  {filterConfig.weightCategories?.map((weight) => (
+                  {transportFilterConfig.weightCategories?.map((weight) => (
                     <Button 
                       key={weight.id}
                       variant={selectedFilters.bodyType === weight.id ? 'default' : 'outline'} 
