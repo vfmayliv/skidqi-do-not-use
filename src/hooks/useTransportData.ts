@@ -74,9 +74,9 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
           throw new Error(`No table mapping found for vehicle type: ${vehicleType}`);
         }
 
-        // Load brands
+        // Load brands with proper type assertion
         const { data: brandsData, error: brandsError } = await supabase
-          .from(tableConfig.brands)
+          .from(tableConfig.brands as any)
           .select('*')
           .order('name');
 
@@ -84,9 +84,9 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
           throw brandsError;
         }
 
-        // Load models
+        // Load models with proper type assertion
         const { data: modelsData, error: modelsError } = await supabase
-          .from(tableConfig.models)
+          .from(tableConfig.models as any)
           .select('*')
           .order('name');
 
@@ -94,9 +94,25 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
           throw modelsError;
         }
 
+        // Transform the data to match our interfaces
+        const transformedBrands: Brand[] = (brandsData || []).map((brand: any) => ({
+          id: brand.id?.toString() || brand.id,
+          name: brand.name,
+          name_kk: brand.name_kk,
+          slug: brand.slug
+        }));
+
+        const transformedModels: Model[] = (modelsData || []).map((model: any) => ({
+          id: model.id?.toString() || model.id,
+          name: model.name,
+          name_kk: model.name_kk,
+          slug: model.slug,
+          brand_id: model.brand_id?.toString() || model.brand_id
+        }));
+
         setData({
-          brands: brandsData || [],
-          models: modelsData || [],
+          brands: transformedBrands,
+          models: transformedModels,
           loading: false,
           error: null
         });
