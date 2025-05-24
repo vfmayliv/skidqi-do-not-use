@@ -78,7 +78,7 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
 
         console.log('Using table config:', tableConfig);
 
-        // Загружаем бренды
+        // Загружаем бренды без лимитов
         const { data: brandsData, error: brandsError } = await supabase
           .from(tableConfig.brands as any)
           .select('*')
@@ -91,11 +91,12 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
 
         console.log('Loaded brands:', brandsData?.length || 0);
 
-        // Загружаем модели
-        const { data: modelsData, error: modelsError } = await supabase
+        // Загружаем ВСЕ модели без лимитов с явным указанием большого лимита
+        const { data: modelsData, error: modelsError, count } = await supabase
           .from(tableConfig.models as any)
-          .select('*')
-          .order('name');
+          .select('*', { count: 'exact' })
+          .order('name')
+          .limit(10000); // Устанавливаем большой лимит
 
         if (modelsError) {
           console.error('Error loading models:', modelsError);
@@ -103,6 +104,7 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
         }
 
         console.log('Loaded models:', modelsData?.length || 0);
+        console.log('Total models count:', count);
 
         // Преобразуем данные в соответствии с нашими интерфейсами
         const transformedBrands: Brand[] = (brandsData || []).map((brand: any) => ({
@@ -122,6 +124,13 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
 
         console.log('Transformed brands:', transformedBrands.length);
         console.log('Transformed models:', transformedModels.length);
+
+        // Проверим, сколько моделей у каждого бренда
+        const brandModelCounts = transformedBrands.map(brand => {
+          const modelCount = transformedModels.filter(model => model.brand_id === brand.id).length;
+          return { brandName: brand.name, modelCount };
+        });
+        console.log('Models per brand:', brandModelCounts);
 
         setData({
           brands: transformedBrands,
