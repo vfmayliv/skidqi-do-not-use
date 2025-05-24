@@ -17,9 +17,6 @@ import { Listing as ListingType,
 } from '@/types/listingType';
 import { Listing } from '@/types/listing';
 
-// Import BrandData from the data file, not declaring it locally
-import { BrandData } from '@/data/transportData';
-
 export function TransportPage() {
   const { language } = useAppStore();
   const { filters, setFilters, resetFilters, activeFiltersCount } = useTransportFiltersStore();
@@ -43,39 +40,10 @@ export function TransportPage() {
     );
   };
 
-  // Mock brands for the TransportFilters component
-  // Make sure they comply with the BrandData interface from transportData.ts
-  const mockBrands: BrandData[] = [
-    { 
-      id: 'toyota', 
-      name: { ru: 'Тойота', kz: 'Тойота' },
-      models: [],
-      toLowerCase() { return this.id; }
-    },
-    { 
-      id: 'bmw', 
-      name: { ru: 'БМВ', kz: 'БМВ' },
-      models: [],
-      toLowerCase() { return this.id; }
-    },
-    { 
-      id: 'mercedes', 
-      name: { ru: 'Мерседес', kz: 'Мерседес' },
-      models: [],
-      toLowerCase() { return this.id; }
-    },
-    { 
-      id: 'audi', 
-      name: { ru: 'Ауди', kz: 'Ауди' },
-      models: [],
-      toLowerCase() { return this.id; }
-    }
-  ];
-
   // Handle search button click
   const handleSearch = () => {
     console.log('Search with filters:', filters);
-    // In a real app, this would trigger an API call or filter update
+    // В реальном приложении здесь будет API запрос
   };
   
   // Apply filters when they change
@@ -193,8 +161,6 @@ export function TransportPage() {
       }
     }
     
-    // Update state with filtered listings
-    // Cast to the correct type to avoid TypeScript errors
     setTransportListings(filtered);
   }, [filters]);
 
@@ -208,20 +174,9 @@ export function TransportPage() {
           </h1>
           
           <TransportFilters 
-            // Pass filters prop in the correct format
-            availableFilters={{
-              brands: ['Toyota', 'BMW', 'Mercedes', 'Audi'],
-              models: {
-                'Toyota': ['Camry', 'Corolla', 'Land Cruiser'],
-                'BMW': ['X5', 'X6', '5 Series'],
-                'Mercedes': ['C-Class', 'E-Class', 'GLE'],
-                'Audi': ['A4', 'Q5', 'Q7'],
-              }
-            }}
             onFilterChange={setFilters}
             onReset={resetFilters}
             onSearch={handleSearch}
-            brands={mockBrands}
             activeFiltersCount={activeFiltersCount}
           />
           

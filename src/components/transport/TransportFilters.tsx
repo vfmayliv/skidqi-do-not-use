@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
 import { transportFilterConfig } from '@/categories/transport/filterConfig';
+import { useTransportData } from '@/hooks/useTransportData';
 import { 
   TransportFilters as TransportFiltersType,
   BodyType,
@@ -37,13 +38,13 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
   onFilterChange,
   onReset,
   onSearch,
-  brands = [],
   activeFiltersCount = 0,
-  vehicleType = 'passenger',
-  availableFilters
+  vehicleType = 'passenger'
 }) => {
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState(vehicleType);
+  const { brands, models, loading, error } = useTransportData(selectedCategory);
+  
   const [selectedFilters, setSelectedFilters] = useState({
     brand: '',
     model: '',
@@ -61,6 +62,12 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     mileageTo: ''
   });
 
+  // Мемоизированные модели для выбранного бренда
+  const availableModels = useMemo(() => {
+    if (!selectedFilters.brand) return [];
+    return models.filter(model => model.brand_id === selectedFilters.brand);
+  }, [models, selectedFilters.brand]);
+
   // Use the imported transportFilterConfig directly
   const categories = transportFilterConfig.categories || [];
   const currentCategory = categories.find(c => c.id === selectedCategory) || categories[0];
@@ -72,6 +79,12 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
   // Обработчик изменения фильтров
   const handleFilterChange = (key: string, value: any) => {
     const newFilters = { ...selectedFilters, [key]: value };
+    
+    // Сброс модели при изменении бренда
+    if (key === 'brand') {
+      newFilters.model = '';
+    }
+    
     setSelectedFilters(newFilters);
     
     if (onFilterChange) {
@@ -147,6 +160,28 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     }
   };
 
+  // Обработчик смены категории
+  const handleCategoryChange = (newCategory: string) => {
+    setSelectedCategory(newCategory);
+    // Сброс фильтров при смене категории
+    setSelectedFilters({
+      brand: '',
+      model: '',
+      yearFrom: '',
+      yearTo: '',
+      priceFrom: '',
+      priceTo: '',
+      bodyType: '',
+      transmission: '',
+      engine: '',
+      drive: '',
+      condition: 'all',
+      withPhoto: true,
+      mileageFrom: '',
+      mileageTo: ''
+    });
+  };
+
   // Обработчик сброса всех фильтров
   const handleReset = () => {
     setSelectedFilters({
@@ -180,12 +215,32 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     }).length;
   };
 
+  if (loading) {
+    return (
+      <div className="transport-filters">
+        <div className="flex items-center justify-center p-8">
+          <div className="text-muted-foreground">Загрузка данных...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="transport-filters">
+        <div className="flex items-center justify-center p-8">
+          <div className="text-red-500">Ошибка загрузки данных: {error}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="transport-filters">
       {/* Выбор категории транспорта */}
       <Tabs 
         defaultValue={selectedCategory} 
-        onValueChange={setSelectedCategory} 
+        onValueChange={handleCategoryChange} 
         className="mb-6"
       >
         <TabsList className="w-full flex overflow-x-auto space-x-1 mb-6">
@@ -262,8 +317,8 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">{t('all.brands')}</SelectItem>
-                  {availableFilters?.brands?.map((brand) => (
-                    <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                  {brands.map((brand) => (
+                    <SelectItem key={brand.id} value={brand.id}>{brand.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -281,8 +336,8 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">{t('all.models')}</SelectItem>
-                  {selectedFilters.brand && availableFilters?.models?.[selectedFilters.brand]?.map((model) => (
-                    <SelectItem key={model} value={model}>{model}</SelectItem>
+                  {availableModels.map((model) => (
+                    <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
