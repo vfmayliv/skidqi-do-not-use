@@ -24,23 +24,23 @@ export interface TransportData {
   error: string | null;
 }
 
-// Mapping of vehicle types to their corresponding table names
+// Полное сопоставление типов транспорта с таблицами в Supabase
 const TABLE_MAPPING = {
-  // Passenger vehicles
+  // Легковой транспорт
   'passenger': { brands: 'vehicle_brands', models: 'vehicle_models' },
   'cars': { brands: 'vehicle_brands', models: 'vehicle_models' },
   'suvs': { brands: 'vehicle_brands', models: 'vehicle_models' },
   'vans': { brands: 'vehicle_brands', models: 'vehicle_models' },
   'electric': { brands: 'vehicle_brands', models: 'vehicle_models' },
   
-  // Motorcycles
+  // Мототранспорт
   'moto': { brands: 'motorcycle_brands', models: 'motorcycle_models' },
   'motorcycles': { brands: 'motorcycle_brands', models: 'motorcycle_models' },
   'scooters': { brands: 'scooter_brands', models: 'scooter_models' },
   'atvs': { brands: 'atv_brands', models: 'atv_models' },
   'snowmobiles': { brands: 'snowmobile_brands', models: 'snowmobile_models' },
   
-  // Commercial vehicles
+  // Коммерческий транспорт
   'commercial': { brands: 'truck_brands', models: 'truck_models' },
   'light-commercial': { brands: 'light_commercial_brands', models: 'light_commercial_models' },
   'trucks': { brands: 'truck_brands', models: 'truck_models' },
@@ -67,34 +67,44 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
   useEffect(() => {
     const loadData = async () => {
       try {
+        console.log('Loading transport data for type:', vehicleType);
         setData(prev => ({ ...prev, loading: true, error: null }));
         
         const tableConfig = TABLE_MAPPING[vehicleType as keyof typeof TABLE_MAPPING];
         if (!tableConfig) {
+          console.error('No table mapping found for vehicle type:', vehicleType);
           throw new Error(`No table mapping found for vehicle type: ${vehicleType}`);
         }
 
-        // Load brands with proper type assertion
+        console.log('Using table config:', tableConfig);
+
+        // Загружаем бренды
         const { data: brandsData, error: brandsError } = await supabase
           .from(tableConfig.brands as any)
           .select('*')
           .order('name');
 
         if (brandsError) {
+          console.error('Error loading brands:', brandsError);
           throw brandsError;
         }
 
-        // Load models with proper type assertion
+        console.log('Loaded brands:', brandsData?.length || 0);
+
+        // Загружаем модели
         const { data: modelsData, error: modelsError } = await supabase
           .from(tableConfig.models as any)
           .select('*')
           .order('name');
 
         if (modelsError) {
+          console.error('Error loading models:', modelsError);
           throw modelsError;
         }
 
-        // Transform the data to match our interfaces
+        console.log('Loaded models:', modelsData?.length || 0);
+
+        // Преобразуем данные в соответствии с нашими интерфейсами
         const transformedBrands: Brand[] = (brandsData || []).map((brand: any) => ({
           id: brand.id?.toString() || brand.id,
           name: brand.name,
@@ -109,6 +119,9 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
           slug: model.slug,
           brand_id: model.brand_id?.toString() || model.brand_id
         }));
+
+        console.log('Transformed brands:', transformedBrands.length);
+        console.log('Transformed models:', transformedModels.length);
 
         setData({
           brands: transformedBrands,

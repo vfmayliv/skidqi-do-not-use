@@ -43,6 +43,8 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
 }) => {
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState(vehicleType);
+  
+  // Используем хук для загрузки данных из Supabase для текущей категории
   const { brands, models, loading, error } = useTransportData(selectedCategory);
   
   const [selectedFilters, setSelectedFilters] = useState({
@@ -68,10 +70,9 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     return models.filter(model => model.brand_id === selectedFilters.brand);
   }, [models, selectedFilters.brand]);
 
-  // Use the imported transportFilterConfig directly
+  // Используем конфигурацию фильтров транспорта
   const categories = transportFilterConfig.categories || [];
   const currentCategory = categories.find(c => c.id === selectedCategory) || categories[0];
-  const subcategories = currentCategory?.subcategories || [];
 
   // Годы для фильтра
   const years = Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i);
@@ -88,21 +89,21 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     setSelectedFilters(newFilters);
     
     if (onFilterChange) {
-      // Convert the selected filters to the format expected by TransportFiltersType
+      // Преобразуем фильтры в формат TransportFiltersType
       const convertedFilters: Partial<TransportFiltersType> = {
+        vehicleType: selectedCategory,
         priceRange: { min: null, max: null },
         yearRange: { min: null, max: null },
         mileageRange: { min: null, max: null },
-        engineVolumeRange: { min: null, max: null },
         brands: []
       };
       
-      // Convert brand selection to brands array
+      // Преобразуем выбор бренда в массив брендов
       if (newFilters.brand) {
         convertedFilters.brands = [newFilters.brand];
       }
       
-      // Convert price range
+      // Преобразуем ценовой диапазон
       if (newFilters.priceFrom || newFilters.priceTo) {
         convertedFilters.priceRange = {
           min: newFilters.priceFrom ? Number(newFilters.priceFrom) : null,
@@ -110,7 +111,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
         };
       }
       
-      // Convert year range
+      // Преобразуем диапазон годов
       if (newFilters.yearFrom || newFilters.yearTo) {
         convertedFilters.yearRange = {
           min: newFilters.yearFrom ? Number(newFilters.yearFrom) : null,
@@ -118,7 +119,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
         };
       }
       
-      // Convert mileage range
+      // Преобразуем диапазон пробега
       if (newFilters.mileageFrom || newFilters.mileageTo) {
         convertedFilters.mileageRange = {
           min: newFilters.mileageFrom ? Number(newFilters.mileageFrom) : null,
@@ -126,32 +127,32 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
         };
       }
       
-      // Convert body type with proper type casting
+      // Преобразуем тип кузова
       if (newFilters.bodyType) {
         convertedFilters.bodyTypes = [newFilters.bodyType as BodyType];
       }
       
-      // Convert transmission with proper type casting
+      // Преобразуем трансмиссию
       if (newFilters.transmission) {
         convertedFilters.transmissionTypes = [newFilters.transmission as TransmissionType];
       }
       
-      // Convert engine type with proper type casting
+      // Преобразуем тип двигателя
       if (newFilters.engine) {
         convertedFilters.engineTypes = [newFilters.engine as EngineType];
       }
       
-      // Convert drive type with proper type casting
+      // Преобразуем привод
       if (newFilters.drive) {
         convertedFilters.driveTypes = [newFilters.drive as DriveType];
       }
       
-      // Convert condition with proper type casting
+      // Преобразуем состояние
       if (newFilters.condition !== 'all') {
         convertedFilters.conditionTypes = [newFilters.condition as ConditionType];
       }
       
-      // Convert with photo
+      // Преобразуем наличие фото
       if (newFilters.withPhoto) {
         convertedFilters.hasPhoto = true;
       }
@@ -162,6 +163,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
 
   // Обработчик смены категории
   const handleCategoryChange = (newCategory: string) => {
+    console.log('Changing category to:', newCategory);
     setSelectedCategory(newCategory);
     // Сброс фильтров при смене категории
     setSelectedFilters({
@@ -219,7 +221,9 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     return (
       <div className="transport-filters">
         <div className="flex items-center justify-center p-8">
-          <div className="text-muted-foreground">Загрузка данных...</div>
+          <div className="text-muted-foreground">
+            {t('loading.data') || 'Загрузка данных...'}
+          </div>
         </div>
       </div>
     );
@@ -229,7 +233,9 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     return (
       <div className="transport-filters">
         <div className="flex items-center justify-center p-8">
-          <div className="text-red-500">Ошибка загрузки данных: {error}</div>
+          <div className="text-red-500">
+            {t('error.loading.data') || 'Ошибка загрузки данных'}: {error}
+          </div>
         </div>
       </div>
     );
@@ -313,10 +319,10 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
                 onValueChange={(value) => handleFilterChange('brand', value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t('all.brands')} />
+                  <SelectValue placeholder={t('all.brands') || 'Все марки'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t('all.brands')}</SelectItem>
+                  <SelectItem value="">{t('all.brands') || 'Все марки'}</SelectItem>
                   {brands.map((brand) => (
                     <SelectItem key={brand.id} value={brand.id}>{brand.name}</SelectItem>
                   ))}
@@ -332,10 +338,10 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
                 disabled={!selectedFilters.brand}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t('all.models')} />
+                  <SelectValue placeholder={t('all.models') || 'Все модели'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t('all.models')}</SelectItem>
+                  <SelectItem value="">{t('all.models') || 'Все модели'}</SelectItem>
                   {availableModels.map((model) => (
                     <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
                   ))}
@@ -537,7 +543,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
               )}
               
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={onSearch}>
-                {t('show.results')}
+                {t('show.results')} ({brands.length} {t('brands')}, {models.length} {t('models')})
               </Button>
             </div>
           </div>
