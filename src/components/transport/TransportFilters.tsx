@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -44,9 +45,14 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
 }) => {
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState(vehicleType);
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
   
-  // Используем хук для загрузки данных из Supabase для текущей категории
-  const { brands, models, loading, error } = useTransportData(selectedCategory);
+  // Определяем тип транспорта для загрузки данных
+  // Если выбрана подкатегория, используем её, иначе основную категорию
+  const dataType = selectedSubcategory || selectedCategory;
+  
+  // Используем хук для загрузки данных из Supabase для текущего типа транспорта
+  const { brands, models, loading, error } = useTransportData(dataType);
   
   const [selectedFilters, setSelectedFilters] = useState({
     brand: '',
@@ -166,7 +172,31 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
   const handleCategoryChange = (newCategory: string) => {
     console.log('Changing category to:', newCategory);
     setSelectedCategory(newCategory);
+    setSelectedSubcategory(''); // Сброс подкатегории при смене основной категории
     // Сброс фильтров при смене категории
+    setSelectedFilters({
+      brand: '',
+      model: '',
+      yearFrom: '',
+      yearTo: '',
+      priceFrom: '',
+      priceTo: '',
+      bodyType: '',
+      transmission: '',
+      engine: '',
+      drive: '',
+      condition: 'all',
+      withPhoto: true,
+      mileageFrom: '',
+      mileageTo: ''
+    });
+  };
+
+  // Новый обработчик для подкатегорий
+  const handleSubcategoryChange = (subcategoryId: string) => {
+    console.log('Changing subcategory to:', subcategoryId);
+    setSelectedSubcategory(subcategoryId);
+    // Сброс фильтров при смене подкатегории
     setSelectedFilters({
       brand: '',
       model: '',
@@ -270,9 +300,9 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
                   key={subcat.id}
                   variant="outline" 
                   className={`justify-start hover:bg-blue-50 ${
-                    selectedFilters.bodyType === subcat.id ? 'bg-blue-100 text-blue-600 border-blue-300' : ''
+                    selectedSubcategory === subcat.id ? 'bg-blue-100 text-blue-600 border-blue-300' : ''
                   }`}
-                  onClick={() => handleFilterChange('bodyType', subcat.id)}
+                  onClick={() => handleSubcategoryChange(subcat.id)}
                 >
                   {t(subcat.label.ru)}
                 </Button>
