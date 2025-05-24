@@ -15,7 +15,8 @@ import {
   TransmissionType,
   EngineType,
   DriveType,
-  ConditionType 
+  ConditionType,
+  VehicleType 
 } from '@/types/listingType';
 import { BrandData } from '@/data/transportData';
 
@@ -91,7 +92,7 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
     if (onFilterChange) {
       // Преобразуем фильтры в формат TransportFiltersType
       const convertedFilters: Partial<TransportFiltersType> = {
-        vehicleType: selectedCategory,
+        vehicleType: selectedCategory as VehicleType,
         priceRange: { min: null, max: null },
         yearRange: { min: null, max: null },
         mileageRange: { min: null, max: null },
