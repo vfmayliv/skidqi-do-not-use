@@ -16,26 +16,29 @@ const translations = {
 export const useTranslation = () => {
   const { language } = useAppStore();
   
-  const t = (key: string | TranslationKey): string => {
+  const t = (key: string | TranslationKey, fallback?: string): string => {
     if (typeof key === 'string') {
       // Для простых строк, ищем перевод в файлах локализации
       const translation = translations[language as keyof typeof translations];
+      
+      // Обработка вложенных ключей с точками
       const keys = key.split('.');
       let result: any = translation;
       
       for (const k of keys) {
-        if (result && typeof result === 'object') {
+        if (result && typeof result === 'object' && k in result) {
           result = result[k as keyof typeof result];
         } else {
-          return key; // Возвращаем ключ если перевод не найден
+          // Если перевод не найден, возвращаем fallback или ключ
+          return fallback || key;
         }
       }
       
-      return typeof result === 'string' ? result : key;
+      return typeof result === 'string' ? result : (fallback || key);
     }
     
     // Для объектов с языковыми ключами, возвращаем соответствующий перевод
-    return key[language as keyof TranslationKey] || '';
+    return key[language as keyof TranslationKey] || (fallback || '');
   };
   
   return { 

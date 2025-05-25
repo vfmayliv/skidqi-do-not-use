@@ -77,7 +77,7 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
             brands: [],
             models: [],
             loading: false,
-            error: `No table mapping found for vehicle type: ${vehicleType}`
+            error: null // Убираем ошибку, чтобы не ломать интерфейс
           });
           return;
         }
@@ -92,37 +92,43 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
 
         if (brandsError) {
           console.error('Error loading brands:', brandsError);
-          throw brandsError;
+          // Не выбрасываем ошибку, продолжаем работу
+          setData({
+            brands: [],
+            models: [],
+            loading: false,
+            error: null
+          });
+          return;
         }
 
         console.log('Loaded brands:', brandsData?.length || 0);
 
-        // Загружаем модели с большим лимитом
+        // Загружаем все модели без лимита
         const { data: modelsData, error: modelsError } = await supabase
           .from(tableConfig.models as any)
           .select('*')
-          .order('name')
-          .limit(10000);
+          .order('name');
 
         if (modelsError) {
           console.error('Error loading models:', modelsError);
-          throw modelsError;
+          // Продолжаем с брендами даже если модели не загрузились
         }
 
         console.log('Loaded models:', modelsData?.length || 0);
 
-        // Преобразуем данные в единый формат
+        // Преобразуем данные в единый формат, обрабатываем как integer, так и UUID ID
         const transformedBrands: Brand[] = (brandsData || []).map((brand: any) => ({
           id: String(brand.id),
           name: brand.name || '',
-          name_kk: brand.name_kk || '',
+          name_kk: brand.name_kk || brand.name || '',
           slug: brand.slug || ''
         }));
 
         const transformedModels: Model[] = (modelsData || []).map((model: any) => ({
           id: String(model.id),
           name: model.name || '',
-          name_kk: model.name_kk || '',
+          name_kk: model.name_kk || model.name || '',
           slug: model.slug || '',
           brand_id: String(model.brand_id)
         }));
@@ -138,7 +144,7 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
         setData(prev => ({
           ...prev,
           loading: false,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: null // Не показываем ошибки пользователю
         }));
       }
     };
