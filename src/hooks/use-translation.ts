@@ -20,7 +20,18 @@ export const useTranslation = () => {
     if (typeof key === 'string') {
       // Для простых строк, ищем перевод в файлах локализации
       const translation = translations[language as keyof typeof translations];
-      return (translation as any)[key] || key;
+      const keys = key.split('.');
+      let result: any = translation;
+      
+      for (const k of keys) {
+        if (result && typeof result === 'object') {
+          result = result[k as keyof typeof result];
+        } else {
+          return key; // Возвращаем ключ если перевод не найден
+        }
+      }
+      
+      return typeof result === 'string' ? result : key;
     }
     
     // Для объектов с языковыми ключами, возвращаем соответствующий перевод

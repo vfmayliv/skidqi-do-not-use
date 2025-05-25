@@ -72,13 +72,19 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
         
         const tableConfig = TABLE_MAPPING[vehicleType as keyof typeof TABLE_MAPPING];
         if (!tableConfig) {
-          console.error('No table mapping found for vehicle type:', vehicleType);
-          throw new Error(`No table mapping found for vehicle type: ${vehicleType}`);
+          console.warn('No table mapping found for vehicle type:', vehicleType);
+          setData({
+            brands: [],
+            models: [],
+            loading: false,
+            error: `No table mapping found for vehicle type: ${vehicleType}`
+          });
+          return;
         }
 
         console.log('Using table config:', tableConfig);
 
-        // Загружаем бренды без лимитов
+        // Загружаем бренды
         const { data: brandsData, error: brandsError } = await supabase
           .from(tableConfig.brands as any)
           .select('*')
@@ -91,12 +97,12 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
 
         console.log('Loaded brands:', brandsData?.length || 0);
 
-        // Загружаем ВСЕ модели без лимитов с явным указанием большого лимита
-        const { data: modelsData, error: modelsError, count } = await supabase
+        // Загружаем модели с большим лимитом
+        const { data: modelsData, error: modelsError } = await supabase
           .from(tableConfig.models as any)
-          .select('*', { count: 'exact' })
+          .select('*')
           .order('name')
-          .limit(10000); // Устанавливаем большой лимит
+          .limit(10000);
 
         if (modelsError) {
           console.error('Error loading models:', modelsError);
@@ -104,33 +110,22 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
         }
 
         console.log('Loaded models:', modelsData?.length || 0);
-        console.log('Total models count:', count);
 
-        // Преобразуем данные в соответствии с нашими интерфейсами
+        // Преобразуем данные в единый формат
         const transformedBrands: Brand[] = (brandsData || []).map((brand: any) => ({
-          id: brand.id?.toString() || brand.id,
-          name: brand.name,
-          name_kk: brand.name_kk,
-          slug: brand.slug
+          id: String(brand.id),
+          name: brand.name || '',
+          name_kk: brand.name_kk || '',
+          slug: brand.slug || ''
         }));
 
         const transformedModels: Model[] = (modelsData || []).map((model: any) => ({
-          id: model.id?.toString() || model.id,
-          name: model.name,
-          name_kk: model.name_kk,
-          slug: model.slug,
-          brand_id: model.brand_id?.toString() || model.brand_id
+          id: String(model.id),
+          name: model.name || '',
+          name_kk: model.name_kk || '',
+          slug: model.slug || '',
+          brand_id: String(model.brand_id)
         }));
-
-        console.log('Transformed brands:', transformedBrands.length);
-        console.log('Transformed models:', transformedModels.length);
-
-        // Проверим, сколько моделей у каждого бренда
-        const brandModelCounts = transformedBrands.map(brand => {
-          const modelCount = transformedModels.filter(model => model.brand_id === brand.id).length;
-          return { brandName: brand.name, modelCount };
-        });
-        console.log('Models per brand:', brandModelCounts);
 
         setData({
           brands: transformedBrands,
