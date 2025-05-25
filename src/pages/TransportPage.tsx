@@ -6,21 +6,12 @@ import { Footer } from '@/components/Footer';
 import { useAppStore } from '@/stores/useAppStore';
 import { transportListings } from '@/data/transportListings';
 import TransportFilters from '@/components/transport/TransportFilters';
-import TransportCard, { TransportListing } from '@/components/transport/TransportCard';
+import TransportCard from '@/components/transport/TransportCard';
 import { useTransportFiltersStore } from '@/stores/useTransportFiltersStore';
-import { Listing as ListingType, 
-  EngineType, 
-  TransmissionType, 
-  DriveType, 
-  BodyType,
-  ConditionType
-} from '@/types/listingType';
-import { Listing } from '@/types/listing';
 
 export function TransportPage() {
   const { language } = useAppStore();
   const { filters, setFilters, resetFilters, activeFiltersCount } = useTransportFiltersStore();
-  const [searchParams, setSearchParams] = useSearchParams();
   
   // Use the new transport listings data
   const [filteredListings, setFilteredListings] = useState(transportListings);
@@ -41,7 +32,6 @@ export function TransportPage() {
   // Handle search button click
   const handleSearch = () => {
     console.log('Search with filters:', filters);
-    // В реальном приложении здесь будет API запрос
   };
   
   // Apply filters when they change
@@ -88,41 +78,6 @@ export function TransportPage() {
     if (filters.mileageRange.max) {
       filtered = filtered.filter(listing => 
         listing.mileage && listing.mileage <= filters.mileageRange.max!
-      );
-    }
-    
-    // Apply vehicle type filter
-    if (filters.vehicleType) {
-      filtered = filtered.filter(listing => 
-        listing.bodyType === filters.vehicleType
-      );
-    }
-    
-    // Apply engine types filter
-    if (filters.engineTypes && filters.engineTypes.length > 0) {
-      filtered = filtered.filter(listing => 
-        listing.engineType && filters.engineTypes!.includes(listing.engineType as EngineType)
-      );
-    }
-    
-    // Apply transmission types filter
-    if (filters.transmissionTypes && filters.transmissionTypes.length > 0) {
-      filtered = filtered.filter(listing => 
-        listing.transmission && filters.transmissionTypes!.includes(listing.transmission as TransmissionType)
-      );
-    }
-    
-    // Apply drive types filter
-    if (filters.driveTypes && filters.driveTypes.length > 0) {
-      filtered = filtered.filter(listing => 
-        listing.driveType && filters.driveTypes!.includes(listing.driveType as DriveType)
-      );
-    }
-    
-    // Apply condition types filter
-    if (filters.conditionTypes && filters.conditionTypes.length > 0) {
-      filtered = filtered.filter(listing => 
-        listing.condition && filters.conditionTypes!.includes(listing.condition as ConditionType)
       );
     }
     
@@ -219,7 +174,7 @@ export function TransportPage() {
                 {filteredListings.map(listing => (
                   <TransportCard 
                     key={listing.id}
-                    listing={listing as any}
+                    listing={listing}
                     variant={viewMode === 'list' ? 'horizontal' : 'default'}
                     onFavoriteToggle={handleFavoriteToggle}
                     isFavorite={favorites.includes(listing.id)}
