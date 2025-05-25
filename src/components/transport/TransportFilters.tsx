@@ -1,12 +1,10 @@
-
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { useTranslation } from '@/hooks/use-translation';
 import { transportFilterConfig } from '@/categories/transport/filterConfig';
 import { useTransportData } from '@/hooks/useTransportData';
@@ -250,11 +248,9 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
 
   if (loading) {
     return (
-      <div className="transport-filters">
-        <div className="flex items-center justify-center p-8">
-          <div className="text-muted-foreground">
-            {t('loading.data') || 'Загрузка данных...'}
-          </div>
+      <div className="flex items-center justify-center p-8">
+        <div className="text-muted-foreground">
+          {t('loading.data') || 'Загрузка данных...'}
         </div>
       </div>
     );
@@ -262,381 +258,325 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
 
   if (error) {
     return (
-      <div className="transport-filters">
-        <div className="flex items-center justify-center p-8">
-          <div className="text-red-500">
-            {t('error.loading.data') || 'Ошибка загрузки данных'}: {error}
-          </div>
+      <div className="flex items-center justify-center p-8">
+        <div className="text-red-500">
+          {t('error.loading.data') || 'Ошибка загрузки данных'}: {error}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="transport-filters">
-      {/* Выбор категории транспорта */}
-      <Tabs 
-        defaultValue={selectedCategory} 
-        onValueChange={handleCategoryChange} 
-        className="mb-6"
-      >
-        <TabsList className="w-full flex overflow-x-auto space-x-1 mb-6">
-          {categories.map((category) => (
-            <TabsTrigger 
-              key={category.id}
-              value={category.id} 
-              className={`flex-1 py-3 px-6 rounded-md ${selectedCategory === category.id ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
-            >
-              {t(category.label.ru)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Фильтры</h2>
+        
+        {/* Выбор категории транспорта */}
+        <Tabs 
+          defaultValue={selectedCategory} 
+          onValueChange={handleCategoryChange} 
+          className="mb-6"
+        >
+          <TabsList className="w-full grid grid-cols-3 mb-4">
+            {categories.slice(0, 3).map((category) => (
+              <TabsTrigger 
+                key={category.id}
+                value={category.id} 
+                className="text-xs px-2 py-2"
+              >
+                {t(category.label.ru)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {categories.map((category) => (
-          <TabsContent key={category.id} value={category.id} className="mb-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {categories.map((category) => (
+            <TabsContent key={category.id} value={category.id} className="space-y-2">
               {category.subcategories?.map((subcat) => (
                 <Button 
                   key={subcat.id}
-                  variant="outline" 
-                  className={`justify-start hover:bg-blue-50 ${
-                    selectedSubcategory === subcat.id ? 'bg-blue-100 text-blue-600 border-blue-300' : ''
-                  }`}
+                  variant={selectedSubcategory === subcat.id ? "default" : "outline"}
+                  size="sm"
+                  className="w-full justify-start text-xs"
                   onClick={() => handleSubcategoryChange(subcat.id)}
                 >
                   {t(subcat.label.ru)}
                 </Button>
               ))}
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
+            </TabsContent>
+          ))}
+        </Tabs>
 
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          {/* Основные фильтры - состояние, марка, модель */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div>
-              <label className="text-sm text-gray-500 mb-1 block">{t('condition')}</label>
-              <div className="flex rounded-md overflow-hidden">
-                <Button 
-                  variant={selectedFilters.condition === 'all' ? 'default' : 'outline'}
-                  className="flex-1 rounded-none border-r-0" 
-                  onClick={() => handleFilterChange('condition', 'all')}
-                >
-                  {t('all')}
-                </Button>
-                <Button 
-                  variant={selectedFilters.condition === 'new' ? 'default' : 'outline'}
-                  className="flex-1 rounded-none border-r-0 border-l-0" 
-                  onClick={() => handleFilterChange('condition', 'new')}
-                >
-                  {t('new')}
-                </Button>
-                <Button 
-                  variant={selectedFilters.condition === 'used' ? 'default' : 'outline'}
-                  className="flex-1 rounded-none border-l-0" 
-                  onClick={() => handleFilterChange('condition', 'used')}
-                >
-                  {t('used')}
-                </Button>
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm text-gray-500 mb-1 block">{t('brand')}</label>
-              <Select 
-                value={selectedFilters.brand} 
-                onValueChange={(value) => handleFilterChange('brand', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('all.brands') || 'Все марки'} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">{t('all.brands') || 'Все марки'}</SelectItem>
-                  {brands.map((brand) => (
-                    <SelectItem key={brand.id} value={brand.id}>{brand.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <label className="text-sm text-gray-500 mb-1 block">{t('model')}</label>
-              <Select 
-                value={selectedFilters.model} 
-                onValueChange={(value) => handleFilterChange('model', value)}
-                disabled={!selectedFilters.brand}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('all.models') || 'Все модели'} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">{t('all.models') || 'Все модели'}</SelectItem>
-                  {availableModels.map((model) => (
-                    <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        <Separator className="my-4" />
+      </div>
 
-          {/* Дополнительные фильтры в зависимости от категории */}
-          {selectedCategory === 'passenger' && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">{t('body.type')}</label>
-                <Select 
-                  value={selectedFilters.bodyType} 
-                  onValueChange={(value) => handleFilterChange('bodyType', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('all.types')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">{t('all.types')}</SelectItem>
-                    {transportFilterConfig.bodyTypes?.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>{t(type.label.ru)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">{t('transmission')}</label>
-                <Select 
-                  value={selectedFilters.transmission} 
-                  onValueChange={(value) => handleFilterChange('transmission', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('all')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">{t('all')}</SelectItem>
-                    {transportFilterConfig.transmissions?.map((trans) => (
-                      <SelectItem key={trans.id} value={trans.id}>{t(trans.label.ru)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">{t('engine')}</label>
-                <Select 
-                  value={selectedFilters.engine} 
-                  onValueChange={(value) => handleFilterChange('engine', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('all')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">{t('all')}</SelectItem>
-                    {transportFilterConfig.engineTypes?.map((engine) => (
-                      <SelectItem key={engine.id} value={engine.id}>{t(engine.label.ru)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">{t('drive')}</label>
-                <Select 
-                  value={selectedFilters.drive} 
-                  onValueChange={(value) => handleFilterChange('drive', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('all')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">{t('all')}</SelectItem>
-                    {transportFilterConfig.driveTypes?.map((drive) => (
-                      <SelectItem key={drive.id} value={drive.id}>{t(drive.label.ru)}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
+      {/* Состояние */}
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-gray-700">Состояние</label>
+        <div className="grid grid-cols-3 gap-2">
+          <Button 
+            variant={selectedFilters.condition === 'all' ? 'default' : 'outline'}
+            size="sm"
+            className="text-xs"
+            onClick={() => handleFilterChange('condition', 'all')}
+          >
+            Все
+          </Button>
+          <Button 
+            variant={selectedFilters.condition === 'new' ? 'default' : 'outline'}
+            size="sm"
+            className="text-xs"
+            onClick={() => handleFilterChange('condition', 'new')}
+          >
+            Новый
+          </Button>
+          <Button 
+            variant={selectedFilters.condition === 'used' ? 'default' : 'outline'}
+            size="sm"
+            className="text-xs"
+            onClick={() => handleFilterChange('condition', 'used')}
+          >
+            Б/у
+          </Button>
+        </div>
+      </div>
 
-          {selectedCategory === 'commercial' && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">{t('weight')}</label>
-                <div className="flex space-x-2">
-                  {transportFilterConfig.weightCategories?.map((weight) => (
-                    <Button 
-                      key={weight.id}
-                      variant={selectedFilters.bodyType === weight.id ? 'default' : 'outline'} 
-                      className="flex-1"
-                      onClick={() => handleFilterChange('bodyType', weight.id)}
-                    >
-                      {t(weight.label.ru)}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+      <Separator />
+      
+      {/* Марка */}
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-gray-700">Марка</label>
+        <Select 
+          value={selectedFilters.brand} 
+          onValueChange={(value) => handleFilterChange('brand', value)}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Выберите марку" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Все марки</SelectItem>
+            {brands.map((brand) => (
+              <SelectItem key={brand.id} value={brand.id}>{brand.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {/* Модель */}
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-gray-700">Модель</label>
+        <Select 
+          value={selectedFilters.model} 
+          onValueChange={(value) => handleFilterChange('model', value)}
+          disabled={!selectedFilters.brand}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Выберите модель" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Все модели</SelectItem>
+            {availableModels.map((model) => (
+              <SelectItem key={model.id} value={model.id}>{model.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-          {/* Общие фильтры для всех категорий */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className="text-sm text-gray-500 mb-1 block">{t('price')}</label>
-              <div className="flex space-x-2">
-                <Input 
-                  type="text" 
-                  placeholder={t('from')} 
-                  value={selectedFilters.priceFrom}
-                  onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
-                />
-                <Input 
-                  type="text" 
-                  placeholder={t('to')} 
-                  value={selectedFilters.priceTo}
-                  onChange={(e) => handleFilterChange('priceTo', e.target.value)}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm text-gray-500 mb-1 block">{t('year')}</label>
-              <div className="flex space-x-2">
-                <Select 
-                  value={selectedFilters.yearFrom} 
-                  onValueChange={(value) => handleFilterChange('yearFrom', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('from')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">{t('from')}</SelectItem>
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                <Select 
-                  value={selectedFilters.yearTo} 
-                  onValueChange={(value) => handleFilterChange('yearTo', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('to')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">{t('to')}</SelectItem>
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
+      <Separator />
 
-          {selectedFilters.condition === 'used' && (
-            <div className="mb-6">
-              <label className="text-sm text-gray-500 mb-1 block">{t('mileage')}</label>
-              <div className="flex space-x-2">
-                <Input 
-                  type="text" 
-                  placeholder={t('from')} 
-                  value={selectedFilters.mileageFrom}
-                  onChange={(e) => handleFilterChange('mileageFrom', e.target.value)}
-                />
-                <Input 
-                  type="text" 
-                  placeholder={t('to')} 
-                  value={selectedFilters.mileageTo}
-                  onChange={(e) => handleFilterChange('mileageTo', e.target.value)}
-                />
-              </div>
-            </div>
-          )}
+      {/* Цена */}
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-gray-700">Цена, ₸</label>
+        <div className="grid grid-cols-2 gap-2">
+          <Input 
+            type="text" 
+            placeholder="от" 
+            value={selectedFilters.priceFrom}
+            onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
+            className="text-sm"
+          />
+          <Input 
+            type="text" 
+            placeholder="до" 
+            value={selectedFilters.priceTo}
+            onChange={(e) => handleFilterChange('priceTo', e.target.value)}
+            className="text-sm"
+          />
+        </div>
+      </div>
+      
+      {/* Год */}
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-gray-700">Год выпуска</label>
+        <div className="grid grid-cols-2 gap-2">
+          <Select 
+            value={selectedFilters.yearFrom} 
+            onValueChange={(value) => handleFilterChange('yearFrom', value)}
+          >
+            <SelectTrigger className="text-sm">
+              <SelectValue placeholder="от" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">от</SelectItem>
+              {years.map((year) => (
+                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select 
+            value={selectedFilters.yearTo} 
+            onValueChange={(value) => handleFilterChange('yearTo', value)}
+          >
+            <SelectTrigger className="text-sm">
+              <SelectValue placeholder="до" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">до</SelectItem>
+              {years.map((year) => (
+                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <Checkbox 
-                id="withPhoto" 
-                checked={selectedFilters.withPhoto}
-                onCheckedChange={(checked) => 
-                  handleFilterChange('withPhoto', checked === true)
-                }
+      {/* Пробег для б/у */}
+      {selectedFilters.condition === 'used' && (
+        <>
+          <Separator />
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-gray-700">Пробег, км</label>
+            <div className="grid grid-cols-2 gap-2">
+              <Input 
+                type="text" 
+                placeholder="от" 
+                value={selectedFilters.mileageFrom}
+                onChange={(e) => handleFilterChange('mileageFrom', e.target.value)}
+                className="text-sm"
               />
-              <label htmlFor="withPhoto" className="ml-2 text-sm">{t('with.photo')}</label>
-            </div>
-            
-            <div className="flex space-x-2">
-              {countActiveFilters() > 0 && (
-                <Button variant="outline" onClick={handleReset}>
-                  {t('reset.filters')}
-                </Button>
-              )}
-              
-              <Button className="bg-blue-600 hover:bg-blue-700" onClick={onSearch}>
-                {t('show.results')} ({brands.length} {t('brands')}, {models.length} {t('models')})
-              </Button>
+              <Input 
+                type="text" 
+                placeholder="до" 
+                value={selectedFilters.mileageTo}
+                onChange={(e) => handleFilterChange('mileageTo', e.target.value)}
+                className="text-sm"
+              />
             </div>
           </div>
+        </>
+      )}
 
-          {/* Дополнительные фильтры (раскрывающийся аккордеон) */}
-          <Accordion type="single" collapsible className="mt-6">
-            <AccordionItem value="additional-filters">
-              <AccordionTrigger className="text-blue-600 hover:text-blue-800">
-                {t('additional.filters')}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-                  {selectedCategory === 'passenger' && (
-                    <>
-                      <div>
-                        <label className="text-sm text-gray-500 mb-1 block">{t('color')}</label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t('all')} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">{t('all')}</SelectItem>
-                            <SelectItem value="black">{t('black')}</SelectItem>
-                            <SelectItem value="white">{t('white')}</SelectItem>
-                            <SelectItem value="silver">{t('silver')}</SelectItem>
-                            <SelectItem value="red">{t('red')}</SelectItem>
-                            <SelectItem value="blue">{t('blue')}</SelectItem>
-                            <SelectItem value="green">{t('green')}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div>
-                        <label className="text-sm text-gray-500 mb-1 block">{t('number.of.seats')}</label>
-                        <div className="flex space-x-2">
-                          <Input type="text" placeholder={t('from')} />
-                          <Input type="text" placeholder={t('to')} />
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  
-                  <div>
-                    <label className="text-sm text-gray-500 mb-1 block">{t('region')}</label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('all.regions')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">{t('all.regions')}</SelectItem>
-                        <SelectItem value="almaty">{t('almaty')}</SelectItem>
-                        <SelectItem value="astana">{t('astana')}</SelectItem>
-                        <SelectItem value="shymkent">{t('shymkent')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </CardContent>
-      </Card>
+      {/* Дополнительные фильтры для легковых автомобилей */}
+      {selectedCategory === 'passenger' && (
+        <>
+          <Separator />
+          
+          {/* Тип кузова */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-gray-700">Тип кузова</label>
+            <Select 
+              value={selectedFilters.bodyType} 
+              onValueChange={(value) => handleFilterChange('bodyType', value)}
+            >
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Все типы" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Все типы</SelectItem>
+                {transportFilterConfig.bodyTypes?.map((type) => (
+                  <SelectItem key={type.id} value={type.id}>{t(type.label.ru)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Коробка передач */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-gray-700">Коробка передач</label>
+            <Select 
+              value={selectedFilters.transmission} 
+              onValueChange={(value) => handleFilterChange('transmission', value)}
+            >
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Все" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Все</SelectItem>
+                {transportFilterConfig.transmissions?.map((trans) => (
+                  <SelectItem key={trans.id} value={trans.id}>{t(trans.label.ru)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Тип двигателя */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-gray-700">Двигатель</label>
+            <Select 
+              value={selectedFilters.engine} 
+              onValueChange={(value) => handleFilterChange('engine', value)}
+            >
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Все" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Все</SelectItem>
+                {transportFilterConfig.engineTypes?.map((engine) => (
+                  <SelectItem key={engine.id} value={engine.id}>{t(engine.label.ru)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Привод */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-gray-700">Привод</label>
+            <Select 
+              value={selectedFilters.drive} 
+              onValueChange={(value) => handleFilterChange('drive', value)}
+            >
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Все" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Все</SelectItem>
+                {transportFilterConfig.driveTypes?.map((drive) => (
+                  <SelectItem key={drive.id} value={drive.id}>{t(drive.label.ru)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
+
+      <Separator />
+
+      {/* Только с фото */}
+      <div className="flex items-center space-x-2">
+        <Checkbox 
+          id="withPhoto" 
+          checked={selectedFilters.withPhoto}
+          onCheckedChange={(checked) => 
+            handleFilterChange('withPhoto', checked === true)
+          }
+        />
+        <label htmlFor="withPhoto" className="text-sm text-gray-700">
+          Только с фото
+        </label>
+      </div>
+      
+      {/* Кнопки действий */}
+      <div className="space-y-3 pt-4">
+        {countActiveFilters() > 0 && (
+          <Button variant="outline" onClick={handleReset} className="w-full text-sm">
+            Сбросить все фильтры
+          </Button>
+        )}
+        
+        <Button onClick={onSearch} className="w-full bg-blue-600 hover:bg-blue-700 text-sm">
+          Показать результаты
+        </Button>
+      </div>
     </div>
   );
 };
