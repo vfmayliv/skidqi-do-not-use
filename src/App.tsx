@@ -38,26 +38,27 @@ const App: React.FC = () => {
             <Route path="/" element={<Index />} />
             <Route path="/search" element={<SearchResults />} />
             
-            {/* Use the universal CategoryPage for all categories */}
+            {/* Category routes - Universal CategoryPage for all categories */}
             <Route path="/category/:categoryId" element={<CategoryPage />} />
             <Route path="/category/:categoryId/:subcategoryId" element={<SubcategoryPage />} />
             
             {/* Support nested subcategories */}
             <Route path="/category/:categoryId/:subcategoryId/*" element={<SubcategoryPage />} />
             
-            {/* Support listing detail with the full category path before it */}
+            {/* Custom pages for specific categories */}
+            <Route path="/property" element={<PropertyPage />} />
+            <Route path="/transport" element={<TransportPage />} />
+            
+            {/* Listing detail routes - support various category path depths */}
             <Route path="/category/:categoryId/listing/:listingId" element={<ListingDetail />} />
             <Route path="/category/:categoryId/:subcategoryId/listing/:listingId" element={<ListingDetail />} />
             <Route path="/category/:categoryId/:subcategory1/:subcategory2/listing/:listingId" element={<ListingDetail />} />
             <Route path="/category/:categoryId/:subcategory1/:subcategory2/:subcategory3/listing/:listingId" element={<ListingDetail />} />
             <Route path="/category/:categoryId/:subcategory1/:subcategory2/:subcategory3/:subcategory4/listing/:listingId" element={<ListingDetail />} />
             
-            {/* Catch-all route for deep subcategories */}
-            <Route path="/category/:categoryId/**/listing/:listingId" element={<ListingDetail />} />
-            
-            {/* Categories with custom pages */}
-            <Route path="/property" element={<PropertyPage />} />
-            <Route path="/transport" element={<TransportPage />} />
+            {/* Transport and property specific listing routes */}
+            <Route path="/transport/listing/:listingId" element={<ListingDetail />} />
+            <Route path="/property/listing/:listingId" element={<ListingDetail />} />
             
             {/* Legacy listing route */}
             <Route path="/listing/:listingId" element={<ListingDetail />} />
@@ -84,10 +85,15 @@ const App: React.FC = () => {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             
-            {/* Owner panel route */}
+            {/* Owner panel routes */}
             <Route path="/owner" element={<OwnerPanel />} />
             <Route path="/ownerpanel" element={<OwnerPanel />} />
             
+            {/* Redirect old routes to new structure */}
+            <Route path="/categories" element={<Navigate to="/" replace />} />
+            <Route path="/category" element={<Navigate to="/" replace />} />
+            
+            {/* 404 catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
