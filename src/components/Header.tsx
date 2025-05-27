@@ -28,6 +28,14 @@ export function Header() {
     return IconComponent ? <IconComponent className={className} /> : null;
   };
 
+  // Helper function to get city display name
+  const getCityDisplayName = () => {
+    if (!selectedCity) {
+      return language === 'ru' ? 'Город' : 'Қала';
+    }
+    return selectedCity[language];
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -108,7 +116,7 @@ export function Header() {
           <div className="flex items-center space-x-4">
             {/* City Selector */}
             <Button variant="ghost" size="sm" className="text-gray-600">
-              📍 {selectedCity || (language === 'ru' ? 'Город' : 'Қала')}
+              📍 {getCityDisplayName()}
             </Button>
 
             {/* Language Toggle */}
