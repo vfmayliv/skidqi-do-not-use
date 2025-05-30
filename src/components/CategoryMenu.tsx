@@ -6,9 +6,13 @@ import { useAppWithTranslations } from '@/stores/useAppStore';
 import * as LucideIcons from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useChildrenCategories } from '@/hooks/useChildrenCategories';
+import { usePharmacyCategories } from '@/hooks/usePharmacyCategories';
 
 export function CategoryMenu() {
   const { language, t } = useAppWithTranslations();
+  const { categories: childrenCategories, loading: childrenLoading } = useChildrenCategories();
+  const { categories: pharmacyCategories, loading: pharmacyLoading } = usePharmacyCategories();
 
   // Helper function to dynamically render icons from Lucide
   const DynamicIcon = ({ name, className }: { name: string, className?: string }) => {
@@ -17,6 +21,25 @@ export function CategoryMenu() {
     
     // Return the icon if found, otherwise return null
     return IconComponent ? <IconComponent className={className} /> : null;
+  };
+
+  // Get subcategories for a specific category
+  const getSubcategories = (categoryId: string) => {
+    if (categoryId === 'kids') {
+      return childrenCategories.map(cat => ({
+        id: cat.slug,
+        name: { ru: cat.name_ru, kz: cat.name_kz },
+        icon: 'Baby'
+      }));
+    }
+    if (categoryId === 'pharmacy') {
+      return pharmacyCategories.map(cat => ({
+        id: cat.slug,
+        name: { ru: cat.name_ru, kz: cat.name_kz },
+        icon: 'Pill'
+      }));
+    }
+    return [];
   };
 
   return (
@@ -50,8 +73,16 @@ export function CategoryMenu() {
             );
           }
           
-          // For categories with subcategories, use Popover
-          if (category.subcategories && category.subcategories.length > 0) {
+          // For categories with subcategories (including kids and pharmacy from Supabase)
+          const hasSubcategories = (category.subcategories && category.subcategories.length > 0) || 
+                                  category.id === 'kids' || 
+                                  category.id === 'pharmacy';
+          
+          if (hasSubcategories) {
+            const subcategories = category.id === 'kids' || category.id === 'pharmacy' 
+              ? getSubcategories(category.id)
+              : category.subcategories || [];
+
             return (
               <Popover key={category.id}>
                 <PopoverTrigger asChild>
@@ -76,32 +107,10 @@ export function CategoryMenu() {
                       </span>
                     </Link>
                     
-                    {category.subcategories.map((subcat) => {
-                      if (category.id === 'property') {
-                        return (
-                          <Link
-                            key={subcat.id}
-                            to={`/property?type=${subcat.id}`}
-                            className="flex items-center p-2 rounded-md hover:bg-accent"
-                          >
-                            <DynamicIcon name={subcat.icon} className="h-4 w-4 mr-2" />
-                            <span className="text-sm">{subcat.name[language]}</span>
-                          </Link>
-                        );
-                      } else if (category.id === 'transport') {
-                        return (
-                          <Link
-                            key={subcat.id}
-                            to={`/transport?type=${subcat.id}`}
-                            className="flex items-center p-2 rounded-md hover:bg-accent"
-                          >
-                            <DynamicIcon name={subcat.icon} className="h-4 w-4 mr-2" />
-                            <span className="text-sm">{subcat.name[language]}</span>
-                          </Link>
-                        );
-                      }
-                      
-                      return (
+                    {(category.id === 'kids' && childrenLoading) || (category.id === 'pharmacy' && pharmacyLoading) ? (
+                      <div className="p-2 text-sm text-gray-500">Загрузка...</div>
+                    ) : (
+                      subcategories.map((subcat) => (
                         <Link
                           key={subcat.id}
                           to={`/category/${category.id}/${subcat.id}`}
@@ -110,8 +119,8 @@ export function CategoryMenu() {
                           <DynamicIcon name={subcat.icon} className="h-4 w-4 mr-2" />
                           <span className="text-sm">{subcat.name[language]}</span>
                         </Link>
-                      );
-                    })}
+                      ))
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>

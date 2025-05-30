@@ -8,6 +8,8 @@ import { useAppWithTranslations } from '@/stores/useAppStore';
 import { categories } from '@/data/categories';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useChildrenCategories } from '@/hooks/useChildrenCategories';
+import { usePharmacyCategories } from '@/hooks/usePharmacyCategories';
 import * as LucideIcons from 'lucide-react';
 
 export function Header() {
@@ -15,6 +17,8 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { categories: childrenCategories } = useChildrenCategories();
+  const { categories: pharmacyCategories } = usePharmacyCategories();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +38,25 @@ export function Header() {
       return language === 'ru' ? 'Город' : 'Қала';
     }
     return selectedCity[language];
+  };
+
+  // Get subcategories for specific categories
+  const getSubcategories = (categoryId: string) => {
+    if (categoryId === 'kids') {
+      return childrenCategories.map(cat => ({
+        id: cat.slug,
+        name: { ru: cat.name_ru, kz: cat.name_kz },
+        icon: 'Baby'
+      }));
+    }
+    if (categoryId === 'pharmacy') {
+      return pharmacyCategories.map(cat => ({
+        id: cat.slug,
+        name: { ru: cat.name_ru, kz: cat.name_kz },
+        icon: 'Pill'
+      }));
+    }
+    return [];
   };
 
   return (
@@ -56,40 +79,46 @@ export function Header() {
               </PopoverTrigger>
               <PopoverContent className="w-96 p-0" align="start">
                 <div className="grid grid-cols-1 max-h-96 overflow-y-auto">
-                  {categories.map((category) => (
-                    <div key={category.id} className="border-b border-gray-100 last:border-b-0">
-                      {/* Main Category */}
-                      <Link
-                        to={category.id === 'property' ? '/property' : 
-                             category.id === 'transport' ? '/transport' : 
-                             `/category/${category.id}`}
-                        className="flex items-center p-3 hover:bg-gray-50 transition-colors"
-                      >
-                        <DynamicIcon name={category.icon} className="h-5 w-5 mr-3 text-gray-600" />
-                        <span className="font-medium text-gray-900">
-                          {category.name[language]}
-                        </span>
-                      </Link>
-                      
-                      {/* Subcategories */}
-                      {category.subcategories && category.subcategories.length > 0 && (
-                        <div className="pl-8 pb-2">
-                          {category.subcategories.map((subcat) => (
-                            <Link
-                              key={subcat.id}
-                              to={category.id === 'property' ? `/property?type=${subcat.id}` :
-                                   category.id === 'transport' ? `/transport?type=${subcat.id}` :
-                                   `/category/${category.id}/${subcat.id}`}
-                              className="flex items-center p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                            >
-                              <DynamicIcon name={subcat.icon} className="h-4 w-4 mr-2" />
-                              {subcat.name[language]}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  {categories.map((category) => {
+                    const subcategories = category.id === 'kids' || category.id === 'pharmacy' 
+                      ? getSubcategories(category.id)
+                      : category.subcategories || [];
+
+                    return (
+                      <div key={category.id} className="border-b border-gray-100 last:border-b-0">
+                        {/* Main Category */}
+                        <Link
+                          to={category.id === 'property' ? '/property' : 
+                               category.id === 'transport' ? '/transport' : 
+                               `/category/${category.id}`}
+                          className="flex items-center p-3 hover:bg-gray-50 transition-colors"
+                        >
+                          <DynamicIcon name={category.icon} className="h-5 w-5 mr-3 text-gray-600" />
+                          <span className="font-medium text-gray-900">
+                            {category.name[language]}
+                          </span>
+                        </Link>
+                        
+                        {/* Subcategories */}
+                        {subcategories && subcategories.length > 0 && (
+                          <div className="pl-8 pb-2">
+                            {subcategories.map((subcat) => (
+                              <Link
+                                key={subcat.id}
+                                to={category.id === 'property' ? `/property?type=${subcat.id}` :
+                                     category.id === 'transport' ? `/transport?type=${subcat.id}` :
+                                     `/category/${category.id}/${subcat.id}`}
+                                className="flex items-center p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                              >
+                                <DynamicIcon name={subcat.icon} className="h-4 w-4 mr-2" />
+                                {subcat.name[language]}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </PopoverContent>
             </Popover>
@@ -180,31 +209,37 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-gray-200 py-4">
             <div className="space-y-2">
-              {categories.map((category) => (
-                <div key={category.id}>
-                  <Link
-                    to={category.id === 'property' ? '/property' : 
-                         category.id === 'transport' ? '/transport' : 
-                         `/category/${category.id}`}
-                    className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {category.name[language]}
-                  </Link>
-                  {category.subcategories && category.subcategories.map((subcat) => (
+              {categories.map((category) => {
+                const subcategories = category.id === 'kids' || category.id === 'pharmacy' 
+                  ? getSubcategories(category.id)
+                  : category.subcategories || [];
+
+                return (
+                  <div key={category.id}>
                     <Link
-                      key={subcat.id}
-                      to={category.id === 'property' ? `/property?type=${subcat.id}` :
-                           category.id === 'transport' ? `/transport?type=${subcat.id}` :
-                           `/category/${category.id}/${subcat.id}`}
-                      className="block px-8 py-1 text-sm text-gray-500 hover:text-blue-600"
+                      to={category.id === 'property' ? '/property' : 
+                           category.id === 'transport' ? '/transport' : 
+                           `/category/${category.id}`}
+                      className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      {subcat.name[language]}
+                      {category.name[language]}
                     </Link>
-                  ))}
-                </div>
-              ))}
+                    {subcategories && subcategories.map((subcat) => (
+                      <Link
+                        key={subcat.id}
+                        to={category.id === 'property' ? `/property?type=${subcat.id}` :
+                             category.id === 'transport' ? `/transport?type=${subcat.id}` :
+                             `/category/${category.id}/${subcat.id}`}
+                        className="block px-8 py-1 text-sm text-gray-500 hover:text-blue-600"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {subcat.name[language]}
+                      </Link>
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

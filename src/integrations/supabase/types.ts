@@ -313,6 +313,47 @@ export type Database = {
           },
         ]
       }
+      children_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          name_kz?: string
+          name_ru?: string
+          parent_id?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "children_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           id: number
@@ -996,6 +1037,47 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "municipal_brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pharmacy_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          name_kz?: string
+          name_ru?: string
+          parent_id?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pharmacy_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "pharmacy_categories"
             referencedColumns: ["id"]
           },
         ]
