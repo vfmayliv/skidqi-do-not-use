@@ -9,6 +9,7 @@ import { mockListings } from '@/data/mockListings';
 import { getCategoryConfig } from '@/categories/categoryRegistry';
 import { ListingCard } from '@/components/ListingCard';
 import { UniversalFilters, UniversalFiltersData } from '@/components/filters/UniversalFilters';
+import { CategoryTreeFilter } from '@/components/filters/CategoryTreeFilter';
 import { useUniversalFiltersStore } from '@/stores/useUniversalFiltersStore';
 
 export function CategoryPage() {
@@ -16,6 +17,7 @@ export function CategoryPage() {
   const [searchParams] = useSearchParams();
   const { language, t } = useAppWithTranslations();
   const [filteredListings, setFilteredListings] = useState(mockListings);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | undefined>();
   const { filters, setFilters, resetFilters } = useUniversalFiltersStore();
 
   useEffect(() => {
@@ -26,8 +28,8 @@ export function CategoryPage() {
       newListings = newListings.filter(listing => listing.categoryId === categoryId);
     }
     
-    // Apply subcategory filter if present in URL params
-    const subcategoryId = searchParams.get('subcategory');
+    // Apply subcategory filter if present in URL params or selected
+    const subcategoryId = searchParams.get('subcategory') || selectedSubcategory;
     if (subcategoryId) {
       newListings = newListings.filter(listing => listing.subcategoryId === subcategoryId);
     }
@@ -53,7 +55,7 @@ export function CategoryPage() {
     // Location filters would be applied here based on listing location data
     
     setFilteredListings(newListings);
-  }, [categoryId, searchParams, filters]);
+  }, [categoryId, searchParams, selectedSubcategory, filters]);
 
   const config = categoryId ? getCategoryConfig(categoryId) : null;
 
@@ -61,6 +63,9 @@ export function CategoryPage() {
   const shouldShowUniversalFilters = categoryId && 
     categoryId !== 'transport' && 
     categoryId !== 'property';
+
+  // Show category tree for kids and pharmacy categories
+  const shouldShowCategoryTree = categoryId === 'kids' || categoryId === 'pharmacy';
 
   // Fall back to default components if no config is found
   const FiltersComponent = config?.filtersComponent;
@@ -83,10 +88,18 @@ export function CategoryPage() {
       ? (language === 'ru' ? 'Недвижимость' : 'Жылжымайтын мүлік')
       : categoryId === 'transport'
       ? (language === 'ru' ? 'Транспорт' : 'Көлік')
+      : categoryId === 'kids'
+      ? (language === 'ru' ? 'Детям' : 'Балаларға')
+      : categoryId === 'pharmacy'
+      ? (language === 'ru' ? 'Аптеки' : 'Дәріханалар')
       : (language === 'ru' ? 'Товары' : 'Тауарлар'));
 
   const handleSearch = () => {
-    console.log('Search triggered with filters:', filters);
+    console.log('Search triggered with filters:', filters, 'subcategory:', selectedSubcategory);
+  };
+
+  const handleSubcategorySelect = (subcategoryId: string) => {
+    setSelectedSubcategory(subcategoryId === selectedSubcategory ? undefined : subcategoryId);
   };
 
   return (
@@ -99,15 +112,28 @@ export function CategoryPage() {
           
           <div className="flex gap-8">
             {/* Filters Sidebar */}
-            <div className="w-80 flex-shrink-0">
-              {shouldShowUniversalFilters ? (
+            <div className="w-80 flex-shrink-0 space-y-6">
+              {/* Category Tree Filter for kids and pharmacy */}
+              {shouldShowCategoryTree && (
+                <CategoryTreeFilter
+                  categoryId={categoryId}
+                  onCategorySelect={handleSubcategorySelect}
+                  selectedCategoryId={selectedSubcategory}
+                />
+              )}
+              
+              {/* Universal Filters */}
+              {shouldShowUniversalFilters && (
                 <UniversalFilters
                   filters={filters}
                   onFilterChange={setFilters}
                   onReset={resetFilters}
                   onSearch={handleSearch}
                 />
-              ) : FiltersComponent ? (
+              )}
+              
+              {/* Custom Category Filters */}
+              {FiltersComponent && (
                 <FiltersComponent
                   filters={{}}
                   onFilterChange={() => {}}
@@ -122,7 +148,7 @@ export function CategoryPage() {
                   brands={[]}
                   activeFiltersCount={0}
                 />
-              ) : null}
+              )}
             </div>
             
             {/* Listings Content */}

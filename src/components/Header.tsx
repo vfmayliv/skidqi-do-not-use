@@ -40,21 +40,25 @@ export function Header() {
     return selectedCity[language];
   };
 
-  // Get subcategories for specific categories
+  // Get subcategories for specific categories (only first level)
   const getSubcategories = (categoryId: string) => {
     if (categoryId === 'kids') {
-      return childrenCategories.map(cat => ({
-        id: cat.slug,
-        name: { ru: cat.name_ru, kz: cat.name_kz },
-        icon: 'Baby'
-      }));
+      return childrenCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Baby'
+        }));
     }
     if (categoryId === 'pharmacy') {
-      return pharmacyCategories.map(cat => ({
-        id: cat.slug,
-        name: { ru: cat.name_ru, kz: cat.name_kz },
-        icon: 'Pill'
-      }));
+      return pharmacyCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Pill'
+        }));
     }
     return [];
   };
@@ -66,7 +70,15 @@ export function Header() {
           {/* Logo and Categories Menu */}
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center space-x-2">
-              <img src="/logo.png" alt="Logo" className="h-8 w-8" />
+              <img src="/logo.png" alt="Logo" className="h-8 w-8" onError={(e) => {
+                // Fallback if logo doesn't load
+                e.currentTarget.style.display = 'none';
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'block';
+              }} />
+              <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ display: 'none' }}>
+                L
+              </div>
               <span className="text-xl font-bold text-blue-600">{t('siteName')}</span>
             </Link>
             

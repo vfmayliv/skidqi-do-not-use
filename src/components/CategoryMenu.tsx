@@ -23,21 +23,25 @@ export function CategoryMenu() {
     return IconComponent ? <IconComponent className={className} /> : null;
   };
 
-  // Get subcategories for a specific category
+  // Get subcategories for a specific category (only first level)
   const getSubcategories = (categoryId: string) => {
     if (categoryId === 'kids') {
-      return childrenCategories.map(cat => ({
-        id: cat.slug,
-        name: { ru: cat.name_ru, kz: cat.name_kz },
-        icon: 'Baby'
-      }));
+      return childrenCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Baby'
+        }));
     }
     if (categoryId === 'pharmacy') {
-      return pharmacyCategories.map(cat => ({
-        id: cat.slug,
-        name: { ru: cat.name_ru, kz: cat.name_kz },
-        icon: 'Pill'
-      }));
+      return pharmacyCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Pill'
+        }));
     }
     return [];
   };
