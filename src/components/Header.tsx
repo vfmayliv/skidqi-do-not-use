@@ -275,16 +275,49 @@ export function Header() {
                     <div className="px-4 py-2 font-medium">
                       {language === 'ru' ? 'Категории' : 'Санаттар'}
                     </div>
-                    {categoriesReady && categories.map((category) => (
-                      <Link 
-                        key={category.id}
-                        to={`/category/${category.id}`} 
-                        className="flex px-4 py-2 hover:bg-accent"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {category.name[language]}
-                      </Link>
-                    ))}
+                    {/* Специальные категории с отдельными страницами */}
+                    <Link 
+                      to="/transport" 
+                      className="flex px-4 py-2 hover:bg-accent font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {language === 'ru' ? 'Транспорт' : 'Көлік'}
+                    </Link>
+                    <Link 
+                      to="/electronics" 
+                      className="flex px-4 py-2 hover:bg-accent font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {language === 'ru' ? 'Электроника' : 'Электроника'}
+                    </Link>
+                    <Link 
+                      to="/fashion" 
+                      className="flex px-4 py-2 hover:bg-accent font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {language === 'ru' ? 'Мода и одежда' : 'Сән және киім'}
+                    </Link>
+                    <Link 
+                      to="/pets" 
+                      className="flex px-4 py-2 hover:bg-accent font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {language === 'ru' ? 'Домашние животные' : 'Үй жануарлары'}
+                    </Link>
+                    
+                    {/* Обычные категории */}
+                    <div className="mt-2 pt-2 border-t">
+                      {categoriesReady && categories.map((category) => (
+                        <Link 
+                          key={category.id}
+                          to={`/category/${category.id}`} 
+                          className="flex px-4 py-2 hover:bg-accent"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          {category.name[language]}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                   
                   {/* Профиль и настройки - только для авторизованных */}
@@ -363,6 +396,38 @@ export function Header() {
                         )}
                       </div>
                     ))}
+                    
+                    {/* Специальные категории с отдельными страницами */}
+                    <div className="mt-4 pt-4 border-t">
+                      <Link
+                        to="/transport"
+                        className="flex items-center px-3 py-2 rounded-md hover:bg-slate-50"
+                        onClick={() => setShowCategoryMenu(false)}
+                      >
+                        {language === 'ru' ? 'Транспорт' : 'Көлік'}
+                      </Link>
+                      <Link
+                        to="/electronics"
+                        className="flex items-center px-3 py-2 rounded-md hover:bg-slate-50"
+                        onClick={() => setShowCategoryMenu(false)}
+                      >
+                        {language === 'ru' ? 'Электроника' : 'Электроника'}
+                      </Link>
+                      <Link
+                        to="/fashion"
+                        className="flex items-center px-3 py-2 rounded-md hover:bg-slate-50"
+                        onClick={() => setShowCategoryMenu(false)}
+                      >
+                        {language === 'ru' ? 'Мода и одежда' : 'Сән және киім'}
+                      </Link>
+                      <Link
+                        to="/pets"
+                        className="flex items-center px-3 py-2 rounded-md hover:bg-slate-50"
+                        onClick={() => setShowCategoryMenu(false)}
+                      >
+                        {language === 'ru' ? 'Домашние животные' : 'Үй жануарлары'}
+                      </Link>
+                    </div>
                   </div>
                   
                   {/* Правая колонка с подкатегориями */}

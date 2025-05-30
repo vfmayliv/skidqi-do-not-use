@@ -22,6 +22,9 @@ import ConfirmEmail from '@/pages/ConfirmEmail';
 import { AuthProtection } from '@/components/AuthProtection';
 import { PropertyPage } from '@/pages/PropertyPage';
 import { TransportPage } from '@/pages/TransportPage';
+import ElectronicsPage from '@/pages/ElectronicsPage';
+import FashionPage from '@/pages/FashionPage';
+import PetsPage from '@/pages/PetsPage';
 import { AppProvider } from '@/contexts/AppContext';
 import { SearchProvider } from '@/contexts/SearchContext';
 
@@ -58,6 +61,9 @@ const App: React.FC = () => {
             {/* Categories with custom pages */}
             <Route path="/property" element={<PropertyPage />} />
             <Route path="/transport" element={<TransportPage />} />
+            <Route path="/electronics" element={<ElectronicsPage />} />
+            <Route path="/fashion" element={<FashionPage />} />
+            <Route path="/pets" element={<PetsPage />} />
             
             {/* Legacy listing route */}
             <Route path="/listing/:listingId" element={<ListingDetail />} />

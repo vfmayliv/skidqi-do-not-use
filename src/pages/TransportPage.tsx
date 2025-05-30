@@ -566,6 +566,23 @@ export function TransportPage() {
                   onReset={resetFilters}
                   onSearch={handleSearch}
                   activeFiltersCount={activeFiltersCount}
+                  vehicleType={filters.vehicleType || 'passenger'}
+                  availableFilters={{
+                    brands: ['Toyota', 'Honda', 'Hyundai', 'Kia', 'Nissan', 'Mitsubishi', 'Lexus', 'BMW', 'Mercedes-Benz'],
+                    models: {
+                      'Toyota': ['Camry', 'Corolla', 'RAV4', 'Land Cruiser'],
+                      'Honda': ['CR-V', 'Civic', 'Accord'],
+                      'Hyundai': ['Tucson', 'Santa Fe', 'Accent'],
+                      'Kia': ['Sportage', 'Sorento', 'Cerato'],
+                      'Nissan': ['X-Trail', 'Qashqai', 'Patrol'],
+                      'Mitsubishi': ['Outlander', 'Pajero', 'ASX'],
+                      'Lexus': ['RX', 'LX', 'ES'],
+                      'BMW': ['X5', 'X3', '5 Series'],
+                      'Mercedes-Benz': ['GLE', 'E-Class', 'C-Class']
+                    },
+                    years: Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i),
+                    bodyTypes: ['Седан', 'Хэтчбек', 'Универсал', 'Кроссовер', 'Внедорожник', 'Минивэн']
+                  }}
                 />
               </div>
             </div>
