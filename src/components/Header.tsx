@@ -10,6 +10,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useChildrenCategories } from '@/hooks/useChildrenCategories';
 import { usePharmacyCategories } from '@/hooks/usePharmacyCategories';
+import { useFashionCategories } from '@/hooks/useFashionCategories';
+import { useFoodCategories } from '@/hooks/useFoodCategories';
+import { useTechElectronicsCategories } from '@/hooks/useTechElectronicsCategories';
 import * as LucideIcons from 'lucide-react';
 
 export function Header() {
@@ -19,6 +22,9 @@ export function Header() {
   const navigate = useNavigate();
   const { categories: childrenCategories } = useChildrenCategories();
   const { categories: pharmacyCategories } = usePharmacyCategories();
+  const { categories: fashionCategories } = useFashionCategories();
+  const { categories: foodCategories } = useFoodCategories();
+  const { categories: techElectronicsCategories } = useTechElectronicsCategories();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +66,33 @@ export function Header() {
           icon: 'Pill'
         }));
     }
+    if (categoryId === 'fashion') {
+      return fashionCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Shirt'
+        }));
+    }
+    if (categoryId === 'food') {
+      return foodCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Apple'
+        }));
+    }
+    if (categoryId === 'electronics') {
+      return techElectronicsCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Smartphone'
+        }));
+    }
     return [];
   };
 
@@ -92,7 +125,11 @@ export function Header() {
               <PopoverContent className="w-96 p-0" align="start">
                 <div className="grid grid-cols-1 max-h-96 overflow-y-auto">
                   {categories.map((category) => {
-                    const subcategories = category.id === 'kids' || category.id === 'pharmacy' 
+                    const subcategories = category.id === 'kids' || 
+                      category.id === 'pharmacy' || 
+                      category.id === 'fashion' || 
+                      category.id === 'food' || 
+                      category.id === 'electronics'
                       ? getSubcategories(category.id)
                       : category.subcategories || [];
 
@@ -102,6 +139,8 @@ export function Header() {
                         <Link
                           to={category.id === 'property' ? '/property' : 
                                category.id === 'transport' ? '/transport' : 
+                               category.id === 'electronics' ? '/electronics' :
+                               category.id === 'fashion' ? '/fashion' :
                                `/category/${category.id}`}
                           className="flex items-center p-3 hover:bg-gray-50 transition-colors"
                         >
@@ -119,6 +158,8 @@ export function Header() {
                                 key={subcat.id}
                                 to={category.id === 'property' ? `/property?type=${subcat.id}` :
                                      category.id === 'transport' ? `/transport?type=${subcat.id}` :
+                                     category.id === 'electronics' ? `/electronics?subcategory=${subcat.id}` :
+                                     category.id === 'fashion' ? `/fashion?subcategory=${subcat.id}` :
                                      `/category/${category.id}/${subcat.id}`}
                                 className="flex items-center p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                               >
@@ -222,7 +263,11 @@ export function Header() {
           <div className="md:hidden border-t border-gray-200 py-4">
             <div className="space-y-2">
               {categories.map((category) => {
-                const subcategories = category.id === 'kids' || category.id === 'pharmacy' 
+                const subcategories = category.id === 'kids' || 
+                  category.id === 'pharmacy' || 
+                  category.id === 'fashion' || 
+                  category.id === 'food' || 
+                  category.id === 'electronics'
                   ? getSubcategories(category.id)
                   : category.subcategories || [];
 
@@ -231,6 +276,8 @@ export function Header() {
                     <Link
                       to={category.id === 'property' ? '/property' : 
                            category.id === 'transport' ? '/transport' : 
+                           category.id === 'electronics' ? '/electronics' :
+                           category.id === 'fashion' ? '/fashion' :
                            `/category/${category.id}`}
                       className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50"
                       onClick={() => setIsMenuOpen(false)}
@@ -242,6 +289,8 @@ export function Header() {
                         key={subcat.id}
                         to={category.id === 'property' ? `/property?type=${subcat.id}` :
                              category.id === 'transport' ? `/transport?type=${subcat.id}` :
+                             category.id === 'electronics' ? `/electronics?subcategory=${subcat.id}` :
+                             category.id === 'fashion' ? `/fashion?subcategory=${subcat.id}` :
                              `/category/${category.id}/${subcat.id}`}
                         className="block px-8 py-1 text-sm text-gray-500 hover:text-blue-600"
                         onClick={() => setIsMenuOpen(false)}

@@ -4,6 +4,9 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 import { useChildrenCategories } from '@/hooks/useChildrenCategories';
 import { usePharmacyCategories } from '@/hooks/usePharmacyCategories';
+import { useFashionCategories } from '@/hooks/useFashionCategories';
+import { useFoodCategories } from '@/hooks/useFoodCategories';
+import { useTechElectronicsCategories } from '@/hooks/useTechElectronicsCategories';
 
 interface CategoryTreeNode {
   id: string;
@@ -23,6 +26,9 @@ export function CategoryTreeFilter({ categoryId, onCategorySelect, selectedCateg
   const { language } = useAppWithTranslations();
   const { categories: childrenCategories } = useChildrenCategories();
   const { categories: pharmacyCategories } = usePharmacyCategories();
+  const { categories: fashionCategories } = useFashionCategories();
+  const { categories: foodCategories } = useFoodCategories();
+  const { categories: techElectronicsCategories } = useTechElectronicsCategories();
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
   // Build tree structure from flat array
@@ -119,6 +125,12 @@ export function CategoryTreeFilter({ categoryId, onCategorySelect, selectedCateg
     categories = childrenCategories;
   } else if (categoryId === 'pharmacy') {
     categories = pharmacyCategories;
+  } else if (categoryId === 'fashion') {
+    categories = fashionCategories;
+  } else if (categoryId === 'food') {
+    categories = foodCategories;
+  } else if (categoryId === 'electronics') {
+    categories = techElectronicsCategories;
   }
 
   if (categories.length === 0) {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useAppWithTranslations } from '@/stores/useAppStore';
@@ -59,13 +58,17 @@ export function CategoryPage() {
 
   const config = categoryId ? getCategoryConfig(categoryId) : null;
 
+  // Show category tree for kids, pharmacy, fashion, food, and electronics categories
+  const shouldShowCategoryTree = categoryId === 'kids' || 
+    categoryId === 'pharmacy' || 
+    categoryId === 'fashion' || 
+    categoryId === 'food' || 
+    categoryId === 'electronics';
+
   // Skip universal filters for transport and property categories
   const shouldShowUniversalFilters = categoryId && 
     categoryId !== 'transport' && 
     categoryId !== 'property';
-
-  // Show category tree for kids and pharmacy categories
-  const shouldShowCategoryTree = categoryId === 'kids' || categoryId === 'pharmacy';
 
   // Fall back to default components if no config is found
   const FiltersComponent = config?.filtersComponent;
@@ -92,6 +95,12 @@ export function CategoryPage() {
       ? (language === 'ru' ? 'Детям' : 'Балаларға')
       : categoryId === 'pharmacy'
       ? (language === 'ru' ? 'Аптеки' : 'Дәріханалар')
+      : categoryId === 'fashion'
+      ? (language === 'ru' ? 'Мода и стиль' : 'Сән және стиль')
+      : categoryId === 'food'
+      ? (language === 'ru' ? 'Продукты питания' : 'Азық-түлік')
+      : categoryId === 'electronics'
+      ? (language === 'ru' ? 'Техника и электроника' : 'Техника және электроника')
       : (language === 'ru' ? 'Товары' : 'Тауарлар'));
 
   const handleSearch = () => {
@@ -113,7 +122,7 @@ export function CategoryPage() {
           <div className="flex gap-8">
             {/* Filters Sidebar */}
             <div className="w-80 flex-shrink-0 space-y-6">
-              {/* Category Tree Filter for kids and pharmacy */}
+              {/* Category Tree Filter for kids, pharmacy, fashion, food, and electronics */}
               {shouldShowCategoryTree && (
                 <CategoryTreeFilter
                   categoryId={categoryId}

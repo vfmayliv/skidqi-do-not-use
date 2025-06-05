@@ -605,6 +605,50 @@ export type Database = {
           },
         ]
       }
+      fashion_style_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id: string | null
+          parent_name_ru: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          name_kz?: string
+          name_ru?: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fashion_style_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "fashion_style_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string | null
@@ -630,6 +674,50 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      food_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id: string | null
+          parent_name_ru: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          name_kz?: string
+          name_ru?: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "food_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -1267,6 +1355,50 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "snowmobile_brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tech_electronics_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id: string | null
+          parent_name_ru: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          name_kz?: string
+          name_ru?: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tech_electronics_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "tech_electronics_categories"
             referencedColumns: ["id"]
           },
         ]
