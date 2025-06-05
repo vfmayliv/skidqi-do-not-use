@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useAppWithTranslations } from '@/stores/useAppStore';
@@ -58,12 +59,15 @@ export function CategoryPage() {
 
   const config = categoryId ? getCategoryConfig(categoryId) : null;
 
-  // Show category tree for kids, pharmacy, fashion, food, and electronics categories
+  // Show category tree for categories with Supabase subcategories
   const shouldShowCategoryTree = categoryId === 'kids' || 
     categoryId === 'pharmacy' || 
     categoryId === 'fashion' || 
     categoryId === 'food' || 
-    categoryId === 'electronics';
+    categoryId === 'electronics' ||
+    categoryId === 'home' ||
+    categoryId === 'services' ||
+    categoryId === 'pets';
 
   // Skip universal filters for transport and property categories
   const shouldShowUniversalFilters = categoryId && 
@@ -101,6 +105,12 @@ export function CategoryPage() {
       ? (language === 'ru' ? 'Продукты питания' : 'Азық-түлік')
       : categoryId === 'electronics'
       ? (language === 'ru' ? 'Техника и электроника' : 'Техника және электроника')
+      : categoryId === 'home'
+      ? (language === 'ru' ? 'Все для дома и дачи' : 'Үй мен дача үшін бәрі')
+      : categoryId === 'services'
+      ? (language === 'ru' ? 'Услуги' : 'Қызметтер')
+      : categoryId === 'pets'
+      ? (language === 'ru' ? 'Зоотовары' : 'Жануарлар тауарлары')
       : (language === 'ru' ? 'Товары' : 'Тауарлар'));
 
   const handleSearch = () => {
@@ -122,7 +132,7 @@ export function CategoryPage() {
           <div className="flex gap-8">
             {/* Filters Sidebar */}
             <div className="w-80 flex-shrink-0 space-y-6">
-              {/* Category Tree Filter for kids, pharmacy, fashion, food, and electronics */}
+              {/* Category Tree Filter */}
               {shouldShowCategoryTree && (
                 <CategoryTreeFilter
                   categoryId={categoryId}

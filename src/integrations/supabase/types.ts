@@ -722,6 +722,50 @@ export type Database = {
           },
         ]
       }
+      home_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id: string | null
+          parent_name_ru: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          name_kz?: string
+          name_ru?: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "home_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       light_commercial_brands: {
         Row: {
           created_at: string
@@ -1129,6 +1173,50 @@ export type Database = {
           },
         ]
       }
+      pet_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id: string | null
+          parent_name_ru: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          name_kz?: string
+          name_ru?: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "pet_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pharmacy_categories: {
         Row: {
           created_at: string | null
@@ -1290,6 +1378,50 @@ export type Database = {
             columns: ["brand_id"]
             isOneToOne: false
             referencedRelation: "scooter_brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id: string | null
+          parent_name_ru: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          name_kz?: string
+          name_ru?: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "services_categories"
             referencedColumns: ["id"]
           },
         ]

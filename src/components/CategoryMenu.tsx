@@ -8,11 +8,23 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useChildrenCategories } from '@/hooks/useChildrenCategories';
 import { usePharmacyCategories } from '@/hooks/usePharmacyCategories';
+import { useFashionCategories } from '@/hooks/useFashionCategories';
+import { useFoodCategories } from '@/hooks/useFoodCategories';
+import { useTechElectronicsCategories } from '@/hooks/useTechElectronicsCategories';
+import { useHomeCategories } from '@/hooks/useHomeCategories';
+import { useServicesCategories } from '@/hooks/useServicesCategories';
+import { usePetCategories } from '@/hooks/usePetCategories';
 
 export function CategoryMenu() {
   const { language, t } = useAppWithTranslations();
   const { categories: childrenCategories, loading: childrenLoading } = useChildrenCategories();
   const { categories: pharmacyCategories, loading: pharmacyLoading } = usePharmacyCategories();
+  const { categories: fashionCategories, loading: fashionLoading } = useFashionCategories();
+  const { categories: foodCategories, loading: foodLoading } = useFoodCategories();
+  const { categories: techElectronicsCategories, loading: techElectronicsLoading } = useTechElectronicsCategories();
+  const { categories: homeCategories, loading: homeLoading } = useHomeCategories();
+  const { categories: servicesCategories, loading: servicesLoading } = useServicesCategories();
+  const { categories: petCategories, loading: petLoading } = usePetCategories();
 
   // Helper function to dynamically render icons from Lucide
   const DynamicIcon = ({ name, className }: { name: string, className?: string }) => {
@@ -43,7 +55,76 @@ export function CategoryMenu() {
           icon: 'Pill'
         }));
     }
+    if (categoryId === 'fashion') {
+      return fashionCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Shirt'
+        }));
+    }
+    if (categoryId === 'food') {
+      return foodCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Apple'
+        }));
+    }
+    if (categoryId === 'electronics') {
+      return techElectronicsCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Smartphone'
+        }));
+    }
+    if (categoryId === 'home') {
+      return homeCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Home'
+        }));
+    }
+    if (categoryId === 'services') {
+      return servicesCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Settings'
+        }));
+    }
+    if (categoryId === 'pets') {
+      return petCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Heart'
+        }));
+    }
     return [];
+  };
+
+  // Get loading state for a specific category
+  const isLoading = (categoryId: string) => {
+    switch (categoryId) {
+      case 'kids': return childrenLoading;
+      case 'pharmacy': return pharmacyLoading;
+      case 'fashion': return fashionLoading;
+      case 'food': return foodLoading;
+      case 'electronics': return techElectronicsLoading;
+      case 'home': return homeLoading;
+      case 'services': return servicesLoading;
+      case 'pets': return petLoading;
+      default: return false;
+    }
   };
 
   return (
@@ -77,13 +158,12 @@ export function CategoryMenu() {
             );
           }
           
-          // For categories with subcategories (including kids and pharmacy from Supabase)
+          // For categories with subcategories (including all Supabase categories)
           const hasSubcategories = (category.subcategories && category.subcategories.length > 0) || 
-                                  category.id === 'kids' || 
-                                  category.id === 'pharmacy';
+                                  ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets'].includes(category.id);
           
           if (hasSubcategories) {
-            const subcategories = category.id === 'kids' || category.id === 'pharmacy' 
+            const subcategories = ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets'].includes(category.id)
               ? getSubcategories(category.id)
               : category.subcategories || [];
 
@@ -111,7 +191,7 @@ export function CategoryMenu() {
                       </span>
                     </Link>
                     
-                    {(category.id === 'kids' && childrenLoading) || (category.id === 'pharmacy' && pharmacyLoading) ? (
+                    {isLoading(category.id) ? (
                       <div className="p-2 text-sm text-gray-500">Загрузка...</div>
                     ) : (
                       subcategories.map((subcat) => (
