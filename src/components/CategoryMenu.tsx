@@ -39,11 +39,11 @@ export function CategoryMenu() {
     return IconComponent ? <IconComponent className={className} /> : null;
   };
 
-  // Get subcategories for a specific category (only first level)
+  // Get subcategories for a specific category (only level 0)
   const getSubcategories = (categoryId: string) => {
     if (categoryId === 'kids') {
       return childrenCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -52,7 +52,7 @@ export function CategoryMenu() {
     }
     if (categoryId === 'pharmacy') {
       return pharmacyCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -61,7 +61,7 @@ export function CategoryMenu() {
     }
     if (categoryId === 'fashion') {
       return fashionCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -70,7 +70,7 @@ export function CategoryMenu() {
     }
     if (categoryId === 'food') {
       return foodCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -79,7 +79,7 @@ export function CategoryMenu() {
     }
     if (categoryId === 'electronics') {
       return techElectronicsCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -88,7 +88,7 @@ export function CategoryMenu() {
     }
     if (categoryId === 'home') {
       return homeCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -97,7 +97,7 @@ export function CategoryMenu() {
     }
     if (categoryId === 'services') {
       return servicesCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -106,16 +106,16 @@ export function CategoryMenu() {
     }
     if (categoryId === 'pets') {
       return petCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
-          id: cat.slug,
+          id: cat.slug || cat.id,
           name: { ru: cat.name_ru, kz: cat.name_kz },
           icon: 'Heart'
         }));
     }
     if (categoryId === 'hobby') {
       return hobbiesCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug || cat.id,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -124,7 +124,7 @@ export function CategoryMenu() {
     }
     if (categoryId === 'beauty') {
       return beautyCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },

@@ -23,6 +23,7 @@ export function Header() {
   const { language, setLanguage, selectedCity, t } = useAppWithTranslations();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const navigate = useNavigate();
   const { categories: childrenCategories } = useChildrenCategories();
   const { categories: pharmacyCategories } = usePharmacyCategories();
@@ -55,11 +56,11 @@ export function Header() {
     return selectedCity[language];
   };
 
-  // Get subcategories for specific categories (only first level)
+  // Get subcategories for specific categories (only level 0)
   const getSubcategories = (categoryId: string) => {
     if (categoryId === 'kids') {
       return childrenCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -68,7 +69,7 @@ export function Header() {
     }
     if (categoryId === 'pharmacy') {
       return pharmacyCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -77,7 +78,7 @@ export function Header() {
     }
     if (categoryId === 'fashion') {
       return fashionCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -86,7 +87,7 @@ export function Header() {
     }
     if (categoryId === 'food') {
       return foodCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -95,7 +96,7 @@ export function Header() {
     }
     if (categoryId === 'electronics') {
       return techElectronicsCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -104,7 +105,7 @@ export function Header() {
     }
     if (categoryId === 'home') {
       return homeCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -113,7 +114,7 @@ export function Header() {
     }
     if (categoryId === 'services') {
       return servicesCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -122,16 +123,16 @@ export function Header() {
     }
     if (categoryId === 'pets') {
       return petCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
-          id: cat.slug,
+          id: cat.slug || cat.id,
           name: { ru: cat.name_ru, kz: cat.name_kz },
           icon: 'Heart'
         }));
     }
     if (categoryId === 'hobby') {
       return hobbiesCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug || cat.id,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -140,7 +141,7 @@ export function Header() {
     }
     if (categoryId === 'beauty') {
       return beautyCategories
-        .filter(cat => cat.level === 1) // Only first level
+        .filter(cat => cat.level === 0) // Only level 0
         .map(cat => ({
           id: cat.slug,
           name: { ru: cat.name_ru, kz: cat.name_kz },
@@ -178,35 +179,35 @@ export function Header() {
               </PopoverTrigger>
               <PopoverContent className="w-96 p-0" align="start">
                 <div className="grid grid-cols-1 max-h-96 overflow-y-auto">
-                  {categories.map((category) => {
-                    const subcategories = ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets', 'hobby', 'beauty'].includes(category.id)
-                      ? getSubcategories(category.id)
-                      : category.subcategories || [];
-
-                    return (
-                      <div key={category.id} className="border-b border-gray-100 last:border-b-0">
-                        {/* Main Category */}
-                        <Link
-                          to={category.id === 'property' ? '/property' : 
-                               category.id === 'transport' ? '/transport' : 
-                               `/category/${category.id}`}
-                          className="flex items-center p-3 hover:bg-gray-50 transition-colors"
-                        >
-                          <DynamicIcon name={category.icon} className="h-5 w-5 mr-3 text-gray-600" />
-                          <span className="font-medium text-gray-900">
-                            {category.name[language]}
-                          </span>
-                        </Link>
-                        
-                        {/* Subcategories */}
-                        {subcategories && subcategories.length > 0 && (
-                          <div className="pl-8 pb-2">
-                            {subcategories.map((subcat) => (
+                  {categories.map((category) => (
+                    <div 
+                      key={category.id} 
+                      className="relative"
+                      onMouseEnter={() => setHoveredCategory(category.id)}
+                      onMouseLeave={() => setHoveredCategory(null)}
+                    >
+                      {/* Main Category */}
+                      <Link
+                        to={category.id === 'property' ? '/property' : 
+                             category.id === 'transport' ? '/transport' : 
+                             `/category/${category.id}`}
+                        className="flex items-center p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                      >
+                        <DynamicIcon name={category.icon} className="h-5 w-5 mr-3 text-gray-600" />
+                        <span className="font-medium text-gray-900">
+                          {category.name[language]}
+                        </span>
+                      </Link>
+                      
+                      {/* Subcategories on hover - only for categories with Supabase data */}
+                      {hoveredCategory === category.id && 
+                       ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets', 'hobby', 'beauty'].includes(category.id) && (
+                        <div className="absolute left-full top-0 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                          <div className="p-2">
+                            {getSubcategories(category.id).map((subcat) => (
                               <Link
                                 key={subcat.id}
-                                to={category.id === 'property' ? `/property?type=${subcat.id}` :
-                                     category.id === 'transport' ? `/transport?type=${subcat.id}` :
-                                     `/category/${category.id}/${subcat.id}`}
+                                to={`/category/${category.id}/${subcat.id}`}
                                 className="flex items-center p-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                               >
                                 <DynamicIcon name={subcat.icon} className="h-4 w-4 mr-2" />
@@ -214,10 +215,10 @@ export function Header() {
                               </Link>
                             ))}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </PopoverContent>
             </Popover>
@@ -308,37 +309,31 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-gray-200 py-4">
             <div className="space-y-2">
-              {categories.map((category) => {
-                const subcategories = ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets', 'hobby', 'beauty'].includes(category.id)
-                  ? getSubcategories(category.id)
-                  : category.subcategories || [];
-
-                return (
-                  <div key={category.id}>
+              {categories.map((category) => (
+                <div key={category.id}>
+                  <Link
+                    to={category.id === 'property' ? '/property' : 
+                         category.id === 'transport' ? '/transport' : 
+                         `/category/${category.id}`}
+                    className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {category.name[language]}
+                  </Link>
+                  {/* Only show level 0 subcategories in mobile */}
+                  {['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets', 'hobby', 'beauty'].includes(category.id) && 
+                   getSubcategories(category.id).map((subcat) => (
                     <Link
-                      to={category.id === 'property' ? '/property' : 
-                           category.id === 'transport' ? '/transport' : 
-                           `/category/${category.id}`}
-                      className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                      key={subcat.id}
+                      to={`/category/${category.id}/${subcat.id}`}
+                      className="block px-8 py-1 text-sm text-gray-500 hover:text-blue-600"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      {category.name[language]}
+                      {subcat.name[language]}
                     </Link>
-                    {subcategories && subcategories.map((subcat) => (
-                      <Link
-                        key={subcat.id}
-                        to={category.id === 'property' ? `/property?type=${subcat.id}` :
-                             category.id === 'transport' ? `/transport?type=${subcat.id}` :
-                             `/category/${category.id}/${subcat.id}`}
-                        className="block px-8 py-1 text-sm text-gray-500 hover:text-blue-600"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {subcat.name[language]}
-                      </Link>
-                    ))}
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         )}
