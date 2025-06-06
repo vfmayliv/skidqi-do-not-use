@@ -139,6 +139,64 @@ export type Database = {
           },
         ]
       }
+      beauty_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id: string | null
+          parent_name_ru: string | null
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          level?: number
+          name_kz?: string
+          name_ru?: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beauty_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "beauty_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beauty_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "beauty_categories_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beauty_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "beauty_categories_view"
+            referencedColumns: ["parent_id"]
+          },
+        ]
+      }
       bulldozer_brands: {
         Row: {
           created_at: string
@@ -722,7 +780,7 @@ export type Database = {
           },
         ]
       }
-      home_categories: {
+      hobbies_categories: {
         Row: {
           created_at: string | null
           id: string
@@ -731,7 +789,7 @@ export type Database = {
           name_ru: string
           parent_id: string | null
           parent_name_ru: string | null
-          slug: string
+          slug: string | null
           updated_at: string | null
         }
         Insert: {
@@ -742,7 +800,7 @@ export type Database = {
           name_ru: string
           parent_id?: string | null
           parent_name_ru?: string | null
-          slug: string
+          slug?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -753,8 +811,46 @@ export type Database = {
           name_ru?: string
           parent_id?: string | null
           parent_name_ru?: string | null
-          slug?: string
+          slug?: string | null
           updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hobbies_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "hobbies_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_categories: {
+        Row: {
+          id: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id: string | null
+          parent_name_ru: string | null
+          slug: string
+        }
+        Insert: {
+          id?: string
+          level: number
+          name_kz: string
+          name_ru: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug: string
+        }
+        Update: {
+          id?: string
+          level?: number
+          name_kz?: string
+          name_ru?: string
+          parent_id?: string | null
+          parent_name_ru?: string | null
+          slug?: string
         }
         Relationships: [
           {
@@ -1785,10 +1881,47 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      beauty_categories_view: {
+        Row: {
+          id: string | null
+          level: number | null
+          name_kz: string | null
+          name_ru: string | null
+          parent_id: string | null
+          parent_name_ru: string | null
+          slug: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      import_beauty_category: {
+        Args: {
+          name_ru_param: string
+          name_kz_param: string
+          parent_name_ru_param: string
+          level_param: number
+        }
+        Returns: string
+      }
+      import_categories: {
+        Args: {
+          p_name_ru: string
+          p_name_kz: string
+          p_parent_name_ru: string
+          p_level: number
+        }
+        Returns: string
+      }
+      import_hobbies_category: {
+        Args: {
+          p_name_ru: string
+          p_name_kz: string
+          p_parent_name_ru: string
+          p_level: number
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

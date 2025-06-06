@@ -67,7 +67,9 @@ export function CategoryPage() {
     categoryId === 'electronics' ||
     categoryId === 'home' ||
     categoryId === 'services' ||
-    categoryId === 'pets';
+    categoryId === 'pets' ||
+    categoryId === 'hobby' ||
+    categoryId === 'beauty';
 
   // Skip universal filters for transport and property categories
   const shouldShowUniversalFilters = categoryId && 
@@ -111,6 +113,10 @@ export function CategoryPage() {
       ? (language === 'ru' ? 'Услуги' : 'Қызметтер')
       : categoryId === 'pets'
       ? (language === 'ru' ? 'Зоотовары' : 'Жануарлар тауарлары')
+      : categoryId === 'hobby'
+      ? (language === 'ru' ? 'Хобби и спорт' : 'Хобби және спорт')
+      : categoryId === 'beauty'
+      ? (language === 'ru' ? 'Красота и здоровье' : 'Сұлулық және денсаулық')
       : (language === 'ru' ? 'Товары' : 'Тауарлар'));
 
   const handleSearch = () => {

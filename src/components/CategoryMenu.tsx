@@ -14,6 +14,8 @@ import { useTechElectronicsCategories } from '@/hooks/useTechElectronicsCategori
 import { useHomeCategories } from '@/hooks/useHomeCategories';
 import { useServicesCategories } from '@/hooks/useServicesCategories';
 import { usePetCategories } from '@/hooks/usePetCategories';
+import { useHobbiesCategories } from '@/hooks/useHobbiesCategories';
+import { useBeautyCategories } from '@/hooks/useBeautyCategories';
 
 export function CategoryMenu() {
   const { language, t } = useAppWithTranslations();
@@ -25,6 +27,8 @@ export function CategoryMenu() {
   const { categories: homeCategories, loading: homeLoading } = useHomeCategories();
   const { categories: servicesCategories, loading: servicesLoading } = useServicesCategories();
   const { categories: petCategories, loading: petLoading } = usePetCategories();
+  const { categories: hobbiesCategories, loading: hobbiesLoading } = useHobbiesCategories();
+  const { categories: beautyCategories, loading: beautyLoading } = useBeautyCategories();
 
   // Helper function to dynamically render icons from Lucide
   const DynamicIcon = ({ name, className }: { name: string, className?: string }) => {
@@ -109,6 +113,24 @@ export function CategoryMenu() {
           icon: 'Heart'
         }));
     }
+    if (categoryId === 'hobby') {
+      return hobbiesCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug || cat.id,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Dumbbell'
+        }));
+    }
+    if (categoryId === 'beauty') {
+      return beautyCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Sparkles'
+        }));
+    }
     return [];
   };
 
@@ -123,6 +145,8 @@ export function CategoryMenu() {
       case 'home': return homeLoading;
       case 'services': return servicesLoading;
       case 'pets': return petLoading;
+      case 'hobby': return hobbiesLoading;
+      case 'beauty': return beautyLoading;
       default: return false;
     }
   };
@@ -160,10 +184,10 @@ export function CategoryMenu() {
           
           // For categories with subcategories (including all Supabase categories)
           const hasSubcategories = (category.subcategories && category.subcategories.length > 0) || 
-                                  ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets'].includes(category.id);
+                                  ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets', 'hobby', 'beauty'].includes(category.id);
           
           if (hasSubcategories) {
-            const subcategories = ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets'].includes(category.id)
+            const subcategories = ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets', 'hobby', 'beauty'].includes(category.id)
               ? getSubcategories(category.id)
               : category.subcategories || [];
 

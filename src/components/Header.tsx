@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Search, User, Heart, MessageCircle, Plus } from 'lucide-react';
@@ -16,6 +15,8 @@ import { useTechElectronicsCategories } from '@/hooks/useTechElectronicsCategori
 import { useHomeCategories } from '@/hooks/useHomeCategories';
 import { useServicesCategories } from '@/hooks/useServicesCategories';
 import { usePetCategories } from '@/hooks/usePetCategories';
+import { useHobbiesCategories } from '@/hooks/useHobbiesCategories';
+import { useBeautyCategories } from '@/hooks/useBeautyCategories';
 import * as LucideIcons from 'lucide-react';
 
 export function Header() {
@@ -31,6 +32,8 @@ export function Header() {
   const { categories: homeCategories } = useHomeCategories();
   const { categories: servicesCategories } = useServicesCategories();
   const { categories: petCategories } = usePetCategories();
+  const { categories: hobbiesCategories } = useHobbiesCategories();
+  const { categories: beautyCategories } = useBeautyCategories();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,6 +129,24 @@ export function Header() {
           icon: 'Heart'
         }));
     }
+    if (categoryId === 'hobby') {
+      return hobbiesCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug || cat.id,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Dumbbell'
+        }));
+    }
+    if (categoryId === 'beauty') {
+      return beautyCategories
+        .filter(cat => cat.level === 1) // Only first level
+        .map(cat => ({
+          id: cat.slug,
+          name: { ru: cat.name_ru, kz: cat.name_kz },
+          icon: 'Sparkles'
+        }));
+    }
     return [];
   };
 
@@ -158,7 +179,7 @@ export function Header() {
               <PopoverContent className="w-96 p-0" align="start">
                 <div className="grid grid-cols-1 max-h-96 overflow-y-auto">
                   {categories.map((category) => {
-                    const subcategories = ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets'].includes(category.id)
+                    const subcategories = ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets', 'hobby', 'beauty'].includes(category.id)
                       ? getSubcategories(category.id)
                       : category.subcategories || [];
 
@@ -288,7 +309,7 @@ export function Header() {
           <div className="md:hidden border-t border-gray-200 py-4">
             <div className="space-y-2">
               {categories.map((category) => {
-                const subcategories = ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets'].includes(category.id)
+                const subcategories = ['kids', 'pharmacy', 'fashion', 'food', 'electronics', 'home', 'services', 'pets', 'hobby', 'beauty'].includes(category.id)
                   ? getSubcategories(category.id)
                   : category.subcategories || [];
 

@@ -10,6 +10,8 @@ import { useTechElectronicsCategories } from '@/hooks/useTechElectronicsCategori
 import { useHomeCategories } from '@/hooks/useHomeCategories';
 import { useServicesCategories } from '@/hooks/useServicesCategories';
 import { usePetCategories } from '@/hooks/usePetCategories';
+import { useHobbiesCategories } from '@/hooks/useHobbiesCategories';
+import { useBeautyCategories } from '@/hooks/useBeautyCategories';
 
 interface CategoryTreeNode {
   id: string;
@@ -35,6 +37,8 @@ export function CategoryTreeFilter({ categoryId, onCategorySelect, selectedCateg
   const { categories: homeCategories } = useHomeCategories();
   const { categories: servicesCategories } = useServicesCategories();
   const { categories: petCategories } = usePetCategories();
+  const { categories: hobbiesCategories } = useHobbiesCategories();
+  const { categories: beautyCategories } = useBeautyCategories();
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
   // Build tree structure from flat array
@@ -143,6 +147,10 @@ export function CategoryTreeFilter({ categoryId, onCategorySelect, selectedCateg
     categories = servicesCategories;
   } else if (categoryId === 'pets') {
     categories = petCategories;
+  } else if (categoryId === 'hobby') {
+    categories = hobbiesCategories;
+  } else if (categoryId === 'beauty') {
+    categories = beautyCategories;
   }
 
   if (categories.length === 0) {
