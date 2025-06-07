@@ -181,20 +181,6 @@ export type Database = {
             referencedRelation: "beauty_categories"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "beauty_categories_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "beauty_categories_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "beauty_categories_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "beauty_categories_view"
-            referencedColumns: ["parent_id"]
-          },
         ]
       }
       bulldozer_brands: {
@@ -1881,18 +1867,7 @@ export type Database = {
       }
     }
     Views: {
-      beauty_categories_view: {
-        Row: {
-          id: string | null
-          level: number | null
-          name_kz: string | null
-          name_ru: string | null
-          parent_id: string | null
-          parent_name_ru: string | null
-          slug: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       import_beauty_category: {
@@ -1920,6 +1895,10 @@ export type Database = {
           p_parent_name_ru: string
           p_level: number
         }
+        Returns: string
+      }
+      transliterate_cyrillic: {
+        Args: { "": string }
         Returns: string
       }
     }

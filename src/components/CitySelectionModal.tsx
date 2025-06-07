@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { X, Check, Search } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,19 +13,29 @@ export function CitySelectionModal() {
   const [suggestedCity, setSuggestedCity] = useState(cities[0]);
 
   useEffect(() => {
-    // If city is not confirmed, show the confirmation dialog
-    if (!cityConfirmed && !selectedCity) {
-      // Suggest a popular city like Almaty or Astana
+    // Check if this is the first visit by looking at localStorage
+    const hasVisited = localStorage.getItem('hasVisited');
+    
+    // If city is not confirmed and user hasn't visited before, show confirmation dialog
+    if (!cityConfirmed && !hasVisited) {
+      // Set Almaty as suggested city (first in list)
       setSuggestedCity(cities[0]); // Almaty
       setOpen(true);
+      // Mark as visited
+      localStorage.setItem('hasVisited', 'true');
     }
-  }, [cityConfirmed, selectedCity]);
+  }, [cityConfirmed]);
 
   const confirmCity = (confirm: boolean) => {
     if (confirm) {
       setSelectedCity(suggestedCity);
+      setCityConfirmed(true);
+    } else {
+      // If user says no, show city selection
+      setCityConfirmed(true);
+      // Keep modal open for city selection
+      return;
     }
-    setCityConfirmed(true);
     setOpen(false);
   };
 
@@ -45,24 +54,34 @@ export function CitySelectionModal() {
   return (
     <>
       {/* City Confirmation Dialog */}
-      <Dialog open={open && !cityConfirmed} onOpenChange={setOpen}>
+      <Dialog open={open && !cityConfirmed} onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          setCityConfirmed(true);
+        }
+        setOpen(isOpen);
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('Ваш город')} {suggestedCity[language]}?</DialogTitle>
+            <DialogTitle>
+              {language === 'ru' 
+                ? `Ваш город ${suggestedCity[language]}?` 
+                : `Сіздің қалаңыз ${suggestedCity[language]}?`
+              }
+            </DialogTitle>
           </DialogHeader>
           <div className="flex justify-center space-x-4 mt-4">
             <Button onClick={() => confirmCity(true)} className="w-24">
-              {t('yes')}
+              {language === 'ru' ? 'Да' : 'Иә'}
             </Button>
-            <Button variant="outline" onClick={() => setOpen(true)} className="w-24">
-              {t('no')}
+            <Button variant="outline" onClick={() => confirmCity(false)} className="w-24">
+              {language === 'ru' ? 'Нет' : 'Жоқ'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* City Selection Dialog */}
-      <Dialog open={open && cityConfirmed} onOpenChange={setOpen}>
+      {/* City Selection Dialog for manual selection */}
+      <Dialog open={open && cityConfirmed && !selectedCity} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t('selectCity')}</DialogTitle>
@@ -110,3 +129,10 @@ export function CitySelectionModal() {
     </>
   );
 }
+
+// Export a function to open city selection manually
+export const openCitySelection = () => {
+  // This will be used by the header to open city selection
+  const event = new CustomEvent('openCitySelection');
+  window.dispatchEvent(event);
+};
