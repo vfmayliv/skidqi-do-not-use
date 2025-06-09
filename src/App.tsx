@@ -1,7 +1,8 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CitySelectionModal } from "@/components/CitySelectionModal";
 import { SupabaseProvider } from "@/contexts/SupabaseContext";
@@ -9,8 +10,6 @@ import { AdminProvider } from "@/contexts/AdminContext";
 
 // Import i18n configuration
 import "./i18n";
-import AppContext from "./contexts/AppContext";
-import { useAppStore } from "./stores/useAppStore";
 
 const queryClient = new QueryClient();
 
@@ -48,35 +47,33 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-              <BrowserRouter>
-                <CitySelectionModal />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/search" element={<SearchResults />} />
-                  <Route path="/listing/:id" element={<ListingDetail />} />
-                  <Route path="/category/:slug" element={<CategoryPage />} />
-                  <Route path="/category/:parentSlug/:slug" element={<SubcategoryPage />} />
-                  <Route path="/create-listing" element={<CreateListing />} />
-                  <Route path="/profile" element={<UserProfile />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/confirm-email" element={<ConfirmEmail />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/help" element={<Help />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-of-service" element={<TermsOfService />} />
-                  <Route path="/transport" element={<TransportPage />} />
-                  <Route path="/property" element={<PropertyPage />} />
-                  <Route path="/electronics" element={<ElectronicsPage />} />
-                  <Route path="/fashion" element={<FashionPage />} />
-                  <Route path="/pets" element={<PetsPage />} />
-                  <Route path="/owner-panel" element={<OwnerPanel />} />
-                  <Route path="/admin" element={<AdminPanel />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
+              <CitySelectionModal />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/search" element={<SearchResults />} />
+                <Route path="/listing/:id" element={<ListingDetail />} />
+                <Route path="/category/:slug" element={<CategoryPage />} />
+                <Route path="/category/:parentSlug/:slug" element={<SubcategoryPage />} />
+                <Route path="/create-listing" element={<CreateListing />} />
+                <Route path="/profile" element={<UserProfile />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/confirm-email" element={<ConfirmEmail />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/help" element={<Help />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/transport" element={<TransportPage />} />
+                <Route path="/property" element={<PropertyPage />} />
+                <Route path="/electronics" element={<ElectronicsPage />} />
+                <Route path="/fashion" element={<FashionPage />} />
+                <Route path="/pets" element={<PetsPage />} />
+                <Route path="/owner-panel" element={<OwnerPanel />} />
+                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </Suspense>
           </TooltipProvider>
         </AdminProvider>

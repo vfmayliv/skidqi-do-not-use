@@ -4,15 +4,12 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
 import './i18n' // Import i18n configuration
-import { SupabaseProvider } from './contexts/SupabaseContext'
 
 // Log message for mapbox token
 console.log('Note: To enable maps functionality, you need to provide a Mapbox token. Get one at https://mapbox.com');
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
-    <SupabaseProvider>
-      <App />
-    </SupabaseProvider>
+    <App />
   </BrowserRouter>
 );
