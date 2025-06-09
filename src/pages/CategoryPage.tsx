@@ -12,7 +12,7 @@ import { UniversalFilters, UniversalFiltersData } from '@/components/filters/Uni
 import { CategoryTreeFilter } from '@/components/filters/CategoryTreeFilter';
 import { useUniversalFiltersStore } from '@/stores/useUniversalFiltersStore';
 
-export function CategoryPage() {
+export default function CategoryPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const [searchParams] = useSearchParams();
   const { language, t } = useAppWithTranslations();
