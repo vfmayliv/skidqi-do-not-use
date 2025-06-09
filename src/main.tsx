@@ -9,7 +9,7 @@ import './i18n' // Import i18n configuration
 console.log('Note: To enable maps functionality, you need to provide a Mapbox token. Get one at https://mapbox.com');
 
 createRoot(document.getElementById("root")!).render(
-  <BrowserRouter>
+  <BrowserRouter basename="/skidqi-kz">
     <App />
   </BrowserRouter>
 );
