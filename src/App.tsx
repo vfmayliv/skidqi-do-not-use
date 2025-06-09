@@ -35,8 +35,7 @@ const PropertyPage = lazy(() => import("./pages/PropertyPage"));
 const ElectronicsPage = lazy(() => import("./pages/ElectronicsPage"));
 const FashionPage = lazy(() => import("./pages/FashionPage"));
 const PetsPage = lazy(() => import("./pages/PetsPage"));
-const OwnerPanel = lazy(() => import("./pages/OwnerPanel"));
-const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const Ojah = lazy(() => import("./pages/Ojah"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function App() {
@@ -70,8 +69,7 @@ function App() {
                 <Route path="/electronics" element={<ElectronicsPage />} />
                 <Route path="/fashion" element={<FashionPage />} />
                 <Route path="/pets" element={<PetsPage />} />
-                <Route path="/owner-panel" element={<OwnerPanel />} />
-                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/ojah" element={<Ojah />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
