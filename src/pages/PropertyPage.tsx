@@ -49,7 +49,7 @@ export const propertyFilterConfig: PropertyFilterConfig = {
   generalFilters: []
 };
 
-export function PropertyPage() {
+export default function PropertyPage() {
   const { language } = useAppStore();
   const { filters, setFilters, resetFilters, activeFiltersCount } = usePropertyFiltersStore();
   const [searchParams, setSearchParams] = useSearchParams();

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -452,7 +451,7 @@ const mockTransportListings = [
   }
 ];
 
-export function TransportPage() {
+export default function TransportPage() {
   const { language } = useAppStore();
   const { filters, setFilters, resetFilters, activeFiltersCount } = useTransportFiltersStore();
   
