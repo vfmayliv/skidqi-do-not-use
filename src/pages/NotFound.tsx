@@ -4,11 +4,11 @@ import { useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { useAppContext } from "@/contexts/AppContext";
+import { useAppStore } from "@/stores/useAppStore";
 
 const NotFound = () => {
   const location = useLocation();
-  const { language } = useAppContext();
+  const { language } = useAppStore();
 
   useEffect(() => {
     console.error(
