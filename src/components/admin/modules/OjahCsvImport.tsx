@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -55,9 +54,9 @@ export const OjahCsvImport = () => {
   const [importProgress, setImportProgress] = useState(0);
 
   // Загрузка городов при монтировании компонента
-  useState(() => {
+  useEffect(() => {
     fetchCities();
-  });
+  }, []);
 
   const fetchCities = async () => {
     try {
