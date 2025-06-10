@@ -10,7 +10,8 @@ import {
   Settings, 
   BarChart3, 
   Shield,
-  LogOut
+  LogOut,
+  Upload
 } from 'lucide-react';
 import { OjahDashboard } from './modules/OjahDashboard';
 import { OjahContentManagement } from './modules/OjahContentManagement';
@@ -18,6 +19,7 @@ import { OjahUserManagement } from './modules/OjahUserManagement';
 import { OjahSiteSettings } from './modules/OjahSiteSettings';
 import { OjahAnalytics } from './modules/OjahAnalytics';
 import { OjahSystemSecurity } from './modules/OjahSystemSecurity';
+import { OjahCsvImport } from './modules/OjahCsvImport';
 
 interface OjahLayoutProps {
   onLogout: () => void;
@@ -27,6 +29,7 @@ const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, component: OjahDashboard },
   { id: 'content', label: 'Управление контентом', icon: FileText, component: OjahContentManagement },
   { id: 'users', label: 'Управление пользователями', icon: Users, component: OjahUserManagement },
+  { id: 'csv-import', label: 'Импорт CSV', icon: Upload, component: OjahCsvImport },
   { id: 'settings', label: 'Настройки сайта', icon: Settings, component: OjahSiteSettings },
   { id: 'analytics', label: 'Аналитика и статистика', icon: BarChart3, component: OjahAnalytics },
   { id: 'system', label: 'Система и безопасность', icon: Shield, component: OjahSystemSecurity },

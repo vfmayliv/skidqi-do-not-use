@@ -1375,15 +1375,15 @@ export type Database = {
       }
       ojpw: {
         Row: {
-          created_at: string
+          created_at: string | null
           id: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           id: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           id?: string
         }
         Relationships: []
