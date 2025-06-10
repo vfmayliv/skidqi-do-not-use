@@ -1,20 +1,16 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, File, AlertCircle, CheckCircle2, FileSpreadsheet, X, Settings } from 'lucide-react';
+import { Upload, File, CheckCircle2, FileSpreadsheet, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AdvancedCsvImporter } from '../AdvancedCsvImporter';
 import { CategoryTreeSelector } from '../CategoryTreeSelector';
-import { ListingLifecycleManager } from '../ListingLifecycleManager';
-import { AdvancedImageProcessor } from '../AdvancedImageProcessor';
 import { supabase } from '@/lib/supabase';
-
-type ImportEntityType = 'categories' | 'users' | 'listings';
 
 interface CsvData {
   headers: string[];
@@ -26,54 +22,56 @@ interface FieldMapping {
   systemField: string;
 }
 
-interface ImageProcessingResult {
-  originalUrl: string;
-  processedUrl?: string;
-  fileName: string;
-  size: number;
-  format: string;
-  status: 'pending' | 'processing' | 'completed' | 'error';
-  error?: string;
+interface ImportSettings {
+  categoryId: number | null;
+  cityId: number | null;
+  expiryDays: number;
 }
 
-interface LifecycleSettings {
-  defaultDuration: number;
-  autoExpire: boolean;
-  sendNotifications: boolean;
-  notifyBeforeExpiry: number;
-  allowRenewal: boolean;
-  maxRenewals: number;
-}
-
-const systemFields = {
-  categories: ['id', 'name_ru', 'name_kk', 'parent_id', 'level', 'slug'],
-  users: ['id', 'email', 'name', 'phone', 'role', 'city'],
-  listings: ['id', 'title', 'description', 'regular_price', 'discount_price', 'category_id', 'user_id', 'city_id', 'images', 'expires_at']
-};
+// Поля CSV файла (только эти 6 полей)
+const csvFields = [
+  { key: 'title', label: 'Заголовок объявления', required: true },
+  { key: 'description', label: 'Описание объявления', required: true },
+  { key: 'image', label: 'Фото объявления', required: false },
+  { key: 'regular_price', label: 'Обычная цена', required: false },
+  { key: 'discount_price', label: 'Цена со скидкой', required: false },
+  { key: 'source_link', label: 'Ссылка на источник', required: false }
+];
 
 export const OjahCsvImport = () => {
   const { toast } = useToast();
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [importType, setImportType] = useState<ImportEntityType>('categories');
-  const [isImporting, setIsImporting] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [csvData, setCsvData] = useState<CsvData | null>(null);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [currentStep, setCurrentStep] = useState<'upload' | 'mapping' | 'categories' | 'lifecycle' | 'images' | 'validation' | 'import'>('upload');
-  
-  // Новые состояния для расширенной функциональности
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-  const [categoryMappings, setCategoryMappings] = useState<Record<string, number>>({});
-  const [lifecycleSettings, setLifecycleSettings] = useState<LifecycleSettings>({
-    defaultDuration: 30,
-    autoExpire: true,
-    sendNotifications: true,
-    notifyBeforeExpiry: 3,
-    allowRenewal: true,
-    maxRenewals: 3
+  const [importSettings, setImportSettings] = useState<ImportSettings>({
+    categoryId: null,
+    cityId: null,
+    expiryDays: 30
   });
-  const [images, setImages] = useState<ImageProcessingResult[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [cities, setCities] = useState<any[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+
+  // Загрузка городов при монтировании компонента
+  useState(() => {
+    fetchCities();
+  });
+
+  const fetchCities = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cities')
+        .select('id, name_ru')
+        .order('name_ru');
+
+      if (error) throw error;
+      setCities(data || []);
+    } catch (error: any) {
+      console.error('Ошибка загрузки городов:', error);
+    }
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -107,23 +105,171 @@ export const OjahCsvImport = () => {
       // Автоматическое сопоставление полей
       const autoMappings: FieldMapping[] = headers.map(header => {
         const normalizedHeader = header.toLowerCase().replace(/[\s-]/g, '_');
-        const matchedField = systemFields[importType].find(field => 
-          field.toLowerCase() === normalizedHeader || 
-          field.toLowerCase().includes(normalizedHeader) ||
-          normalizedHeader.includes(field.toLowerCase())
+        const matchedField = csvFields.find(field => 
+          field.key.toLowerCase() === normalizedHeader || 
+          field.key.toLowerCase().includes(normalizedHeader.replace('_', '')) ||
+          normalizedHeader.includes(field.key.replace('_', ''))
         );
         
         return {
           csvField: header,
-          systemField: matchedField || ''
+          systemField: matchedField?.key || ''
         };
       });
       
       setFieldMappings(autoMappings);
-      setCurrentStep('mapping');
     };
     
     reader.readAsText(file, 'utf-8');
+  };
+
+  const goToNextStep = () => {
+    if (currentStep === 1 && csvData) {
+      setCurrentStep(2);
+    } else if (currentStep === 2 && validateSettings()) {
+      setCurrentStep(3);
+    } else if (currentStep === 3 && validateMappings()) {
+      setCurrentStep(4);
+    }
+  };
+
+  const goToPreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep((currentStep - 1) as 1 | 2 | 3 | 4);
+    }
+  };
+
+  const validateSettings = () => {
+    if (!importSettings.categoryId) {
+      toast({
+        variant: "destructive",
+        title: "Ошибка",
+        description: "Выберите категорию для импорта"
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const validateMappings = () => {
+    const requiredFields = csvFields.filter(f => f.required);
+    const mappedRequiredFields = requiredFields.filter(field => 
+      fieldMappings.some(mapping => mapping.systemField === field.key && mapping.csvField)
+    );
+
+    if (mappedRequiredFields.length !== requiredFields.length) {
+      toast({
+        variant: "destructive",
+        title: "Ошибка сопоставления",
+        description: "Все обязательные поля должны быть сопоставлены"
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const startImport = async () => {
+    if (!csvData) return;
+
+    setIsImporting(true);
+    setImportProgress(0);
+
+    const totalRows = csvData.rows.length;
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + importSettings.expiryDays);
+
+    try {
+      for (let i = 0; i < totalRows; i++) {
+        const row = csvData.rows[i];
+        const listingData: any = {
+          category_id: importSettings.categoryId,
+          city_id: importSettings.cityId,
+          expires_at: expiryDate.toISOString(),
+          status: 'active'
+        };
+
+        // Сопоставление полей из CSV
+        fieldMappings.forEach(mapping => {
+          if (mapping.systemField && mapping.csvField) {
+            const columnIndex = csvData.headers.indexOf(mapping.csvField);
+            if (columnIndex !== -1) {
+              const value = row[columnIndex];
+              
+              switch (mapping.systemField) {
+                case 'title':
+                  listingData.title = value;
+                  break;
+                case 'description':
+                  listingData.description = value;
+                  break;
+                case 'image':
+                  if (value) {
+                    listingData.images = [value];
+                  }
+                  break;
+                case 'regular_price':
+                  if (value && !isNaN(Number(value))) {
+                    listingData.regular_price = parseInt(value);
+                  }
+                  break;
+                case 'discount_price':
+                  if (value && !isNaN(Number(value))) {
+                    listingData.discount_price = parseInt(value);
+                  }
+                  break;
+                case 'source_link':
+                  // Можно сохранить в дополнительных полях или игнорировать
+                  break;
+              }
+            }
+          }
+        });
+
+        // Создание объявления в базе данных
+        const { error } = await supabase
+          .from('listings')
+          .insert(listingData);
+
+        if (error) {
+          console.error(`Ошибка импорта строки ${i + 1}:`, error);
+        }
+
+        setImportProgress(((i + 1) / totalRows) * 100);
+        
+        // Пауза для избежания перегрузки
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      toast({
+        title: "Импорт завершен",
+        description: `Успешно импортировано ${totalRows} объявлений`
+      });
+
+      resetImport();
+    } catch (error: any) {
+      console.error('Ошибка импорта:', error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка импорта",
+        description: error.message
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const resetImport = () => {
+    setCurrentStep(1);
+    setSelectedFile(null);
+    setCsvData(null);
+    setFieldMappings([]);
+    setImportSettings({
+      categoryId: null,
+      cityId: null,
+      expiryDays: 30
+    });
+    setSelectedCategories([]);
+    setImportProgress(0);
   };
 
   const updateFieldMapping = (csvField: string, systemField: string) => {
@@ -136,274 +282,178 @@ export const OjahCsvImport = () => {
     );
   };
 
-  // Автоматическое сопоставление категорий по названию
-  const mapCategoriesAutomatically = async () => {
-    if (!csvData || importType !== 'listings') return;
-
-    try {
-      const { data: categories, error } = await supabase
-        .from('categories')
-        .select('id, name_ru, name_kk');
-
-      if (error) throw error;
-
-      const mappings: Record<string, number> = {};
-      const categoryNameField = fieldMappings.find(m => m.systemField === 'category_id')?.csvField;
-      
-      if (categoryNameField) {
-        const categoryColumnIndex = csvData.headers.indexOf(categoryNameField);
-        
-        csvData.rows.forEach(row => {
-          const categoryName = row[categoryColumnIndex]?.toLowerCase().trim();
-          if (categoryName) {
-            const matchedCategory = categories?.find(cat => 
-              cat.name_ru.toLowerCase() === categoryName ||
-              cat.name_kk.toLowerCase() === categoryName
-            );
-            
-            if (matchedCategory) {
-              mappings[categoryName] = matchedCategory.id;
-            }
-          }
-        });
-      }
-
-      setCategoryMappings(mappings);
-      toast({
-        title: "Автоматическое сопоставление",
-        description: `Сопоставлено ${Object.keys(mappings).length} категорий`
-      });
-    } catch (error: any) {
-      console.error('Ошибка автоматического сопоставления:', error);
-    }
-  };
-
-  const validateMappings = () => {
-    const errors: string[] = [];
-    const mappedSystemFields = fieldMappings
-      .filter(m => m.systemField)
-      .map(m => m.systemField);
-    
-    // Проверка на дублированные поля
-    const duplicates = mappedSystemFields.filter((field, index) => 
-      mappedSystemFields.indexOf(field) !== index
-    );
-    
-    if (duplicates.length > 0) {
-      errors.push(`Дублированные поля: ${duplicates.join(', ')}`);
-    }
-
-    // Проверка обязательных полей для каждого типа
-    const requiredFields = {
-      categories: ['name_ru'],
-      users: ['email'],
-      listings: ['title', 'category_id']
-    };
-
-    const missing = requiredFields[importType].filter(field => 
-      !mappedSystemFields.includes(field)
-    );
-
-    if (missing.length > 0) {
-      errors.push(`Отсутствуют обязательные поля: ${missing.join(', ')}`);
-    }
-
-    setValidationErrors(errors);
-    
-    if (errors.length === 0) {
-      if (importType === 'listings') {
-        setCurrentStep('categories');
-      } else {
-        setCurrentStep('validation');
-      }
-      return true;
-    }
-    return false;
-  };
-
-  const simulateImport = async () => {
-    setIsImporting(true);
-    setProgress(0);
-    setCurrentStep('import');
-    
-    // Симуляция процесса импорта с учетом настроек жизненного цикла
-    const totalRows = csvData?.rows.length || 0;
-    
-    for (let i = 0; i <= totalRows; i++) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      setProgress((i / totalRows) * 100);
-      
-      // Здесь был бы реальный импорт данных с применением:
-      // - сопоставлений категорий
-      // - настроек жизненного цикла
-      // - обработанных изображений
-    }
-    
-    setIsImporting(false);
-    toast({
-      title: "Импорт завершен",
-      description: `Успешно импортировано ${totalRows} записей с настройками жизненного цикла`
-    });
-    
-    resetImport();
-  };
-
-  const resetImport = () => {
-    setSelectedFile(null);
-    setCsvData(null);
-    setFieldMappings([]);
-    setValidationErrors([]);
-    setSelectedCategories([]);
-    setCategoryMappings({});
-    setImages([]);
-    setProgress(0);
-    setCurrentStep('upload');
-  };
-
-  const renderUploadStep = () => (
+  const renderStep1 = () => (
     <div className="space-y-4">
       <div>
-        <Label>Тип импорта</Label>
-        <Select 
-          value={importType} 
-          onValueChange={(value) => setImportType(value as ImportEntityType)}
-          disabled={isImporting}
-        >
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="Выберите тип" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="categories">Категории</SelectItem>
-            <SelectItem value="users">Пользователи</SelectItem>
-            <SelectItem value="listings">Объявления</SelectItem>
-          </SelectContent>
-        </Select>
+        <h3 className="text-lg font-medium mb-2">Шаг 1: Выбор CSV-файла</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Загрузите CSV файл с объявлениями для импорта
+        </p>
       </div>
-      
+
       {!selectedFile ? (
         <div className="border-2 border-dashed rounded-lg p-8 text-center">
-          <FileSpreadsheet className="h-10 w-10 mx-auto text-muted-foreground" />
-          <h3 className="mt-3 text-lg font-medium">Загрузите CSV файл</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Файл должен содержать данные для импорта {importType}
+          <FileSpreadsheet className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+          <h3 className="text-lg font-medium mb-2">Загрузите CSV файл</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Файл должен содержать поля: title, desc, image, regularprice, saleprice, link
           </p>
-          <div className="mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => document.getElementById('csv-file-input')?.click()}
-              disabled={isImporting}
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Выбрать файл
-            </Button>
-            <input 
-              id="csv-file-input" 
-              type="file" 
-              accept=".csv" 
-              className="hidden"
-              onChange={handleFileSelect}
-              disabled={isImporting}
-            />
-          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => document.getElementById('csv-file-input')?.click()}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Выбрать файл
+          </Button>
+          <input 
+            id="csv-file-input" 
+            type="file" 
+            accept=".csv" 
+            className="hidden"
+            onChange={handleFileSelect}
+          />
         </div>
       ) : (
-        <div className="bg-muted rounded-md p-4 flex items-center">
-          <File className="h-5 w-5 mr-2 text-muted-foreground" />
-          <span className="text-sm font-medium">{selectedFile.name}</span>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="ml-auto"
-            onClick={resetImport}
-            disabled={isImporting}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+        <div className="space-y-4">
+          <div className="bg-muted rounded-md p-4 flex items-center">
+            <File className="h-5 w-5 mr-2 text-muted-foreground" />
+            <span className="text-sm font-medium">{selectedFile.name}</span>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="ml-auto"
+              onClick={resetImport}
+            >
+              Выбрать другой файл
+            </Button>
+          </div>
+          
+          {csvData && (
+            <div className="border rounded-md overflow-x-auto">
+              <div className="bg-muted p-2">
+                <p className="text-sm font-medium">Предпросмотр (первые 5 строк)</p>
+              </div>
+              <table className="min-w-full divide-y divide-border">
+                <thead>
+                  <tr className="bg-muted/50">
+                    {csvData.headers.map((header, index) => (
+                      <th 
+                        key={index} 
+                        className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase"
+                      >
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {csvData.rows.slice(0, 5).map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {row.map((cell, cellIndex) => (
+                        <td key={cellIndex} className="px-4 py-2 text-sm">
+                          {cell.length > 50 ? `${cell.substring(0, 50)}...` : cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="p-2 bg-muted/25 text-xs text-muted-foreground">
+                Всего строк для импорта: {csvData.rows.length}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 
-  const renderCategoryStep = () => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Настройка категорий</h3>
-        <Button onClick={mapCategoriesAutomatically} variant="outline" size="sm">
-          Автосопоставление
-        </Button>
+  const renderStep2 = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium mb-2">Шаг 2: Общие настройки</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Настройки применятся ко всем импортируемым объявлениям
+        </p>
       </div>
-      
-      <CategoryTreeSelector
-        selectedCategories={selectedCategories}
-        onCategoriesChange={setSelectedCategories}
-        multiSelect={true}
-      />
-      
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setCurrentStep('mapping')}>
-          Назад
-        </Button>
-        <Button onClick={() => setCurrentStep('lifecycle')}>
-          Продолжить
-        </Button>
+
+      <div className="space-y-4">
+        <div>
+          <Label className="text-base font-medium">Категория *</Label>
+          <p className="text-xs text-muted-foreground mb-2">
+            Выберите категорию для всех импортируемых объявлений
+          </p>
+          <CategoryTreeSelector
+            selectedCategories={selectedCategories}
+            onCategoriesChange={(categories) => {
+              setSelectedCategories(categories);
+              setImportSettings(prev => ({
+                ...prev,
+                categoryId: categories[0] || null
+              }));
+            }}
+            multiSelect={false}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="city">Город</Label>
+            <Select 
+              value={importSettings.cityId?.toString() || ''} 
+              onValueChange={(value) => 
+                setImportSettings(prev => ({
+                  ...prev,
+                  cityId: value ? parseInt(value) : null
+                }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Выберите город" />
+              </SelectTrigger>
+              <SelectContent>
+                {cities.map((city) => (
+                  <SelectItem key={city.id} value={city.id.toString()}>
+                    {city.name_ru}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="expiry">Срок действия (дни)</Label>
+            <Input
+              id="expiry"
+              type="number"
+              value={importSettings.expiryDays}
+              onChange={(e) => 
+                setImportSettings(prev => ({
+                  ...prev,
+                  expiryDays: parseInt(e.target.value) || 30
+                }))
+              }
+              min="1"
+              max="365"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
 
-  const renderLifecycleStep = () => (
+  const renderStep3 = () => (
     <div className="space-y-4">
-      <ListingLifecycleManager
-        settings={lifecycleSettings}
-        onSettingsChange={setLifecycleSettings}
-      />
-      
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setCurrentStep('categories')}>
-          Назад
-        </Button>
-        <Button onClick={() => setCurrentStep('images')}>
-          Продолжить
-        </Button>
+      <div>
+        <h3 className="text-lg font-medium mb-2">Шаг 3: Сопоставление полей</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Сопоставьте поля CSV с полями системы
+        </p>
       </div>
-    </div>
-  );
 
-  const renderImageStep = () => (
-    <div className="space-y-4">
-      <AdvancedImageProcessor
-        images={images}
-        onImagesChange={setImages}
-        maxImages={20}
-      />
-      
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setCurrentStep('lifecycle')}>
-          Назад
-        </Button>
-        <Button onClick={() => setCurrentStep('validation')}>
-          Продолжить
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderMappingStep = () => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium">Сопоставление полей CSV с полями системы</h3>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => setFieldMappings(prev => prev.map(m => ({ ...m, systemField: '' })))}
-          disabled={isImporting}
-        >
-          Сбросить
-        </Button>
-      </div>
-      
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-3">
         {fieldMappings.map((mapping, index) => (
-          <div key={index} className="grid grid-cols-3 gap-4 items-center">
+          <div key={index} className="grid grid-cols-3 gap-4 items-center p-3 border rounded-lg">
             <div>
               <Label className="text-sm font-medium">
                 {mapping.csvField}
@@ -412,167 +462,185 @@ export const OjahCsvImport = () => {
                 Пример: {csvData?.rows[0]?.[csvData.headers.indexOf(mapping.csvField)] || 'Нет данных'}
               </p>
             </div>
+            
             <div>
               <Select 
                 value={mapping.systemField} 
                 onValueChange={(value) => updateFieldMapping(mapping.csvField, value)}
-                disabled={isImporting}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Выберите поле системы" />
+                  <SelectValue placeholder="Выберите поле" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">-- Не импортировать --</SelectItem>
-                  {systemFields[importType].map(field => (
-                    <SelectItem key={field} value={field}>
-                      {field}
+                  {csvFields.map(field => (
+                    <SelectItem key={field.key} value={field.key}>
+                      {field.label} {field.required && '*'}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+            
             <div className="flex items-center">
               {mapping.systemField ? (
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
               ) : (
-                <AlertCircle className="h-4 w-4 text-amber-500" />
+                <div className="h-4 w-4 rounded-full border-2 border-muted-foreground" />
               )}
             </div>
           </div>
         ))}
       </div>
-      
-      {validationErrors.length > 0 && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <ul className="list-disc list-inside">
-              {validationErrors.map((error, index) => (
-                <li key={index}>{error}</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setCurrentStep('upload')}>
-          Назад
-        </Button>
-        <Button onClick={validateMappings} disabled={isImporting}>
-          Проверить и продолжить
-        </Button>
-      </div>
+
+      <Alert>
+        <AlertDescription>
+          Поля отмеченные * являются обязательными и должны быть сопоставлены
+        </AlertDescription>
+      </Alert>
     </div>
   );
 
-  const renderValidationStep = () => (
-    <div className="space-y-4">
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-center">
-          <CheckCircle2 className="h-5 w-5 text-green-600 mr-2" />
-          <h3 className="text-sm font-medium text-green-800">Проверка пройдена успешно</h3>
-        </div>
-        <div className="mt-2 text-sm text-green-700">
-          <p>Готово к импорту {csvData?.rows.length || 0} записей</p>
-          {importType === 'listings' && (
-            <>
-              <p>Категорий выбрано: {selectedCategories.length}</p>
-              <p>Изображений подготовлено: {images.length}</p>
-              <p>Срок действия: {lifecycleSettings.defaultDuration} дней</p>
-            </>
-          )}
-        </div>
-      </div>
-      
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={() => {
-          if (importType === 'listings') {
-            setCurrentStep('images');
-          } else {
-            setCurrentStep('mapping');
+  const renderStep4 = () => {
+    const mappedData = csvData?.rows.slice(0, 3).map(row => {
+      const mapped: any = {};
+      fieldMappings.forEach(mapping => {
+        if (mapping.systemField && mapping.csvField) {
+          const columnIndex = csvData.headers.indexOf(mapping.csvField);
+          if (columnIndex !== -1) {
+            mapped[mapping.systemField] = row[columnIndex];
           }
-        }}>
-          Назад
-        </Button>
-        <Button onClick={simulateImport} disabled={isImporting}>
-          Начать импорт
-        </Button>
-      </div>
-    </div>
-  );
+        }
+      });
+      return mapped;
+    });
 
-  const renderImportStep = () => (
-    <div className="space-y-4">
-      <div className="text-center">
-        <h3 className="text-lg font-medium">Импорт данных</h3>
-        <p className="text-sm text-muted-foreground">
-          Пожалуйста, подождите, пока данные импортируются в систему
-        </p>
-      </div>
-      
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span>Прогресс импорта</span>
-          <span>{Math.round(progress)}%</span>
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Шаг 4: Предпросмотр и подтверждение</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Проверьте настройки и данные перед импортом
+          </p>
         </div>
-        <Progress value={progress} className="w-full" />
-      </div>
-      
-      {!isImporting && progress === 100 && (
-        <div className="text-center">
-          <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
-          <p className="text-sm text-green-600">Импорт завершен успешно!</p>
-          <Button className="mt-4" onClick={resetImport}>
-            Начать новый импорт
-          </Button>
+
+        <div className="grid gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Настройки импорта</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div><strong>Категория:</strong> {selectedCategories[0] ? `ID: ${selectedCategories[0]}` : 'Не выбрана'}</div>
+              <div><strong>Город:</strong> {importSettings.cityId ? cities.find(c => c.id === importSettings.cityId)?.name_ru : 'Не выбран'}</div>
+              <div><strong>Срок действия:</strong> {importSettings.expiryDays} дней</div>
+              <div><strong>Количество записей:</strong> {csvData?.rows.length || 0}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Предпросмотр данных (первые 3 записи)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {mappedData?.map((item, index) => (
+                  <div key={index} className="p-3 border rounded text-sm">
+                    <div><strong>Заголовок:</strong> {item.title || 'Не указан'}</div>
+                    <div><strong>Описание:</strong> {item.description ? `${item.description.substring(0, 100)}...` : 'Не указано'}</div>
+                    <div><strong>Цена:</strong> {item.regular_price || 'Не указана'}</div>
+                    <div><strong>Скидочная цена:</strong> {item.discount_price || 'Не указана'}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      )}
-    </div>
-  );
+
+        {isImporting && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Импорт в процессе...</span>
+              <span>{Math.round(importProgress)}%</span>
+            </div>
+            <Progress value={importProgress} />
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Импорт CSV данных</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Импорт CSV объявлений</h2>
         <p className="text-muted-foreground">
-          Импортируйте данные из файлов CSV в систему с расширенными возможностями
+          Импорт объявлений из CSV файла в 4 простых шага
         </p>
       </div>
 
-      <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="basic">Базовый импорт</TabsTrigger>
-          <TabsTrigger value="advanced">
-            <Settings className="h-4 w-4 mr-2" />
-            Продвинутый
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="basic">
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Мастер импорта CSV</CardTitle>
-              <CardDescription>
-                Пошаговый процесс импорта данных с полным функционалом
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {currentStep === 'upload' && renderUploadStep()}
-              {currentStep === 'mapping' && renderMappingStep()}
-              {currentStep === 'categories' && renderCategoryStep()}
-              {currentStep === 'lifecycle' && renderLifecycleStep()}
-              {currentStep === 'images' && renderImageStep()}
-              {currentStep === 'validation' && renderValidationStep()}
-              {currentStep === 'import' && renderImportStep()}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="advanced">
-          <AdvancedCsvImporter />
-        </TabsContent>
-      </Tabs>
+      <Card className="w-full">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              Шаг {currentStep} из 4
+            </CardTitle>
+            <div className="flex space-x-2">
+              {[1, 2, 3, 4].map((step) => (
+                <div
+                  key={step}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    step === currentStep
+                      ? 'bg-primary text-primary-foreground'
+                      : step < currentStep
+                      ? 'bg-green-500 text-white'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {step}
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {currentStep === 1 && renderStep1()}
+          {currentStep === 2 && renderStep2()}
+          {currentStep === 3 && renderStep3()}
+          {currentStep === 4 && renderStep4()}
+
+          <div className="flex justify-between">
+            <Button
+              variant="outline"
+              onClick={goToPreviousStep}
+              disabled={currentStep === 1 || isImporting}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Назад
+            </Button>
+
+            {currentStep < 4 ? (
+              <Button
+                onClick={goToNextStep}
+                disabled={
+                  (currentStep === 1 && !csvData) ||
+                  (currentStep === 2 && !importSettings.categoryId) ||
+                  isImporting
+                }
+              >
+                Далее
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            ) : (
+              <Button
+                onClick={startImport}
+                disabled={isImporting}
+              >
+                {isImporting ? 'Импорт...' : 'Начать импорт'}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
