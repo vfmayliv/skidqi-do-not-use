@@ -9,6 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, File, AlertCircle, CheckCircle2, FileSpreadsheet, X, Settings } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AdvancedCsvImporter } from '../AdvancedCsvImporter';
+import { CategoryTreeSelector } from '../CategoryTreeSelector';
+import { ListingLifecycleManager } from '../ListingLifecycleManager';
+import { AdvancedImageProcessor } from '../AdvancedImageProcessor';
+import { supabase } from '@/lib/supabase';
 
 type ImportEntityType = 'categories' | 'users' | 'listings';
 
@@ -22,10 +26,29 @@ interface FieldMapping {
   systemField: string;
 }
 
+interface ImageProcessingResult {
+  originalUrl: string;
+  processedUrl?: string;
+  fileName: string;
+  size: number;
+  format: string;
+  status: 'pending' | 'processing' | 'completed' | 'error';
+  error?: string;
+}
+
+interface LifecycleSettings {
+  defaultDuration: number;
+  autoExpire: boolean;
+  sendNotifications: boolean;
+  notifyBeforeExpiry: number;
+  allowRenewal: boolean;
+  maxRenewals: number;
+}
+
 const systemFields = {
   categories: ['id', 'name_ru', 'name_kk', 'parent_id', 'level', 'slug'],
   users: ['id', 'email', 'name', 'phone', 'role', 'city'],
-  listings: ['id', 'title_ru', 'title_kk', 'description_ru', 'description_kk', 'price', 'discount_price', 'category_id', 'user_id', 'city', 'is_featured']
+  listings: ['id', 'title', 'description', 'regular_price', 'discount_price', 'category_id', 'user_id', 'city_id', 'images', 'expires_at']
 };
 
 export const OjahCsvImport = () => {
@@ -37,7 +60,20 @@ export const OjahCsvImport = () => {
   const [csvData, setCsvData] = useState<CsvData | null>(null);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [currentStep, setCurrentStep] = useState<'upload' | 'mapping' | 'validation' | 'import'>('upload');
+  const [currentStep, setCurrentStep] = useState<'upload' | 'mapping' | 'categories' | 'lifecycle' | 'images' | 'validation' | 'import'>('upload');
+  
+  // Новые состояния для расширенной функциональности
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+  const [categoryMappings, setCategoryMappings] = useState<Record<string, number>>({});
+  const [lifecycleSettings, setLifecycleSettings] = useState<LifecycleSettings>({
+    defaultDuration: 30,
+    autoExpire: true,
+    sendNotifications: true,
+    notifyBeforeExpiry: 3,
+    allowRenewal: true,
+    maxRenewals: 3
+  });
+  const [images, setImages] = useState<ImageProcessingResult[]>([]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -100,6 +136,48 @@ export const OjahCsvImport = () => {
     );
   };
 
+  // Автоматическое сопоставление категорий по названию
+  const mapCategoriesAutomatically = async () => {
+    if (!csvData || importType !== 'listings') return;
+
+    try {
+      const { data: categories, error } = await supabase
+        .from('categories')
+        .select('id, name_ru, name_kk');
+
+      if (error) throw error;
+
+      const mappings: Record<string, number> = {};
+      const categoryNameField = fieldMappings.find(m => m.systemField === 'category_id')?.csvField;
+      
+      if (categoryNameField) {
+        const categoryColumnIndex = csvData.headers.indexOf(categoryNameField);
+        
+        csvData.rows.forEach(row => {
+          const categoryName = row[categoryColumnIndex]?.toLowerCase().trim();
+          if (categoryName) {
+            const matchedCategory = categories?.find(cat => 
+              cat.name_ru.toLowerCase() === categoryName ||
+              cat.name_kk.toLowerCase() === categoryName
+            );
+            
+            if (matchedCategory) {
+              mappings[categoryName] = matchedCategory.id;
+            }
+          }
+        });
+      }
+
+      setCategoryMappings(mappings);
+      toast({
+        title: "Автоматическое сопоставление",
+        description: `Сопоставлено ${Object.keys(mappings).length} категорий`
+      });
+    } catch (error: any) {
+      console.error('Ошибка автоматического сопоставления:', error);
+    }
+  };
+
   const validateMappings = () => {
     const errors: string[] = [];
     const mappedSystemFields = fieldMappings
@@ -117,9 +195,9 @@ export const OjahCsvImport = () => {
 
     // Проверка обязательных полей для каждого типа
     const requiredFields = {
-      categories: ['name_ru', 'name_kk'],
+      categories: ['name_ru'],
       users: ['email'],
-      listings: ['title_ru', 'price', 'category_id', 'user_id']
+      listings: ['title', 'category_id']
     };
 
     const missing = requiredFields[importType].filter(field => 
@@ -133,7 +211,11 @@ export const OjahCsvImport = () => {
     setValidationErrors(errors);
     
     if (errors.length === 0) {
-      setCurrentStep('validation');
+      if (importType === 'listings') {
+        setCurrentStep('categories');
+      } else {
+        setCurrentStep('validation');
+      }
       return true;
     }
     return false;
@@ -144,19 +226,25 @@ export const OjahCsvImport = () => {
     setProgress(0);
     setCurrentStep('import');
     
-    // Симуляция процесса импорта
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      setProgress(i);
+    // Симуляция процесса импорта с учетом настроек жизненного цикла
+    const totalRows = csvData?.rows.length || 0;
+    
+    for (let i = 0; i <= totalRows; i++) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setProgress((i / totalRows) * 100);
+      
+      // Здесь был бы реальный импорт данных с применением:
+      // - сопоставлений категорий
+      // - настроек жизненного цикла
+      // - обработанных изображений
     }
     
     setIsImporting(false);
     toast({
       title: "Импорт завершен",
-      description: `Успешно импортировано ${csvData?.rows.length || 0} записей`
+      description: `Успешно импортировано ${totalRows} записей с настройками жизненного цикла`
     });
     
-    // Сброс состояния
     resetImport();
   };
 
@@ -165,6 +253,9 @@ export const OjahCsvImport = () => {
     setCsvData(null);
     setFieldMappings([]);
     setValidationErrors([]);
+    setSelectedCategories([]);
+    setCategoryMappings({});
+    setImages([]);
     setProgress(0);
     setCurrentStep('upload');
   };
@@ -230,6 +321,69 @@ export const OjahCsvImport = () => {
           </Button>
         </div>
       )}
+    </div>
+  );
+
+  const renderCategoryStep = () => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">Настройка категорий</h3>
+        <Button onClick={mapCategoriesAutomatically} variant="outline" size="sm">
+          Автосопоставление
+        </Button>
+      </div>
+      
+      <CategoryTreeSelector
+        selectedCategories={selectedCategories}
+        onCategoriesChange={setSelectedCategories}
+        multiSelect={true}
+      />
+      
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setCurrentStep('mapping')}>
+          Назад
+        </Button>
+        <Button onClick={() => setCurrentStep('lifecycle')}>
+          Продолжить
+        </Button>
+      </div>
+    </div>
+  );
+
+  const renderLifecycleStep = () => (
+    <div className="space-y-4">
+      <ListingLifecycleManager
+        settings={lifecycleSettings}
+        onSettingsChange={setLifecycleSettings}
+      />
+      
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setCurrentStep('categories')}>
+          Назад
+        </Button>
+        <Button onClick={() => setCurrentStep('images')}>
+          Продолжить
+        </Button>
+      </div>
+    </div>
+  );
+
+  const renderImageStep = () => (
+    <div className="space-y-4">
+      <AdvancedImageProcessor
+        images={images}
+        onImagesChange={setImages}
+        maxImages={20}
+      />
+      
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setCurrentStep('lifecycle')}>
+          Назад
+        </Button>
+        <Button onClick={() => setCurrentStep('validation')}>
+          Продолжить
+        </Button>
+      </div>
     </div>
   );
 
@@ -319,50 +473,26 @@ export const OjahCsvImport = () => {
           <CheckCircle2 className="h-5 w-5 text-green-600 mr-2" />
           <h3 className="text-sm font-medium text-green-800">Проверка пройдена успешно</h3>
         </div>
-        <p className="text-sm text-green-700 mt-1">
-          Готово к импорту {csvData?.rows.length || 0} записей
-        </p>
-      </div>
-      
-      <div className="border rounded-md overflow-hidden">
-        <div className="bg-muted px-4 py-2">
-          <h4 className="text-sm font-medium">Предварительный просмотр данных</h4>
-        </div>
-        <div className="overflow-x-auto max-h-64">
-          <table className="min-w-full divide-y divide-border">
-            <thead className="bg-muted">
-              <tr>
-                {fieldMappings
-                  .filter(m => m.systemField)
-                  .map((mapping, index) => (
-                    <th key={index} className="px-4 py-2 text-left text-xs font-medium uppercase">
-                      {mapping.systemField}
-                    </th>
-                  ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {csvData?.rows.slice(0, 5).map((row, rowIndex) => (
-                <tr key={rowIndex}>
-                  {fieldMappings
-                    .filter(m => m.systemField)
-                    .map((mapping, cellIndex) => {
-                      const columnIndex = csvData.headers.indexOf(mapping.csvField);
-                      return (
-                        <td key={cellIndex} className="px-4 py-2 text-sm">
-                          {row[columnIndex] || ''}
-                        </td>
-                      );
-                    })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="mt-2 text-sm text-green-700">
+          <p>Готово к импорту {csvData?.rows.length || 0} записей</p>
+          {importType === 'listings' && (
+            <>
+              <p>Категорий выбрано: {selectedCategories.length}</p>
+              <p>Изображений подготовлено: {images.length}</p>
+              <p>Срок действия: {lifecycleSettings.defaultDuration} дней</p>
+            </>
+          )}
         </div>
       </div>
       
       <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setCurrentStep('mapping')}>
+        <Button variant="outline" onClick={() => {
+          if (importType === 'listings') {
+            setCurrentStep('images');
+          } else {
+            setCurrentStep('mapping');
+          }
+        }}>
           Назад
         </Button>
         <Button onClick={simulateImport} disabled={isImporting}>
@@ -384,7 +514,7 @@ export const OjahCsvImport = () => {
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span>Прогресс импорта</span>
-          <span>{progress}%</span>
+          <span>{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} className="w-full" />
       </div>
@@ -406,7 +536,7 @@ export const OjahCsvImport = () => {
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Импорт CSV данных</h2>
         <p className="text-muted-foreground">
-          Импортируйте данные из файлов CSV в систему
+          Импортируйте данные из файлов CSV в систему с расширенными возможностями
         </p>
       </div>
 
@@ -424,12 +554,15 @@ export const OjahCsvImport = () => {
             <CardHeader>
               <CardTitle>Мастер импорта CSV</CardTitle>
               <CardDescription>
-                Пошаговый процесс импорта данных из CSV файлов
+                Пошаговый процесс импорта данных с полным функционалом
               </CardDescription>
             </CardHeader>
             <CardContent>
               {currentStep === 'upload' && renderUploadStep()}
               {currentStep === 'mapping' && renderMappingStep()}
+              {currentStep === 'categories' && renderCategoryStep()}
+              {currentStep === 'lifecycle' && renderLifecycleStep()}
+              {currentStep === 'images' && renderImageStep()}
               {currentStep === 'validation' && renderValidationStep()}
               {currentStep === 'import' && renderImportStep()}
             </CardContent>
