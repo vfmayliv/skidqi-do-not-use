@@ -52,6 +52,8 @@ export const OjahCsvImport = () => {
   const [cities, setCities] = useState<any[]>([]);
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
+  const [importedCount, setImportedCount] = useState(0);
+  const [errorCount, setErrorCount] = useState(0);
 
   // Загрузка городов при монтировании компонента
   useEffect(() => {
@@ -172,34 +174,55 @@ export const OjahCsvImport = () => {
 
     setIsImporting(true);
     setImportProgress(0);
+    setImportedCount(0);
+    setErrorCount(0);
 
     const totalRows = csvData.rows.length;
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + importSettings.expiryDays);
 
+    console.log('Начинаем импорт. Всего строк:', totalRows);
+    console.log('Настройки импорта:', importSettings);
+
     try {
       for (let i = 0; i < totalRows; i++) {
         const row = csvData.rows[i];
+        
+        // Проверяем, что строка не пустая
+        if (!row || row.length === 0 || row.every(cell => !cell.trim())) {
+          console.log(`Пропускаем пустую строку ${i + 1}`);
+          continue;
+        }
+
         const listingData: any = {
           category_id: importSettings.categoryId,
           city_id: importSettings.cityId,
           expires_at: expiryDate.toISOString(),
-          status: 'active'
+          status: 'active',
+          views: 0,
+          is_premium: false,
+          is_free: false
         };
 
         // Сопоставление полей из CSV
+        let hasRequiredFields = false;
         fieldMappings.forEach(mapping => {
           if (mapping.systemField && mapping.csvField) {
             const columnIndex = csvData.headers.indexOf(mapping.csvField);
-            if (columnIndex !== -1) {
-              const value = row[columnIndex];
+            if (columnIndex !== -1 && row[columnIndex]) {
+              const value = row[columnIndex].trim();
               
               switch (mapping.systemField) {
                 case 'title':
-                  listingData.title = value;
+                  if (value) {
+                    listingData.title = value;
+                    hasRequiredFields = true;
+                  }
                   break;
                 case 'description':
-                  listingData.description = value;
+                  if (value) {
+                    listingData.description = value;
+                  }
                   break;
                 case 'image':
                   if (value) {
@@ -217,20 +240,48 @@ export const OjahCsvImport = () => {
                   }
                   break;
                 case 'source_link':
-                  // Можно сохранить в дополнительных полях или игнорировать
+                  // Можно добавить в description или игнорировать
+                  if (value && listingData.description) {
+                    listingData.description += `\n\nИсточник: ${value}`;
+                  }
                   break;
               }
             }
           }
         });
 
+        // Проверяем наличие обязательных полей
+        if (!hasRequiredFields || !listingData.title) {
+          console.log(`Пропускаем строку ${i + 1}: отсутствуют обязательные поля`);
+          setErrorCount(prev => prev + 1);
+          continue;
+        }
+
+        // Устанавливаем цену по умолчанию, если не указана
+        if (!listingData.regular_price && !listingData.discount_price) {
+          listingData.regular_price = 0;
+          listingData.is_free = true;
+        }
+
+        // Устанавливаем discount_price если не указана
+        if (!listingData.discount_price && listingData.regular_price) {
+          listingData.discount_price = listingData.regular_price;
+        }
+
+        console.log(`Импортируем строку ${i + 1}:`, listingData);
+
         // Создание объявления в базе данных
-        const { error } = await supabase
+        const { data: insertedData, error } = await supabase
           .from('listings')
-          .insert(listingData);
+          .insert(listingData)
+          .select();
 
         if (error) {
           console.error(`Ошибка импорта строки ${i + 1}:`, error);
+          setErrorCount(prev => prev + 1);
+        } else {
+          console.log(`Успешно импортирована строка ${i + 1}:`, insertedData);
+          setImportedCount(prev => prev + 1);
         }
 
         setImportProgress(((i + 1) / totalRows) * 100);
@@ -241,12 +292,26 @@ export const OjahCsvImport = () => {
 
       toast({
         title: "Импорт завершен",
-        description: `Успешно импортировано ${totalRows} объявлений`
+        description: `Успешно импортировано: ${importedCount}, ошибок: ${errorCount}`
       });
+
+      // Проверим, что данные действительно сохранились
+      const { data: checkData, error: checkError } = await supabase
+        .from('listings')
+        .select('id, title, category_id')
+        .eq('category_id', importSettings.categoryId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (checkError) {
+        console.error('Ошибка проверки импортированных данных:', checkError);
+      } else {
+        console.log('Последние импортированные объявления:', checkData);
+      }
 
       resetImport();
     } catch (error: any) {
-      console.error('Ошибка импорта:', error);
+      console.error('Общая ошибка импорта:', error);
       toast({
         variant: "destructive",
         title: "Ошибка импорта",
@@ -269,6 +334,8 @@ export const OjahCsvImport = () => {
     });
     setSelectedCategories([]);
     setImportProgress(0);
+    setImportedCount(0);
+    setErrorCount(0);
   };
 
   const updateFieldMapping = (csvField: string, systemField: string) => {
@@ -562,6 +629,9 @@ export const OjahCsvImport = () => {
               <span>{Math.round(importProgress)}%</span>
             </div>
             <Progress value={importProgress} />
+            <div className="text-xs text-muted-foreground">
+              Импортировано: {importedCount}, ошибок: {errorCount}
+            </div>
           </div>
         )}
       </div>

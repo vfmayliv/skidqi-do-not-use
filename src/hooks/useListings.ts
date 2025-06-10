@@ -31,14 +31,21 @@ export function useListings() {
     offset: number = 0
   ) => {
     setLoading(true);
+    console.log('Загружаем объявления с фильтрами:', filters);
+    
     try {
       let query = supabase
         .from('listings')
-        .select('*')
+        .select(`
+          *,
+          cities(name_ru, name_kz),
+          categories(name_ru, name_kz)
+        `)
         .eq('status', 'active'); // Только активные объявления
 
       // Применение фильтров
       if (filters.categoryId) {
+        console.log('Фильтр по категории:', filters.categoryId);
         query = query.eq('category_id', filters.categoryId);
       }
 
@@ -95,8 +102,9 @@ export function useListings() {
         throw error;
       }
 
-      setListings(data);
-      return data;
+      console.log('Загруженные объявления:', data);
+      setListings(data || []);
+      return data || [];
     } catch (err: any) {
       setError(err.message);
       console.error('Ошибка при загрузке объявлений:', err);
@@ -111,7 +119,11 @@ export function useListings() {
     try {
       const { data, error } = await supabase
         .from('listings')
-        .select('*')
+        .select(`
+          *,
+          cities(name_ru, name_kz),
+          categories(name_ru, name_kz)
+        `)
         .eq('id', id)
         .single();
 

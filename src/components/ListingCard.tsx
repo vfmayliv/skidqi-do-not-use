@@ -3,17 +3,31 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Eye } from 'lucide-react';
-import { Listing } from '@/types/listingType';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 
 interface ListingCardProps {
-  listing: Listing;
+  listing: {
+    id: string;
+    title: string;
+    description?: string;
+    imageUrl?: string;
+    originalPrice: number;
+    discountPrice: number;
+    discount: number;
+    city: string;
+    categoryId?: string;
+    subcategoryId?: string;
+    isFeatured?: boolean;
+    createdAt: string;
+    views: number;
+  };
 }
 
 export function ListingCard({ listing }: ListingCardProps) {
   const { language, t } = useAppWithTranslations();
   
   const formatPrice = (price: number) => {
+    if (price === 0) return language === 'ru' ? 'Бесплатно' : 'Тегін';
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' ' + t('tenge');
   };
   
@@ -26,26 +40,18 @@ export function ListingCard({ listing }: ListingCardProps) {
     }).format(date);
   };
 
-  // Ensure we get a string for title, even if somehow it comes in as an object
-  const title = typeof listing.title === 'string' 
-    ? listing.title 
-    : (listing.title && typeof listing.title === 'object' && listing.title[language]) 
-      ? listing.title[language] 
-      : '';
+  // Ensure we get a string for title
+  const title = listing.title || '';
 
-  // Ensure we get a string for city, even if somehow it comes in as an object
-  const city = typeof listing.city === 'string' 
-    ? listing.city 
-    : (listing.city && typeof listing.city === 'object' && listing.city[language]) 
-      ? listing.city[language] 
-      : '';
+  // Ensure we get a string for city
+  const city = listing.city || '';
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <Link to={`/listing/${listing.id}`}>
         <div className="relative aspect-[4/3] overflow-hidden">
           <img
-            src={listing.imageUrl}
+            src={listing.imageUrl || '/placeholder.svg'}
             alt={title}
             className="w-full h-full object-cover transition-transform hover:scale-105"
           />
@@ -68,7 +74,7 @@ export function ListingCard({ listing }: ListingCardProps) {
           
           <div className="mt-2 space-y-1">
             <div className="flex flex-col">
-              {listing.discount > 0 && (
+              {listing.discount > 0 && listing.originalPrice > listing.discountPrice && (
                 <span className="text-sm text-muted-foreground line-through">
                   {formatPrice(listing.originalPrice)}
                 </span>
