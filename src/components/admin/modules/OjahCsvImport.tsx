@@ -10,6 +10,7 @@ import { Upload, File, CheckCircle2, FileSpreadsheet, ArrowLeft, ArrowRight } fr
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CategoryTreeSelector } from '../CategoryTreeSelector';
 import { supabase } from '@/lib/supabase';
+import { useSupabase } from '@/contexts/SupabaseContext';
 
 interface CsvData {
   headers: string[];
@@ -39,6 +40,7 @@ const csvFields = [
 
 export const OjahCsvImport = () => {
   const { toast } = useToast();
+  const { user } = useSupabase();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<CsvData | null>(null);
@@ -149,6 +151,16 @@ export const OjahCsvImport = () => {
       });
       return false;
     }
+
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Ошибка авторизации",
+        description: "Войдите в систему для импорта объявлений"
+      });
+      return false;
+    }
+
     return true;
   };
 
@@ -170,7 +182,14 @@ export const OjahCsvImport = () => {
   };
 
   const startImport = async () => {
-    if (!csvData) return;
+    if (!csvData || !user) {
+      toast({
+        variant: "destructive",
+        title: "Ошибка",
+        description: "Нет данных для импорта или пользователь не авторизован"
+      });
+      return;
+    }
 
     setIsImporting(true);
     setImportProgress(0);
@@ -183,6 +202,10 @@ export const OjahCsvImport = () => {
 
     console.log('Начинаем импорт. Всего строк:', totalRows);
     console.log('Настройки импорта:', importSettings);
+    console.log('Пользователь:', user.id);
+
+    let successCount = 0;
+    let errorCount = 0;
 
     try {
       for (let i = 0; i < totalRows; i++) {
@@ -194,7 +217,9 @@ export const OjahCsvImport = () => {
           continue;
         }
 
+        // Базовые данные объявления
         const listingData: any = {
+          user_id: user.id, // ВАЖНО: добавляем владельца объявления
           category_id: importSettings.categoryId,
           city_id: importSettings.cityId,
           expires_at: expiryDate.toISOString(),
@@ -205,7 +230,9 @@ export const OjahCsvImport = () => {
         };
 
         // Сопоставление полей из CSV
-        let hasRequiredFields = false;
+        let hasTitle = false;
+        let hasDescription = false;
+
         fieldMappings.forEach(mapping => {
           if (mapping.systemField && mapping.csvField) {
             const columnIndex = csvData.headers.indexOf(mapping.csvField);
@@ -216,12 +243,13 @@ export const OjahCsvImport = () => {
                 case 'title':
                   if (value) {
                     listingData.title = value;
-                    hasRequiredFields = true;
+                    hasTitle = true;
                   }
                   break;
                 case 'description':
                   if (value) {
                     listingData.description = value;
+                    hasDescription = true;
                   }
                   break;
                 case 'image':
@@ -240,7 +268,7 @@ export const OjahCsvImport = () => {
                   }
                   break;
                 case 'source_link':
-                  // Можно добавить в description или игнорировать
+                  // Добавляем ссылку к описанию
                   if (value && listingData.description) {
                     listingData.description += `\n\nИсточник: ${value}`;
                   }
@@ -250,25 +278,35 @@ export const OjahCsvImport = () => {
           }
         });
 
-        // Проверяем наличие обязательных полей
-        if (!hasRequiredFields || !listingData.title) {
-          console.log(`Пропускаем строку ${i + 1}: отсутствуют обязательные поля`);
-          setErrorCount(prev => prev + 1);
+        // ОБЯЗАТЕЛЬНАЯ ПРОВЕРКА на наличие title и description
+        if (!hasTitle || !listingData.title) {
+          console.log(`Ошибка в строке ${i + 1}: отсутствует заголовок`);
+          errorCount++;
           continue;
         }
 
-        // Устанавливаем цену по умолчанию, если не указана
+        if (!hasDescription || !listingData.description) {
+          console.log(`Ошибка в строке ${i + 1}: отсутствует описание`);
+          errorCount++;
+          continue;
+        }
+
+        // Устанавливаем цены по умолчанию, если не указаны
         if (!listingData.regular_price && !listingData.discount_price) {
           listingData.regular_price = 0;
+          listingData.discount_price = 0;
           listingData.is_free = true;
-        }
-
-        // Устанавливаем discount_price если не указана
-        if (!listingData.discount_price && listingData.regular_price) {
+        } else if (!listingData.discount_price && listingData.regular_price) {
           listingData.discount_price = listingData.regular_price;
+        } else if (!listingData.regular_price && listingData.discount_price) {
+          listingData.regular_price = listingData.discount_price;
         }
 
-        console.log(`Импортируем строку ${i + 1}:`, listingData);
+        console.log(`Импортируем строку ${i + 1}:`, {
+          title: listingData.title.substring(0, 50),
+          user_id: listingData.user_id,
+          category_id: listingData.category_id
+        });
 
         // Создание объявления в базе данных
         const { data: insertedData, error } = await supabase
@@ -278,12 +316,15 @@ export const OjahCsvImport = () => {
 
         if (error) {
           console.error(`Ошибка импорта строки ${i + 1}:`, error);
-          setErrorCount(prev => prev + 1);
+          errorCount++;
         } else {
           console.log(`Успешно импортирована строка ${i + 1}:`, insertedData);
-          setImportedCount(prev => prev + 1);
+          successCount++;
         }
 
+        // Обновляем состояние
+        setImportedCount(successCount);
+        setErrorCount(errorCount);
         setImportProgress(((i + 1) / totalRows) * 100);
         
         // Пауза для избежания перегрузки
@@ -292,14 +333,15 @@ export const OjahCsvImport = () => {
 
       toast({
         title: "Импорт завершен",
-        description: `Успешно импортировано: ${importedCount}, ошибок: ${errorCount}`
+        description: `Успешно импортировано: ${successCount}, ошибок: ${errorCount}`
       });
 
       // Проверим, что данные действительно сохранились
       const { data: checkData, error: checkError } = await supabase
         .from('listings')
-        .select('id, title, category_id')
+        .select('id, title, category_id, user_id')
         .eq('category_id', importSettings.categoryId)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -309,7 +351,12 @@ export const OjahCsvImport = () => {
         console.log('Последние импортированные объявления:', checkData);
       }
 
-      resetImport();
+      // Сброс только если есть успешно импортированные объявления
+      if (successCount > 0) {
+        setTimeout(() => {
+          resetImport();
+        }, 3000);
+      }
     } catch (error: any) {
       console.error('Общая ошибка импорта:', error);
       toast({
@@ -504,6 +551,14 @@ export const OjahCsvImport = () => {
             />
           </div>
         </div>
+
+        {!user && (
+          <Alert>
+            <AlertDescription>
+              Для импорта объявлений необходимо войти в систему
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
     </div>
   );
@@ -600,6 +655,7 @@ export const OjahCsvImport = () => {
               <div><strong>Город:</strong> {importSettings.cityId ? cities.find(c => c.id === importSettings.cityId)?.name_ru : 'Не выбран'}</div>
               <div><strong>Срок действия:</strong> {importSettings.expiryDays} дней</div>
               <div><strong>Количество записей:</strong> {csvData?.rows.length || 0}</div>
+              <div><strong>Пользователь:</strong> {user ? user.email : 'Не авторизован'}</div>
             </CardContent>
           </Card>
 
@@ -692,7 +748,7 @@ export const OjahCsvImport = () => {
                 onClick={goToNextStep}
                 disabled={
                   (currentStep === 1 && !csvData) ||
-                  (currentStep === 2 && !importSettings.categoryId) ||
+                  (currentStep === 2 && (!importSettings.categoryId || !user)) ||
                   isImporting
                 }
               >
@@ -702,7 +758,7 @@ export const OjahCsvImport = () => {
             ) : (
               <Button
                 onClick={startImport}
-                disabled={isImporting}
+                disabled={isImporting || !user}
               >
                 {isImporting ? 'Импорт...' : 'Начать импорт'}
               </Button>
