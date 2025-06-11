@@ -6,9 +6,8 @@ import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, File, CheckCircle2, FileSpreadsheet, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Upload, File, CheckCircle2, FileSpreadsheet, ArrowLeft, ArrowRight, ChevronDown, ChevronRight } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CategoryTreeSelector } from '../CategoryTreeSelector';
 import { supabase } from '@/lib/supabase';
 
 interface CsvData {
@@ -30,6 +29,15 @@ interface ImportSettings {
 interface AdminUser {
   id: string;
   email: string;
+}
+
+interface Category {
+  id: number;
+  name_ru: string;
+  name_kz: string;
+  parent_id: number | null;
+  level: number;
+  children?: Category[];
 }
 
 // Поля CSV файла (только эти 6 полей)
@@ -61,10 +69,16 @@ export const OjahCsvImport = () => {
   const [errorCount, setErrorCount] = useState(0);
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
+  
+  // Состояния для категорий
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryPath, setSelectedCategoryPath] = useState<Category[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
 
-  // Загрузка городов и проверка/создание админ пользователя при монтировании компонента
+  // Загрузка городов и категорий, проверка/создание админ пользователя при монтировании компонента
   useEffect(() => {
     fetchCities();
+    fetchCategories();
     checkOrCreateAdminUser();
   }, []);
 
@@ -82,19 +96,71 @@ export const OjahCsvImport = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('level', { ascending: true })
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+
+      const categoryTree = buildCategoryTree(data || []);
+      setCategories(categoryTree);
+      setAvailableCategories(categoryTree);
+    } catch (error: any) {
+      console.error('Ошибка загрузки категорий:', error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка",
+        description: "Не удалось загрузить категории"
+      });
+    }
+  };
+
+  const buildCategoryTree = (flatCategories: any[]): Category[] => {
+    const categoryMap = new Map<number, Category>();
+    const rootCategories: Category[] = [];
+
+    // Создаем карту категорий
+    flatCategories.forEach(cat => {
+      categoryMap.set(cat.id, {
+        ...cat,
+        children: []
+      });
+    });
+
+    // Строим дерево
+    flatCategories.forEach(cat => {
+      const category = categoryMap.get(cat.id)!;
+      if (cat.parent_id) {
+        const parent = categoryMap.get(cat.parent_id);
+        if (parent) {
+          parent.children = parent.children || [];
+          parent.children.push(category);
+        }
+      } else {
+        rootCategories.push(category);
+      }
+    });
+
+    return rootCategories;
+  };
+
   const checkOrCreateAdminUser = async () => {
     try {
       setIsCreatingAdmin(true);
       
-      // Сначала проверим, есть ли уже админ пользователь в профилях
+      // Сначала проверим, есть ли уже админ пользователь Skidqi в профилях
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select('id, email')
-        .eq('email', 'skidqi@admin.ojah')
+        .eq('email', 'info@skidqi.ru')
         .single();
 
       if (existingProfile && !profileError) {
-        console.log('Найден существующий админ пользователь:', existingProfile);
+        console.log('Найден существующий админ пользователь Skidqi:', existingProfile);
         setAdminUser(existingProfile);
         setIsCreatingAdmin(false);
         return;
@@ -112,10 +178,10 @@ export const OjahCsvImport = () => {
 
       const adminPassword = ojpwData.id;
 
-      // Создаем нового админ пользователя через Supabase Auth
-      console.log('Создаем нового админ пользователя...');
+      // Создаем нового админ пользователя Skidqi через Supabase Auth
+      console.log('Создаем нового админ пользователя Skidqi...');
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: 'skidqi@admin.ojah',
+        email: 'info@skidqi.ru',
         password: adminPassword,
         options: {
           data: {
@@ -127,9 +193,9 @@ export const OjahCsvImport = () => {
       if (authError) {
         // Если ошибка в том, что пользователь уже существует, попробуем войти
         if (authError.message.includes('User already registered')) {
-          console.log('Пользователь уже существует, пытаемся войти...');
+          console.log('Пользователь Skidqi уже существует, пытаемся войти...');
           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email: 'skidqi@admin.ojah',
+            email: 'info@skidqi.ru',
             password: adminPassword
           });
           
@@ -143,7 +209,7 @@ export const OjahCsvImport = () => {
               .from('profiles')
               .upsert({
                 id: signInData.user.id,
-                email: 'skidqi@admin.ojah',
+                email: 'info@skidqi.ru',
                 full_name: 'Skidqi Admin'
               })
               .select()
@@ -155,7 +221,7 @@ export const OjahCsvImport = () => {
             
             setAdminUser({
               id: signInData.user.id,
-              email: 'skidqi@admin.ojah'
+              email: 'info@skidqi.ru'
             });
             
             // Выходим из аккаунта, чтобы не влиять на админ панель
@@ -165,10 +231,10 @@ export const OjahCsvImport = () => {
           throw authError;
         }
       } else if (authData.user) {
-        console.log('Админ пользователь создан:', authData.user);
+        console.log('Админ пользователь Skidqi создан:', authData.user);
         setAdminUser({
           id: authData.user.id,
-          email: 'skidqi@admin.ojah'
+          email: 'info@skidqi.ru'
         });
         
         // Выходим из аккаунта, чтобы не влиять на админ панель
@@ -176,14 +242,49 @@ export const OjahCsvImport = () => {
       }
 
     } catch (error: any) {
-      console.error('Ошибка создания админ пользователя:', error);
+      console.error('Ошибка создания админ пользователя Skidqi:', error);
       toast({
         variant: "destructive",
         title: "Ошибка",
-        description: `Не удалось создать админ пользователя: ${error.message}`
+        description: `Не удалось создать админ пользователя Skidqi: ${error.message}`
       });
     } finally {
       setIsCreatingAdmin(false);
+    }
+  };
+
+  const handleCategorySelect = (category: Category) => {
+    if (category.children && category.children.length > 0) {
+      // Если у категории есть дети, добавляем её в путь и показываем детей
+      const newPath = [...selectedCategoryPath, category];
+      setSelectedCategoryPath(newPath);
+      setAvailableCategories(category.children);
+    } else {
+      // Если это конечная категория, выбираем её
+      const newPath = [...selectedCategoryPath, category];
+      setSelectedCategoryPath(newPath);
+      setImportSettings(prev => ({
+        ...prev,
+        categoryId: category.id
+      }));
+    }
+  };
+
+  const handleCategoryBack = () => {
+    if (selectedCategoryPath.length === 0) return;
+    
+    if (selectedCategoryPath.length === 1) {
+      // Возвращаемся к корневым категориям
+      setSelectedCategoryPath([]);
+      setAvailableCategories(categories);
+      setImportSettings(prev => ({ ...prev, categoryId: null }));
+    } else {
+      // Возвращаемся на уровень выше
+      const newPath = selectedCategoryPath.slice(0, -1);
+      setSelectedCategoryPath(newPath);
+      const parentCategory = newPath[newPath.length - 1];
+      setAvailableCategories(parentCategory.children || []);
+      setImportSettings(prev => ({ ...prev, categoryId: null }));
     }
   };
 
@@ -267,7 +368,7 @@ export const OjahCsvImport = () => {
       toast({
         variant: "destructive",
         title: "Ошибка",
-        description: "Админ пользователь не найден"
+        description: "Админ пользователь Skidqi не найден"
       });
       return false;
     }
@@ -297,7 +398,7 @@ export const OjahCsvImport = () => {
       toast({
         variant: "destructive",
         title: "Ошибка",
-        description: "Нет данных для импорта или админ пользователь не найден"
+        description: "Нет данных для импорта или админ пользователь Skidqi не найден"
       });
       return;
     }
@@ -313,7 +414,7 @@ export const OjahCsvImport = () => {
 
     console.log('Начинаем импорт. Всего строк:', totalRows);
     console.log('Настройки импорта:', importSettings);
-    console.log('Админ пользователь:', adminUser.id);
+    console.log('Админ пользователь Skidqi:', adminUser.id);
 
     let successCount = 0;
     let errorCount = 0;
@@ -330,7 +431,7 @@ export const OjahCsvImport = () => {
 
         // Базовые данные объявления
         const listingData: any = {
-          user_id: adminUser.id, // Используем ID админ пользователя
+          user_id: adminUser.id, // Используем ID админ пользователя Skidqi
           category_id: importSettings.categoryId,
           city_id: importSettings.cityId,
           expires_at: expiryDate.toISOString(),
@@ -490,7 +591,8 @@ export const OjahCsvImport = () => {
       cityId: null,
       expiryDays: 30
     });
-    setSelectedCategories([]);
+    setSelectedCategoryPath([]);
+    setAvailableCategories(categories);
     setImportProgress(0);
     setImportedCount(0);
     setErrorCount(0);
@@ -607,17 +709,66 @@ export const OjahCsvImport = () => {
           <p className="text-xs text-muted-foreground mb-2">
             Выберите категорию для всех импортируемых объявлений
           </p>
-          <CategoryTreeSelector
-            selectedCategories={selectedCategories}
-            onCategoriesChange={(categories) => {
-              setSelectedCategories(categories);
-              setImportSettings(prev => ({
-                ...prev,
-                categoryId: categories[0] || null
-              }));
-            }}
-            multiSelect={false}
-          />
+          
+          {/* Хлебные крошки */}
+          {selectedCategoryPath.length > 0 && (
+            <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedCategoryPath([]);
+                  setAvailableCategories(categories);
+                  setImportSettings(prev => ({ ...prev, categoryId: null }));
+                }}
+                className="p-0 h-auto"
+              >
+                Все категории
+              </Button>
+              {selectedCategoryPath.map((cat, index) => (
+                <div key={cat.id} className="flex items-center gap-2">
+                  <ChevronRight className="h-3 w-3" />
+                  <span>{cat.name_ru}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Навигация назад */}
+          {selectedCategoryPath.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCategoryBack}
+              className="mb-2"
+            >
+              <ArrowLeft className="h-3 w-3 mr-1" />
+              Назад
+            </Button>
+          )}
+
+          {/* Список доступных категорий */}
+          <div className="border rounded-md max-h-64 overflow-y-auto">
+            {availableCategories.map((category) => (
+              <div
+                key={category.id}
+                className={`p-3 border-b cursor-pointer hover:bg-muted/50 flex items-center justify-between ${
+                  importSettings.categoryId === category.id ? 'bg-primary/10 border-primary/20' : ''
+                }`}
+                onClick={() => handleCategorySelect(category)}
+              >
+                <span className="text-sm">{category.name_ru}</span>
+                <div className="flex items-center gap-2">
+                  {importSettings.categoryId === category.id && (
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  )}
+                  {category.children && category.children.length > 0 && (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -666,7 +817,7 @@ export const OjahCsvImport = () => {
         {isCreatingAdmin && (
           <Alert>
             <AlertDescription>
-              Создается админ пользователь для импорта...
+              Создается админ пользователь Skidqi для импорта...
             </AlertDescription>
           </Alert>
         )}
@@ -675,7 +826,7 @@ export const OjahCsvImport = () => {
           <Alert>
             <CheckCircle2 className="h-4 w-4" />
             <AlertDescription>
-              Админ пользователь готов: {adminUser.email}
+              Админ пользователь Skidqi готов: {adminUser.email}
             </AlertDescription>
           </Alert>
         )}
@@ -756,6 +907,11 @@ export const OjahCsvImport = () => {
       return mapped;
     });
 
+    const getSelectedCategoryName = () => {
+      if (selectedCategoryPath.length === 0) return 'Не выбрана';
+      return selectedCategoryPath[selectedCategoryPath.length - 1].name_ru;
+    };
+
     return (
       <div className="space-y-6">
         <div>
@@ -771,11 +927,11 @@ export const OjahCsvImport = () => {
               <CardTitle className="text-base">Настройки импорта</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
-              <div><strong>Категория:</strong> {selectedCategories[0] ? `ID: ${selectedCategories[0]}` : 'Не выбрана'}</div>
+              <div><strong>Категория:</strong> {getSelectedCategoryName()}</div>
               <div><strong>Город:</strong> {importSettings.cityId ? cities.find(c => c.id === importSettings.cityId)?.name_ru : 'Не выбран'}</div>
               <div><strong>Срок действия:</strong> {importSettings.expiryDays} дней</div>
               <div><strong>Количество записей:</strong> {csvData?.rows.length || 0}</div>
-              <div><strong>Владелец объявлений:</strong> {adminUser ? adminUser.email : 'Не найден'}</div>
+              <div><strong>Владелец объявлений:</strong> {adminUser ? `Skidqi (${adminUser.email})` : 'Не найден'}</div>
             </CardContent>
           </Card>
 
