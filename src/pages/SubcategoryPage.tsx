@@ -37,6 +37,23 @@ export default function SubcategoryPage() {
   
   // Determine subcategory name (in a real app, you would get this from your subcategories data)
   const subcategoryName = subcategoryId || '';
+
+  // Helper function to adapt multilingual listings to simple string format
+  const adaptListingForCard = (listing: Listing) => ({
+    id: listing.id,
+    title: typeof listing.title === 'string' ? listing.title : listing.title?.[language] || listing.title?.ru || '',
+    description: typeof listing.description === 'string' ? listing.description : listing.description?.[language] || listing.description?.ru || '',
+    imageUrl: listing.imageUrl,
+    originalPrice: listing.originalPrice,
+    discountPrice: listing.discountPrice,
+    discount: listing.discount,
+    city: typeof listing.city === 'string' ? listing.city : listing.city?.[language] || listing.city?.ru || '',
+    categoryId: listing.categoryId,
+    subcategoryId: listing.subcategoryId,
+    isFeatured: listing.isFeatured,
+    createdAt: listing.createdAt,
+    views: listing.views
+  });
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -54,7 +71,7 @@ export default function SubcategoryPage() {
           
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mt-8">
             {filteredListings.map(listing => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard key={listing.id} listing={adaptListingForCard(listing)} />
             ))}
           </div>
           

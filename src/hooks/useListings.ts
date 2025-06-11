@@ -10,7 +10,7 @@ type ListingFilters = {
   microdistrictId?: number;
   priceMin?: number;
   priceMax?: number;
-  priceRange?: [number, number];
+  priceRange?: { min?: number; max?: number; };
   condition?: string;
   searchQuery?: string;
   isPremium?: boolean;
@@ -60,13 +60,13 @@ export function useListings() {
         query = query.eq('microdistrict_id', filters.microdistrictId);
       }
 
-      // Handle priceRange filter
+      // Handle priceRange filter - now handles object format
       if (filters.priceRange) {
-        const [min, max] = filters.priceRange;
-        if (min > 0) {
+        const { min, max } = filters.priceRange;
+        if (min !== undefined && min > 0) {
           query = query.gte('discount_price', min);
         }
-        if (max > 0) {
+        if (max !== undefined && max > 0) {
           query = query.lte('discount_price', max);
         }
       } else {

@@ -179,6 +179,23 @@ const SearchResults = () => {
       filters.priceRange.max || 1000000
     ]);
   }, [filters.priceRange.min, filters.priceRange.max]);
+
+  // Helper function to adapt multilingual listings to simple string format
+  const adaptListingForCard = (listing: any) => ({
+    id: listing.id,
+    title: typeof listing.title === 'string' ? listing.title : listing.title?.[language] || listing.title?.ru || '',
+    description: typeof listing.description === 'string' ? listing.description : listing.description?.[language] || listing.description?.ru || '',
+    imageUrl: listing.imageUrl,
+    originalPrice: listing.originalPrice,
+    discountPrice: listing.discountPrice,
+    discount: listing.discount,
+    city: typeof listing.city === 'string' ? listing.city : listing.city?.[language] || listing.city?.ru || '',
+    categoryId: listing.categoryId,
+    subcategoryId: listing.subcategoryId,
+    isFeatured: listing.isFeatured,
+    createdAt: listing.createdAt,
+    views: listing.views
+  });
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -527,7 +544,7 @@ const SearchResults = () => {
               : "space-y-4"
           }>
             {searchResults.map(listing => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard key={listing.id} listing={adaptListingForCard(listing)} />
             ))}
           </div>
         ) : (
