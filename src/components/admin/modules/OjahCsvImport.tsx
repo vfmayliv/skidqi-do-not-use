@@ -10,7 +10,6 @@ import { Upload, File, CheckCircle2, FileSpreadsheet, ArrowLeft, ArrowRight } fr
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CategoryTreeSelector } from '../CategoryTreeSelector';
 import { supabase } from '@/lib/supabase';
-import { useSupabase } from '@/contexts/SupabaseContext';
 
 interface CsvData {
   headers: string[];
@@ -28,6 +27,11 @@ interface ImportSettings {
   expiryDays: number;
 }
 
+interface AdminUser {
+  id: string;
+  email: string;
+}
+
 // Поля CSV файла (только эти 6 полей)
 const csvFields = [
   { key: 'title', label: 'Заголовок объявления', required: true },
@@ -40,7 +44,6 @@ const csvFields = [
 
 export const OjahCsvImport = () => {
   const { toast } = useToast();
-  const { user } = useSupabase();
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<CsvData | null>(null);
@@ -56,10 +59,13 @@ export const OjahCsvImport = () => {
   const [importProgress, setImportProgress] = useState(0);
   const [importedCount, setImportedCount] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
+  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
 
-  // Загрузка городов при монтировании компонента
+  // Загрузка городов и проверка/создание админ пользователя при монтировании компонента
   useEffect(() => {
     fetchCities();
+    checkOrCreateAdminUser();
   }, []);
 
   const fetchCities = async () => {
@@ -73,6 +79,111 @@ export const OjahCsvImport = () => {
       setCities(data || []);
     } catch (error: any) {
       console.error('Ошибка загрузки городов:', error);
+    }
+  };
+
+  const checkOrCreateAdminUser = async () => {
+    try {
+      setIsCreatingAdmin(true);
+      
+      // Сначала проверим, есть ли уже админ пользователь в профилях
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .eq('email', 'skidqi@admin.ojah')
+        .single();
+
+      if (existingProfile && !profileError) {
+        console.log('Найден существующий админ пользователь:', existingProfile);
+        setAdminUser(existingProfile);
+        setIsCreatingAdmin(false);
+        return;
+      }
+
+      // Если профиля нет, получаем пароль из ojpw таблицы
+      const { data: ojpwData, error: ojpwError } = await supabase
+        .from('ojpw')
+        .select('id')
+        .single();
+
+      if (ojpwError || !ojpwData?.id) {
+        throw new Error('Не удалось получить пароль для создания админ пользователя');
+      }
+
+      const adminPassword = ojpwData.id;
+
+      // Создаем нового админ пользователя через Supabase Auth
+      console.log('Создаем нового админ пользователя...');
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: 'skidqi@admin.ojah',
+        password: adminPassword,
+        options: {
+          data: {
+            full_name: 'Skidqi Admin'
+          }
+        }
+      });
+
+      if (authError) {
+        // Если ошибка в том, что пользователь уже существует, попробуем войти
+        if (authError.message.includes('User already registered')) {
+          console.log('Пользователь уже существует, пытаемся войти...');
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: 'skidqi@admin.ojah',
+            password: adminPassword
+          });
+          
+          if (signInError) {
+            throw signInError;
+          }
+          
+          if (signInData.user) {
+            // Проверим/создадим профиль
+            const { data: profile, error: createProfileError } = await supabase
+              .from('profiles')
+              .upsert({
+                id: signInData.user.id,
+                email: 'skidqi@admin.ojah',
+                full_name: 'Skidqi Admin'
+              })
+              .select()
+              .single();
+              
+            if (createProfileError) {
+              console.error('Ошибка создания профиля:', createProfileError);
+            }
+            
+            setAdminUser({
+              id: signInData.user.id,
+              email: 'skidqi@admin.ojah'
+            });
+            
+            // Выходим из аккаунта, чтобы не влиять на админ панель
+            await supabase.auth.signOut();
+          }
+        } else {
+          throw authError;
+        }
+      } else if (authData.user) {
+        console.log('Админ пользователь создан:', authData.user);
+        setAdminUser({
+          id: authData.user.id,
+          email: 'skidqi@admin.ojah'
+        });
+        
+        // Выходим из аккаунта, чтобы не влиять на админ панель
+        await supabase.auth.signOut();
+      }
+
+    } catch (error: any) {
+      console.error('Ошибка создания админ пользователя:', error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка",
+        description: `Не удалось создать админ пользователя: ${error.message}`
+      });
+    } finally {
+      setIsCreatingAdmin(false);
     }
   };
 
@@ -152,11 +263,11 @@ export const OjahCsvImport = () => {
       return false;
     }
 
-    if (!user) {
+    if (!adminUser) {
       toast({
         variant: "destructive",
-        title: "Ошибка авторизации",
-        description: "Войдите в систему для импорта объявлений"
+        title: "Ошибка",
+        description: "Админ пользователь не найден"
       });
       return false;
     }
@@ -182,11 +293,11 @@ export const OjahCsvImport = () => {
   };
 
   const startImport = async () => {
-    if (!csvData || !user) {
+    if (!csvData || !adminUser) {
       toast({
         variant: "destructive",
         title: "Ошибка",
-        description: "Нет данных для импорта или пользователь не авторизован"
+        description: "Нет данных для импорта или админ пользователь не найден"
       });
       return;
     }
@@ -202,7 +313,7 @@ export const OjahCsvImport = () => {
 
     console.log('Начинаем импорт. Всего строк:', totalRows);
     console.log('Настройки импорта:', importSettings);
-    console.log('Пользователь:', user.id);
+    console.log('Админ пользователь:', adminUser.id);
 
     let successCount = 0;
     let errorCount = 0;
@@ -219,7 +330,7 @@ export const OjahCsvImport = () => {
 
         // Базовые данные объявления
         const listingData: any = {
-          user_id: user.id, // ВАЖНО: добавляем владельца объявления
+          user_id: adminUser.id, // Используем ID админ пользователя
           category_id: importSettings.categoryId,
           city_id: importSettings.cityId,
           expires_at: expiryDate.toISOString(),
@@ -341,7 +452,7 @@ export const OjahCsvImport = () => {
         .from('listings')
         .select('id, title, category_id, user_id')
         .eq('category_id', importSettings.categoryId)
-        .eq('user_id', user.id)
+        .eq('user_id', adminUser.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -552,10 +663,19 @@ export const OjahCsvImport = () => {
           </div>
         </div>
 
-        {!user && (
+        {isCreatingAdmin && (
           <Alert>
             <AlertDescription>
-              Для импорта объявлений необходимо войти в систему
+              Создается админ пользователь для импорта...
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {adminUser && (
+          <Alert>
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>
+              Админ пользователь готов: {adminUser.email}
             </AlertDescription>
           </Alert>
         )}
@@ -655,7 +775,7 @@ export const OjahCsvImport = () => {
               <div><strong>Город:</strong> {importSettings.cityId ? cities.find(c => c.id === importSettings.cityId)?.name_ru : 'Не выбран'}</div>
               <div><strong>Срок действия:</strong> {importSettings.expiryDays} дней</div>
               <div><strong>Количество записей:</strong> {csvData?.rows.length || 0}</div>
-              <div><strong>Пользователь:</strong> {user ? user.email : 'Не авторизован'}</div>
+              <div><strong>Владелец объявлений:</strong> {adminUser ? adminUser.email : 'Не найден'}</div>
             </CardContent>
           </Card>
 
@@ -748,7 +868,7 @@ export const OjahCsvImport = () => {
                 onClick={goToNextStep}
                 disabled={
                   (currentStep === 1 && !csvData) ||
-                  (currentStep === 2 && (!importSettings.categoryId || !user)) ||
+                  (currentStep === 2 && (!importSettings.categoryId || !adminUser)) ||
                   isImporting
                 }
               >
@@ -758,7 +878,7 @@ export const OjahCsvImport = () => {
             ) : (
               <Button
                 onClick={startImport}
-                disabled={isImporting || !user}
+                disabled={isImporting || !adminUser}
               >
                 {isImporting ? 'Импорт...' : 'Начать импорт'}
               </Button>
