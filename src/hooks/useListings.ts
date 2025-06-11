@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase, Listing } from '@/lib/supabase';
 import { useSupabase } from '@/contexts/SupabaseContext';
@@ -9,6 +10,8 @@ type ListingFilters = {
   microdistrictId?: number;
   priceMin?: number;
   priceMax?: number;
+  priceRange?: [number, number];
+  condition?: string;
   searchQuery?: string;
   isPremium?: boolean;
   isFree?: boolean;
@@ -57,12 +60,23 @@ export function useListings() {
         query = query.eq('microdistrict_id', filters.microdistrictId);
       }
 
-      if (filters.priceMin !== undefined) {
-        query = query.gte('discount_price', filters.priceMin);
-      }
+      // Handle priceRange filter
+      if (filters.priceRange) {
+        const [min, max] = filters.priceRange;
+        if (min > 0) {
+          query = query.gte('discount_price', min);
+        }
+        if (max > 0) {
+          query = query.lte('discount_price', max);
+        }
+      } else {
+        if (filters.priceMin !== undefined) {
+          query = query.gte('discount_price', filters.priceMin);
+        }
 
-      if (filters.priceMax !== undefined) {
-        query = query.lte('discount_price', filters.priceMax);
+        if (filters.priceMax !== undefined) {
+          query = query.lte('discount_price', filters.priceMax);
+        }
       }
 
       if (filters.searchQuery) {

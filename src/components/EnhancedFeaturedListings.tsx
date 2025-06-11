@@ -16,6 +16,14 @@ export function EnhancedFeaturedListings() {
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   ).slice(0, 8);
 
+  // Helper function to adapt multilingual listings to simple string format
+  const adaptListing = (listing: any) => ({
+    ...listing,
+    title: typeof listing.title === 'string' ? listing.title : listing.title[language] || listing.title.ru,
+    description: typeof listing.description === 'string' ? listing.description : listing.description?.[language] || listing.description?.ru,
+    city: typeof listing.city === 'string' ? listing.city : listing.city?.[language] || listing.city?.ru
+  });
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Center the heading and position it above the tabs */}
@@ -46,7 +54,7 @@ export function EnhancedFeaturedListings() {
           {/* Always show 2 columns on mobile */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {featuredListings.slice(0, 8).map(listing => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard key={listing.id} listing={adaptListing(listing)} />
             ))}
           </div>
         </TabsContent>
@@ -55,7 +63,7 @@ export function EnhancedFeaturedListings() {
           {/* Always show 2 columns on mobile */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {latestListings.map(listing => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard key={listing.id} listing={adaptListing(listing)} />
             ))}
           </div>
         </TabsContent>

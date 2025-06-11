@@ -147,7 +147,7 @@ export default function CategoryPage() {
     originalPrice: listing.regular_price || 0,
     discountPrice: listing.discount_price || listing.regular_price || 0,
     discount: listing.discount_percent || 0,
-    city: listing.cities?.name_ru || 'Не указан',
+    city: (listing as any).cities?.name_ru || 'Не указан',
     categoryId: categoryId || '',
     subcategoryId: '',
     isFeatured: listing.is_premium || false,
