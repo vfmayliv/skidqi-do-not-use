@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -157,7 +158,7 @@ export const OjahCsvImport = () => {
         const { data, error } = await supabase
           .from('cities')
           .select('*')
-          .order('name', { ascending: true });
+          .order('name_ru', { ascending: true });
         
         if (error) {
           toast({
@@ -169,7 +170,7 @@ export const OjahCsvImport = () => {
         }
         
         if (data) {
-          setCities(data);
+          setCities(data.map(city => ({ id: city.id, name: city.name_ru })));
         }
       } catch (err) {
         console.error('Ошибка при загрузке городов:', err);
@@ -404,3 +405,313 @@ export const OjahCsvImport = () => {
       });
     }
   };
+
+  // Функция импорта данных из CSV
+  const startImport = async () => {
+    setIsImporting(true);
+    setImportProgress(0);
+    setImportedCount(0);
+    setErrorCount(0);
+    
+    try {
+      // 1. Получаем текущего авторизованного пользователя
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        toast({
+          variant: "destructive",
+          title: "Ошибка авторизации",
+          description: "Необходимо авторизоваться для импорта объявлений"
+        });
+        setIsImporting(false);
+        return;
+      }
+      const userId = userData.user.id;
+      
+      // 2. Подготавливаем дату истечения
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + importSettings.expiryDays);
+      
+      // 3. Импорт объявлений
+      if (!csvData || !fieldMappings.length) {
+        setIsImporting(false);
+        toast({
+          variant: "destructive",
+          title: "Ошибка импорта",
+          description: "Нет данных для импорта или не настроено сопоставление полей"
+        });
+        return;
+      }
+      
+      const totalRows = csvData.rows.length;
+      let importedListings = 0;
+      
+      for (let i = 0; i < totalRows; i++) {
+        const row = csvData.rows[i];
+        
+        // Создаем объект с данными объявления
+        const rowData: Record<string, any> = {};
+        
+        // Заполняем данные из CSV
+        fieldMappings.forEach(mapping => {
+          if (mapping.csvField && mapping.systemField) {
+            const headerIndex = csvData.headers.indexOf(mapping.csvField);
+            if (headerIndex > -1) {
+              // Обработка полей в зависимости от типа
+              if (mapping.systemField === 'regular_price' || mapping.systemField === 'discount_price') {
+                // Конвертация строк с ценами в числа (удаление пробелов, символов валют и т.д.)
+                const priceStr = row[headerIndex] || '';
+                const numericPrice = parseInt(priceStr.replace(/\D/g, ''), 10);
+                rowData[mapping.systemField] = isNaN(numericPrice) ? null : numericPrice;
+              } else {
+                rowData[mapping.systemField] = row[headerIndex] || '';
+              }
+            }
+          }
+        });
+        
+        // Добавляем обязательные поля и общие настройки
+        const listingData = {
+          ...rowData,
+          category_id: importSettings.categoryId,
+          city_id: importSettings.cityId,
+          expires_at: expiryDate.toISOString(),
+          status: 'active',
+          views: 0,
+          is_premium: false,
+          is_free: false,
+          user_id: userId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        // Обработка изображений (если есть)
+        if (rowData.image) {
+          listingData.images = [rowData.image];
+        }
+        
+        // Удаление null и undefined значений
+        Object.keys(listingData).forEach(key => {
+          if (listingData[key] === null || listingData[key] === undefined) {
+            delete listingData[key];
+          }
+        });
+        
+        // Проверка обязательных полей
+        if (!listingData.title || !listingData.description) {
+          toast({
+            variant: "destructive",
+            title: `Ошибка в строке ${i + 1}`,
+            description: "Отсутствуют обязательные поля: заголовок или описание"
+          });
+          setErrorCount(prev => prev + 1);
+          continue;
+        }
+        
+        try {
+          // Вставка объявления в базу данных
+          const { data: insertedData, error } = await supabase
+            .from('listings')
+            .insert(listingData)
+            .select();
+          
+          if (error) {
+            console.error("Error importing listing:", error);
+            toast({
+              variant: "destructive",
+              title: `Ошибка в строке ${i + 1}`,
+              description: `${error.message || 'Неизвестная ошибка'}`
+            });
+            setErrorCount(prev => prev + 1);
+          } else {
+            importedListings++;
+            setImportedCount(prev => prev + 1);
+          }
+        } catch (err) {
+          console.error("Exception during import:", err);
+          toast({
+            variant: "destructive",
+            title: `Ошибка в строке ${i + 1}`,
+            description: `${err.message || 'Неизвестная ошибка'}`
+          });
+          setErrorCount(prev => prev + 1);
+        }
+        
+        // Обновление прогресса
+        const progress = Math.round(((i + 1) / totalRows) * 100);
+        setImportProgress(progress);
+      }
+      
+      // 4. Проверка результатов импорта
+      const { data: countData } = await supabase
+        .from('listings')
+        .select('id', { count: 'exact' })
+        .eq('user_id', userId)
+        .gte('created_at', new Date(Date.now() - 1000 * 60 * 5).toISOString()); // последние 5 минут
+        
+      // 5. Финальное уведомление
+      if (importedListings > 0) {
+        toast({
+          title: "Импорт завершен",
+          description: `Успешно импортировано ${importedListings} объявлений`
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Импорт завершен с ошибками",
+          description: "Не удалось импортировать ни одно объявление"
+        });
+      }
+      
+    } catch (error) {
+      console.error("Import error:", error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка импорта",
+        description: error.message || "Неизвестная ошибка при импорте"
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileSpreadsheet className="h-5 w-5" />
+            Импорт объявлений из CSV
+          </CardTitle>
+          <CardDescription>
+            Загрузите CSV файл с объявлениями для массового импорта
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Шаг 1: Загрузка файла */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                currentStep >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+              }`}>
+                1
+              </div>
+              <h3 className="text-lg font-semibold">Загрузка CSV файла</h3>
+            </div>
+            
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
+              <div className="flex flex-col items-center gap-4">
+                <Upload className="h-10 w-10 text-muted-foreground" />
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Выберите CSV файл с объявлениями
+                  </p>
+                </div>
+                <Input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  className="max-w-xs"
+                />
+              </div>
+            </div>
+            
+            {csvFile && (
+              <Alert>
+                <File className="h-4 w-4" />
+                <AlertDescription>
+                  Файл загружен: {csvFile.name} ({Math.round(csvFile.size / 1024)} КБ)
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+
+          {/* Простой интерфейс для импорта */}
+          {csvData && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                  2
+                </div>
+                <h3 className="text-lg font-semibold">Настройки импорта</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Категория</Label>
+                  <Select value={importSettings.categoryId?.toString() || ""} onValueChange={(value) => setImportSettings(prev => ({ ...prev, categoryId: parseInt(value) }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Выберите категорию" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>
+                          {cat.name_ru}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="city">Город</Label>
+                  <Select value={importSettings.cityId?.toString() || ""} onValueChange={(value) => setImportSettings(prev => ({ ...prev, cityId: parseInt(value) }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Выберите город" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cities.map((city) => (
+                        <SelectItem key={city.id} value={city.id.toString()}>
+                          {city.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="expiry">Срок действия (дни)</Label>
+                  <Input
+                    id="expiry"
+                    type="number"
+                    value={importSettings.expiryDays}
+                    onChange={(e) => setImportSettings(prev => ({ ...prev, expiryDays: parseInt(e.target.value) || 30 }))}
+                    min="1"
+                    max="365"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="font-medium">Предварительный просмотр данных</h4>
+                <div className="text-sm text-muted-foreground">
+                  Обнаружено: {csvData.headers.length} колонок, {csvData.rows.length} строк
+                </div>
+                
+                <Button 
+                  onClick={startImport}
+                  disabled={isImporting || !importSettings.categoryId || !importSettings.cityId}
+                  className="w-full"
+                >
+                  {isImporting ? 'Импортируется...' : 'Начать импорт'}
+                </Button>
+              </div>
+              
+              {isImporting && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Прогресс импорта</span>
+                    <span>{importProgress}%</span>
+                  </div>
+                  <Progress value={importProgress} className="w-full" />
+                  <div className="text-sm text-muted-foreground">
+                    Импортировано: {importedCount}, Ошибок: {errorCount}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
