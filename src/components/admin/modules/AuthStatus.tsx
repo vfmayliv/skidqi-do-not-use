@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/lib/supabase';
@@ -33,9 +34,9 @@ export const AuthStatus = () => {
 
   if (isUserLoggedIn === false) {
     return (
-      <Alert variant="destructive">
+      <Alert>
         <AlertDescription>
-          Необходимо авторизоваться для импорта объявлений
+          Импорт будет выполнен под пользователем Skidqi (info@skidqi.ru)
         </AlertDescription>
       </Alert>
     );
@@ -44,7 +45,7 @@ export const AuthStatus = () => {
   return (
     <Alert>
       <AlertDescription>
-        Пользователь авторизован: {userEmail}
+        Пользователь авторизован: {userEmail}. Импорт будет выполнен под вашим аккаунтом.
       </AlertDescription>
     </Alert>
   );

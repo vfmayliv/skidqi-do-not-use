@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -230,6 +231,8 @@ export const OjahCsvImport = () => {
         title: "Файл успешно загружен",
         description: `Обнаружено ${headers.length} колонок и ${rows.length} строк данных`,
       });
+      
+      setCurrentStep(2);
     } catch (error) {
       console.error('Ошибка при обработке файла:', error);
       toast({
@@ -238,6 +241,18 @@ export const OjahCsvImport = () => {
         description: "Не удалось прочитать CSV файл. Проверьте формат файла.",
       });
     }
+  };
+
+  // Обновление сопоставления полей
+  const updateFieldMapping = (csvField: string, systemField: string) => {
+    setFieldMappings(prev => {
+      const existing = prev.find(m => m.csvField === csvField);
+      if (existing) {
+        return prev.map(m => m.csvField === csvField ? { ...m, systemField } : m);
+      } else {
+        return [...prev, { csvField, systemField }];
+      }
+    });
   };
 
   // Функция импорта данных из CSV
@@ -470,12 +485,89 @@ export const OjahCsvImport = () => {
             )}
           </div>
 
-          {/* Простой интерфейс для импорта */}
-          {csvData && (
+          {/* Шаг 2: Сопоставление полей */}
+          {csvData && currentStep >= 2 && (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  currentStep >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                }`}>
                   2
+                </div>
+                <h3 className="text-lg font-semibold">Сопоставление полей</h3>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="text-sm text-muted-foreground mb-4">
+                  Укажите, какие колонки из CSV файла соответствуют полям объявления:
+                </div>
+                
+                {csvData.headers.map((header, index) => (
+                  <div key={index} className="flex items-center gap-4 p-3 border rounded-lg">
+                    <div className="w-1/3">
+                      <Label className="text-sm font-medium">{header}</Label>
+                      <div className="text-xs text-muted-foreground">Колонка CSV</div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    <div className="w-1/3">
+                      <Select
+                        value={fieldMappings.find(m => m.csvField === header)?.systemField || ''}
+                        onValueChange={(value) => updateFieldMapping(header, value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите поле" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">-- Не импортировать --</SelectItem>
+                          {systemFields.map(field => (
+                            <SelectItem key={field.key} value={field.key}>
+                              {field.label} {field.required && '*'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="w-1/3 flex items-center gap-2">
+                      {fieldMappings.find(m => m.csvField === header)?.systemField ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          <span className="text-sm text-green-600">Сопоставлено</span>
+                        </>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">Не выбрано</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex justify-between pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCurrentStep(1)}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Назад
+                </Button>
+                <Button 
+                  onClick={() => setCurrentStep(3)}
+                  disabled={fieldMappings.filter(m => m.systemField).length === 0}
+                >
+                  Далее
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Шаг 3: Настройки импорта */}
+          {csvData && currentStep >= 3 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  currentStep >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                }`}>
+                  3
                 </div>
                 <h3 className="text-lg font-semibold">Настройки импорта</h3>
               </div>
@@ -541,13 +633,21 @@ export const OjahCsvImport = () => {
                   <strong>Информация:</strong> Объявления будут созданы под пользователем Skidqi (info@skidqi.ru)
                 </div>
                 
-                <Button 
-                  onClick={startImport}
-                  disabled={isImporting || !importSettings.categoryId || !importSettings.cityId}
-                  className="w-full"
-                >
-                  {isImporting ? 'Импортируется...' : 'Начать импорт'}
-                </Button>
+                <div className="flex justify-between pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCurrentStep(2)}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Назад
+                  </Button>
+                  <Button 
+                    onClick={startImport}
+                    disabled={isImporting || !importSettings.categoryId || !importSettings.cityId}
+                  >
+                    {isImporting ? 'Импортируется...' : 'Начать импорт'}
+                  </Button>
+                </div>
               </div>
               
               {isImporting && (
