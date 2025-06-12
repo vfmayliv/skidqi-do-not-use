@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, File, CheckCircle2, FileSpreadsheet, ArrowLeft, ArrowRight, ChevronDown, ChevronRight } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/lib/supabase';
+import { AuthStatus } from './AuthStatus';
 
 interface CsvData {
   headers: string[];
@@ -420,6 +421,7 @@ export const OjahCsvImport = () => {
         <CardContent className="space-y-6">
           {/* Шаг 1: Загрузка файла */}
           <div className="space-y-4">
+            <AuthStatus />
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 currentStep >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
