@@ -10,6 +10,7 @@ import { Upload, File, CheckCircle2, FileSpreadsheet, ArrowLeft, ArrowRight, Che
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/lib/supabase';
 import { AuthStatus } from './AuthStatus';
+import { createSkidqiUser, getSkidqiUserId } from '@/utils/createSkidqiUser';
 
 interface CsvData {
   headers: string[];
@@ -136,6 +137,7 @@ export const OjahCsvImport = () => {
     
     const fetchUser = async () => {
       try {
+        // Сначала пытаемся получить текущего пользователя
         const { data, error } = await supabase.auth.getUser();
         if (error) {
           console.error('Ошибка при получении пользователя:', error);
@@ -246,18 +248,27 @@ export const OjahCsvImport = () => {
     setErrorCount(0);
     
     try {
-      // 1. Получаем текущего авторизованного пользователя
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError || !userData?.user) {
+      // 1. Получаем или создаем пользователя Skidqi для владения объявлениями
+      let skidqiUserId = await getSkidqiUserId();
+      
+      if (!skidqiUserId) {
         toast({
-          variant: "destructive",
-          title: "Ошибка авторизации",
-          description: "Необходимо авторизоваться для импорта объявлений"
+          title: "Создание пользователя Skidqi",
+          description: "Создаем пользователя для импорта объявлений..."
         });
-        setIsImporting(false);
-        return;
+        
+        skidqiUserId = await createSkidqiUser();
+        
+        if (!skidqiUserId) {
+          toast({
+            variant: "destructive",
+            title: "Ошибка создания пользователя",
+            description: "Не удалось создать пользователя Skidqi для импорта"
+          });
+          setIsImporting(false);
+          return;
+        }
       }
-      const userId = userData.user.id;
       
       // 2. Подготавливаем дату истечения
       const expiryDate = new Date();
@@ -315,7 +326,7 @@ export const OjahCsvImport = () => {
           views: 0,
           is_premium: false,
           is_free: false,
-          user_id: userId,
+          user_id: skidqiUserId, // Используем ID пользователя Skidqi
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           images: rowData.image ? [rowData.image] : null
@@ -377,14 +388,14 @@ export const OjahCsvImport = () => {
       const { data: countData } = await supabase
         .from('listings')
         .select('id', { count: 'exact' })
-        .eq('user_id', userId)
+        .eq('user_id', skidqiUserId)
         .gte('created_at', new Date(Date.now() - 1000 * 60 * 5).toISOString()); // последние 5 минут
         
       // 5. Финальное уведомление
       if (importedListings > 0) {
         toast({
           title: "Импорт завершен",
-          description: `Успешно импортировано ${importedListings} объявлений`
+          description: `Успешно импортировано ${importedListings} объявлений под пользователем Skidqi`
         });
       } else {
         toast({
@@ -415,7 +426,8 @@ export const OjahCsvImport = () => {
             Импорт объявлений из CSV
           </CardTitle>
           <CardDescription>
-            Загрузите CSV файл с объявлениями для массового импорта
+            Загрузите CSV файл с объявлениями для массового импорта. 
+            Объявления будут созданы под пользователем Skidqi.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -524,6 +536,9 @@ export const OjahCsvImport = () => {
                 <h4 className="font-medium">Предварительный просмотр данных</h4>
                 <div className="text-sm text-muted-foreground">
                   Обнаружено: {csvData.headers.length} колонок, {csvData.rows.length} строк
+                </div>
+                <div className="text-sm bg-blue-50 p-3 rounded-lg">
+                  <strong>Информация:</strong> Объявления будут созданы под пользователем Skidqi (info@skidqi.ru)
                 </div>
                 
                 <Button 
