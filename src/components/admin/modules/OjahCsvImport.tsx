@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -470,7 +469,10 @@ export const OjahCsvImport = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="category">Категория</Label>
-                  <Select value={importSettings.categoryId?.toString() || ""} onValueChange={(value) => setImportSettings(prev => ({ ...prev, categoryId: parseInt(value) }))}>
+                  <Select 
+                    value={importSettings.categoryId ? importSettings.categoryId.toString() : undefined} 
+                    onValueChange={(value) => setImportSettings(prev => ({ ...prev, categoryId: parseInt(value) }))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите категорию" />
                     </SelectTrigger>
@@ -486,7 +488,10 @@ export const OjahCsvImport = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="city">Город</Label>
-                  <Select value={importSettings.cityId?.toString() || ""} onValueChange={(value) => setImportSettings(prev => ({ ...prev, cityId: parseInt(value) }))}>
+                  <Select 
+                    value={importSettings.cityId ? importSettings.cityId.toString() : undefined} 
+                    onValueChange={(value) => setImportSettings(prev => ({ ...prev, cityId: parseInt(value) }))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите город" />
                     </SelectTrigger>
