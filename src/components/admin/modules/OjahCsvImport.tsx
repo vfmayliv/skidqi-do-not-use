@@ -317,13 +317,9 @@ export const OjahCsvImport = () => {
           is_free: false,
           user_id: userId,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          images: rowData.image ? [rowData.image] : null
         };
-        
-        // Обработка изображений (если есть)
-        if (rowData.image) {
-          listingData.images = [rowData.image];
-        }
         
         // Удаление null и undefined значений
         Object.keys(listingData).forEach(key => {
