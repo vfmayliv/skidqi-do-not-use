@@ -44,1004 +44,363 @@ interface Category {
 const csvFields = [
   { key: 'title', label: 'Заголовок объявления', required: true },
   { key: 'description', label: 'Описание объявления', required: true },
-  { key: 'image', label: 'Фото объявления', required: false },
+  { key: 'image', label: 'URL изображения', required: false },
   { key: 'regular_price', label: 'Обычная цена', required: false },
   { key: 'discount_price', label: 'Цена со скидкой', required: false },
-  { key: 'source_link', label: 'Ссылка на источник', required: false }
+  { key: 'source_link', label: 'Ссылка на источник', required: false },
+];
+
+// Перечисление системных полей
+const systemFields = [
+  { key: 'title', label: 'Заголовок объявления', required: true },
+  { key: 'description', label: 'Описание объявления', required: true },
+  { key: 'image', label: 'URL изображения', required: false },
+  { key: 'regular_price', label: 'Обычная цена', required: false },
+  { key: 'discount_price', label: 'Цена со скидкой', required: false },
+  { key: 'source_link', label: 'Ссылка на источник', required: false },
 ];
 
 export const OjahCsvImport = () => {
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
+  // Состояния для всего компонента
+  const [currentStep, setCurrentStep] = useState(1);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<CsvData | null>(null);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
   const [importSettings, setImportSettings] = useState<ImportSettings>({
     categoryId: null,
     cityId: null,
-    expiryDays: 30
+    expiryDays: 30,
   });
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-  const [cities, setCities] = useState<any[]>([]);
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [cities, setCities] = useState<{id: number, name: string}[]>([]);
+  const [selectedRootCategory, setSelectedRootCategory] = useState<number | null>(null);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<number | null>(null);
+  const [selectedSubSubCategory, setSelectedSubSubCategory] = useState<number | null>(null);
+  
+  // Состояния для импорта
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const [importedCount, setImportedCount] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
-  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
-  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
-  
-  // Состояния для категорий
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategoryPath, setSelectedCategoryPath] = useState<Category[]>([]);
-  const [availableCategories, setAvailableCategories] = useState<Category[]>([]);
 
-  // Загрузка городов и категорий, проверка/создание админ пользователя при монтировании компонента
+  // Получение категорий и пользователя при монтировании компонента
   useEffect(() => {
-    fetchCities();
-    fetchCategories();
-    checkOrCreateAdminUser();
-  }, []);
-
-  const fetchCities = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('cities')
-        .select('id, name_ru')
-        .order('name_ru');
-
-      if (error) throw error;
-      setCities(data || []);
-    } catch (error: any) {
-      console.error('Ошибка загрузки городов:', error);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('level', { ascending: true })
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-
-      const categoryTree = buildCategoryTree(data || []);
-      setCategories(categoryTree);
-      setAvailableCategories(categoryTree);
-    } catch (error: any) {
-      console.error('Ошибка загрузки категорий:', error);
-      toast({
-        variant: "destructive",
-        title: "Ошибка",
-        description: "Не удалось загрузить категории"
-      });
-    }
-  };
-
-  const buildCategoryTree = (flatCategories: any[]): Category[] => {
-    const categoryMap = new Map<number, Category>();
-    const rootCategories: Category[] = [];
-
-    // Создаем карту категорий
-    flatCategories.forEach(cat => {
-      categoryMap.set(cat.id, {
-        ...cat,
-        children: []
-      });
-    });
-
-    // Строим дерево
-    flatCategories.forEach(cat => {
-      const category = categoryMap.get(cat.id)!;
-      if (cat.parent_id) {
-        const parent = categoryMap.get(cat.parent_id);
-        if (parent) {
-          parent.children = parent.children || [];
-          parent.children.push(category);
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name_ru', { ascending: true });
+        
+        if (error) {
+          toast({
+            variant: "destructive",
+            title: "Ошибка загрузки категорий",
+            description: error.message,
+          });
+          return;
         }
-      } else {
-        rootCategories.push(category);
-      }
-    });
-
-    return rootCategories;
-  };
-
-  const checkOrCreateAdminUser = async () => {
-    try {
-      setIsCreatingAdmin(true);
-      
-      // Сначала проверим, есть ли уже админ пользователь Skidqi в профилях
-      const { data: existingProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, email')
-        .eq('email', 'info@skidqi.ru')
-        .single();
-
-      if (existingProfile && !profileError) {
-        console.log('Найден существующий админ пользователь Skidqi:', existingProfile);
-        setAdminUser(existingProfile);
-        setIsCreatingAdmin(false);
-        return;
-      }
-
-      // Если профиля нет, получаем пароль из ojpw таблицы
-      const { data: ojpwData, error: ojpwError } = await supabase
-        .from('ojpw')
-        .select('id')
-        .single();
-
-      if (ojpwError || !ojpwData?.id) {
-        throw new Error('Не удалось получить пароль для создания админ пользователя');
-      }
-
-      const adminPassword = ojpwData.id;
-
-      // Создаем нового админ пользователя Skidqi через Supabase Auth
-      console.log('Создаем нового админ пользователя Skidqi...');
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: 'info@skidqi.ru',
-        password: adminPassword,
-        options: {
-          data: {
-            full_name: 'Skidqi Admin'
-          }
-        }
-      });
-
-      if (authError) {
-        // Если ошибка в том, что пользователь уже существует, попробуем войти
-        if (authError.message.includes('User already registered')) {
-          console.log('Пользователь Skidqi уже существует, пытаемся войти...');
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email: 'info@skidqi.ru',
-            password: adminPassword
+        
+        if (data) {
+          // Построение древовидной структуры категорий
+          const rootCategories: Category[] = [];
+          const categoryMap: Record<number, Category> = {};
+          
+          // Сначала создаем мапу всех категорий по ID
+          data.forEach((cat: Category) => {
+            categoryMap[cat.id] = { ...cat, children: [] };
           });
           
-          if (signInError) {
-            throw signInError;
-          }
-          
-          if (signInData.user) {
-            // Проверим/создадим профиль
-            const { data: profile, error: createProfileError } = await supabase
-              .from('profiles')
-              .upsert({
-                id: signInData.user.id,
-                email: 'info@skidqi.ru',
-                full_name: 'Skidqi Admin'
-              })
-              .select()
-              .single();
-              
-            if (createProfileError) {
-              console.error('Ошибка создания профиля:', createProfileError);
+          // Затем строим дерево категорий
+          data.forEach((cat: Category) => {
+            if (cat.parent_id === null) {
+              rootCategories.push(categoryMap[cat.id]);
+            } else if (categoryMap[cat.parent_id]) {
+              if (!categoryMap[cat.parent_id].children) {
+                categoryMap[cat.parent_id].children = [];
+              }
+              categoryMap[cat.parent_id].children!.push(categoryMap[cat.id]);
             }
-            
-            setAdminUser({
-              id: signInData.user.id,
-              email: 'info@skidqi.ru'
-            });
-            
-            // Выходим из аккаунта, чтобы не влиять на админ панель
-            await supabase.auth.signOut();
-          }
-        } else {
-          throw authError;
+          });
+          
+          setCategories(rootCategories);
         }
-      } else if (authData.user) {
-        console.log('Админ пользователь Skidqi создан:', authData.user);
-        setAdminUser({
-          id: authData.user.id,
-          email: 'info@skidqi.ru'
-        });
-        
-        // Выходим из аккаунта, чтобы не влиять на админ панель
-        await supabase.auth.signOut();
+      } catch (err) {
+        console.error('Ошибка при загрузке категорий:', err);
       }
-
-    } catch (error: any) {
-      console.error('Ошибка создания админ пользователя Skidqi:', error);
-      toast({
-        variant: "destructive",
-        title: "Ошибка",
-        description: `Не удалось создать админ пользователя Skidqi: ${error.message}`
-      });
-    } finally {
-      setIsCreatingAdmin(false);
-    }
-  };
-
-  const handleCategorySelect = (category: Category) => {
-    if (category.children && category.children.length > 0) {
-      // Если у категории есть дети, добавляем её в путь и показываем детей
-      const newPath = [...selectedCategoryPath, category];
-      setSelectedCategoryPath(newPath);
-      setAvailableCategories(category.children);
-    } else {
-      // Если это конечная категория, выбираем её
-      const newPath = [...selectedCategoryPath, category];
-      setSelectedCategoryPath(newPath);
-      setImportSettings(prev => ({
-        ...prev,
-        categoryId: category.id
-      }));
-    }
-  };
-
-  const handleCategoryBack = () => {
-    if (selectedCategoryPath.length === 0) return;
-    
-    if (selectedCategoryPath.length === 1) {
-      // Возвращаемся к корневым категориям
-      setSelectedCategoryPath([]);
-      setAvailableCategories(categories);
-      setImportSettings(prev => ({ ...prev, categoryId: null }));
-    } else {
-      // Возвращаемся на уровень выше
-      const newPath = selectedCategoryPath.slice(0, -1);
-      setSelectedCategoryPath(newPath);
-      const parentCategory = newPath[newPath.length - 1];
-      setAvailableCategories(parentCategory.children || []);
-      setImportSettings(prev => ({ ...prev, categoryId: null }));
-    }
-  };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-      toast({
-        variant: "destructive",
-        title: "Неверный формат файла",
-        description: "Пожалуйста, выберите файл CSV"
-      });
-      return;
-    }
-
-    setSelectedFile(file);
-    parseCsv(file);
-  };
-
-  const parseCsv = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      const lines = content.split('\n').filter(line => line.trim());
-      const headers = lines[0].split(',').map(header => header.trim().replace(/"/g, ''));
-      const rows = lines.slice(1).map(line => 
-        line.split(',').map(cell => cell.trim().replace(/"/g, ''))
-      );
-      
-      setCsvData({ headers, rows });
-      
-      // Автоматическое сопоставление полей
-      const autoMappings: FieldMapping[] = headers.map(header => {
-        const normalizedHeader = header.toLowerCase().replace(/[\s-]/g, '_');
-        const matchedField = csvFields.find(field => 
-          field.key.toLowerCase() === normalizedHeader || 
-          field.key.toLowerCase().includes(normalizedHeader.replace('_', '')) ||
-          normalizedHeader.includes(field.key.replace('_', ''))
-        );
-        
-        return {
-          csvField: header,
-          systemField: matchedField?.key || ''
-        };
-      });
-      
-      setFieldMappings(autoMappings);
     };
     
-    reader.readAsText(file, 'utf-8');
-  };
+    const fetchUser = async () => {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error('Ошибка при получении пользователя:', error);
+          return;
+        }
+        
+        if (data && data.user) {
+          setAdminUser({
+            id: data.user.id,
+            email: data.user.email || '',
+          });
+        }
+      } catch (err) {
+        console.error('Ошибка при получении пользователя:', err);
+      }
+    };
+    
+    const fetchCities = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('cities')
+          .select('*')
+          .order('name', { ascending: true });
+        
+        if (error) {
+          toast({
+            variant: "destructive",
+            title: "Ошибка загрузки городов",
+            description: error.message,
+          });
+          return;
+        }
+        
+        if (data) {
+          setCities(data);
+        }
+      } catch (err) {
+        console.error('Ошибка при загрузке городов:', err);
+      }
+    };
+    
+    fetchCategories();
+    fetchUser();
+    fetchCities();
+  }, [toast]);
 
-  const goToNextStep = () => {
-    if (currentStep === 1 && csvData) {
-      setCurrentStep(2);
-    } else if (currentStep === 2 && validateSettings()) {
-      setCurrentStep(3);
-    } else if (currentStep === 3 && validateMappings()) {
-      setCurrentStep(4);
-    }
-  };
-
-  const goToPreviousStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep((currentStep - 1) as 1 | 2 | 3 | 4);
-    }
-  };
-
-  const validateSettings = () => {
-    if (!importSettings.categoryId) {
-      toast({
-        variant: "destructive",
-        title: "Ошибка",
-        description: "Выберите категорию для импорта"
-      });
-      return false;
-    }
-
-    if (!adminUser) {
-      toast({
-        variant: "destructive",
-        title: "Ошибка",
-        description: "Админ пользователь Skidqi не найден"
-      });
-      return false;
-    }
-
-    return true;
-  };
-
-  const validateMappings = () => {
-    const requiredFields = csvFields.filter(f => f.required);
-    const mappedRequiredFields = requiredFields.filter(field => 
-      fieldMappings.some(mapping => mapping.systemField === field.key && mapping.csvField)
-    );
-
-    if (mappedRequiredFields.length !== requiredFields.length) {
-      toast({
-        variant: "destructive",
-        title: "Ошибка сопоставления",
-        description: "Все обязательные поля должны быть сопоставлены"
-      });
-      return false;
-    }
-    return true;
-  };
-
+  // Функция импорта данных из CSV
   const startImport = async () => {
-    if (!csvData || !adminUser) {
-      toast({
-        variant: "destructive",
-        title: "Ошибка",
-        description: "Нет данных для импорта или админ пользователь Skidqi не найден"
-      });
-      return;
-    }
-
     setIsImporting(true);
     setImportProgress(0);
     setImportedCount(0);
     setErrorCount(0);
-
-    const totalRows = csvData.rows.length;
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + importSettings.expiryDays);
-
-    console.log('Начинаем импорт. Всего строк:', totalRows);
-    console.log('Настройки импорта:', importSettings);
-    console.log('Админ пользователь Skidqi:', adminUser.id);
-
-    let successCount = 0;
-    let errorCount = 0;
-
+    
     try {
+      // 1. Получаем текущего авторизованного пользователя
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        toast({
+          variant: "destructive",
+          title: "Ошибка авторизации",
+          description: "Необходимо авторизоваться для импорта объявлений"
+        });
+        setIsImporting(false);
+        return;
+      }
+      const userId = userData.user.id;
+      
+      // 2. Подготавливаем дату истечения
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + importSettings.expiryDays);
+      
+      // 3. Импорт объявлений
+      if (!csvData || !fieldMappings.length) {
+        setIsImporting(false);
+        toast({
+          variant: "destructive",
+          title: "Ошибка импорта",
+          description: "Нет данных для импорта или не настроено сопоставление полей"
+        });
+        return;
+      }
+      
+      const totalRows = csvData.rows.length;
+      let importedListings = 0;
+      
       for (let i = 0; i < totalRows; i++) {
         const row = csvData.rows[i];
         
-        // Проверяем, что строка не пустая
-        if (!row || row.length === 0 || row.every(cell => !cell.trim())) {
-          console.log(`Пропускаем пустую строку ${i + 1}`);
-          continue;
-        }
-
-        // Базовые данные объявления
-        const listingData: any = {
-          user_id: adminUser.id, // Используем ID админ пользователя Skidqi
+        // Создаем объект с данными объявления
+        const rowData: Record<string, any> = {};
+        
+        // Заполняем данные из CSV
+        fieldMappings.forEach(mapping => {
+          if (mapping.csvField && mapping.systemField) {
+            const headerIndex = csvData.headers.indexOf(mapping.csvField);
+            if (headerIndex > -1) {
+              // Обработка полей в зависимости от типа
+              if (mapping.systemField === 'regular_price' || mapping.systemField === 'discount_price') {
+                // Конвертация строк с ценами в числа (удаление пробелов, символов валют и т.д.)
+                const priceStr = row[headerIndex] || '';
+                const numericPrice = parseInt(priceStr.replace(/\D/g, ''), 10);
+                rowData[mapping.systemField] = isNaN(numericPrice) ? null : numericPrice;
+              } else {
+                rowData[mapping.systemField] = row[headerIndex] || '';
+              }
+            }
+          }
+        });
+        
+        // Добавляем обязательные поля и общие настройки
+        const listingData = {
+          ...rowData,
           category_id: importSettings.categoryId,
           city_id: importSettings.cityId,
           expires_at: expiryDate.toISOString(),
           status: 'active',
           views: 0,
           is_premium: false,
-          is_free: false
+          is_free: false,
+          user_id: userId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         };
-
-        // Сопоставление полей из CSV
-        let hasTitle = false;
-        let hasDescription = false;
-
-        fieldMappings.forEach(mapping => {
-          if (mapping.systemField && mapping.csvField) {
-            const columnIndex = csvData.headers.indexOf(mapping.csvField);
-            if (columnIndex !== -1 && row[columnIndex]) {
-              const value = row[columnIndex].trim();
-              
-              switch (mapping.systemField) {
-                case 'title':
-                  if (value) {
-                    listingData.title = value;
-                    hasTitle = true;
-                  }
-                  break;
-                case 'description':
-                  if (value) {
-                    listingData.description = value;
-                    hasDescription = true;
-                  }
-                  break;
-                case 'image':
-                  if (value) {
-                    listingData.images = [value];
-                  }
-                  break;
-                case 'regular_price':
-                  if (value && !isNaN(Number(value))) {
-                    listingData.regular_price = parseInt(value);
-                  }
-                  break;
-                case 'discount_price':
-                  if (value && !isNaN(Number(value))) {
-                    listingData.discount_price = parseInt(value);
-                  }
-                  break;
-                case 'source_link':
-                  // Добавляем ссылку к описанию
-                  if (value && listingData.description) {
-                    listingData.description += `\n\nИсточник: ${value}`;
-                  }
-                  break;
-              }
-            }
+        
+        // Обработка изображений (если есть)
+        if (rowData.image) {
+          listingData.images = [rowData.image];
+        }
+        
+        // Удаление null и undefined значений
+        Object.keys(listingData).forEach(key => {
+          if (listingData[key] === null || listingData[key] === undefined) {
+            delete listingData[key];
           }
         });
-
-        // ОБЯЗАТЕЛЬНАЯ ПРОВЕРКА на наличие title и description
-        if (!hasTitle || !listingData.title) {
-          console.log(`Ошибка в строке ${i + 1}: отсутствует заголовок`);
-          errorCount++;
-          continue;
-        }
-
-        if (!hasDescription || !listingData.description) {
-          console.log(`Ошибка в строке ${i + 1}: отсутствует описание`);
-          errorCount++;
-          continue;
-        }
-
-        // Устанавливаем цены по умолчанию, если не указаны
-        if (!listingData.regular_price && !listingData.discount_price) {
-          listingData.regular_price = 0;
-          listingData.discount_price = 0;
-          listingData.is_free = true;
-        } else if (!listingData.discount_price && listingData.regular_price) {
-          listingData.discount_price = listingData.regular_price;
-        } else if (!listingData.regular_price && listingData.discount_price) {
-          listingData.regular_price = listingData.discount_price;
-        }
-
-        console.log(`Импортируем строку ${i + 1}:`, {
-          title: listingData.title.substring(0, 50),
-          user_id: listingData.user_id,
-          category_id: listingData.category_id
-        });
-
-        // Создание объявления в базе данных
-        const { data: insertedData, error } = await supabase
-          .from('listings')
-          .insert(listingData)
-          .select();
-
-        if (error) {
-          console.error(`Ошибка импорта строки ${i + 1}:`, error);
-          errorCount++;
-        } else {
-          console.log(`Успешно импортирована строка ${i + 1}:`, insertedData);
-          successCount++;
-        }
-
-        // Обновляем состояние
-        setImportedCount(successCount);
-        setErrorCount(errorCount);
-        setImportProgress(((i + 1) / totalRows) * 100);
         
-        // Пауза для избежания перегрузки
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Проверка обязательных полей
+        if (!listingData.title || !listingData.description) {
+          toast({
+            variant: "destructive",
+            title: `Ошибка в строке ${i + 1}`,
+            description: "Отсутствуют обязательные поля: заголовок или описание"
+          });
+          setErrorCount(prev => prev + 1);
+          continue;
+        }
+        
+        try {
+          // Вставка объявления в базу данных
+          const { data: insertedData, error } = await supabase
+            .from('listings')
+            .insert(listingData)
+            .select();
+          
+          if (error) {
+            console.error("Error importing listing:", error);
+            toast({
+              variant: "destructive",
+              title: `Ошибка в строке ${i + 1}`,
+              description: `${error.message || 'Неизвестная ошибка'}`
+            });
+            setErrorCount(prev => prev + 1);
+          } else {
+            importedListings++;
+            setImportedCount(prev => prev + 1);
+          }
+        } catch (err) {
+          console.error("Exception during import:", err);
+          toast({
+            variant: "destructive",
+            title: `Ошибка в строке ${i + 1}`,
+            description: `${err.message || 'Неизвестная ошибка'}`
+          });
+          setErrorCount(prev => prev + 1);
+        }
+        
+        // Обновление прогресса
+        const progress = Math.round(((i + 1) / totalRows) * 100);
+        setImportProgress(progress);
       }
-
-      toast({
-        title: "Импорт завершен",
-        description: `Успешно импортировано: ${successCount}, ошибок: ${errorCount}`
-      });
-
-      // Проверим, что данные действительно сохранились
-      const { data: checkData, error: checkError } = await supabase
+      
+      // 4. Проверка результатов импорта
+      const { data: countData } = await supabase
         .from('listings')
-        .select('id, title, category_id, user_id')
-        .eq('category_id', importSettings.categoryId)
-        .eq('user_id', adminUser.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (checkError) {
-        console.error('Ошибка проверки импортированных данных:', checkError);
+        .select('id', { count: 'exact' })
+        .eq('user_id', userId)
+        .gte('created_at', new Date(Date.now() - 1000 * 60 * 5).toISOString()); // последние 5 минут
+        
+      // 5. Финальное уведомление
+      if (importedListings > 0) {
+        toast({
+          title: "Импорт завершен",
+          description: `Успешно импортировано ${importedListings} объявлений`
+        });
       } else {
-        console.log('Последние импортированные объявления:', checkData);
+        toast({
+          variant: "destructive",
+          title: "Импорт завершен с ошибками",
+          description: "Не удалось импортировать ни одно объявление"
+        });
       }
-
-      // Сброс только если есть успешно импортированные объявления
-      if (successCount > 0) {
-        setTimeout(() => {
-          resetImport();
-        }, 3000);
-      }
-    } catch (error: any) {
-      console.error('Общая ошибка импорта:', error);
+      
+    } catch (error) {
+      console.error("Import error:", error);
       toast({
         variant: "destructive",
         title: "Ошибка импорта",
-        description: error.message
+        description: error.message || "Неизвестная ошибка при импорте"
       });
     } finally {
       setIsImporting(false);
     }
   };
 
-  const resetImport = () => {
-    setCurrentStep(1);
-    setSelectedFile(null);
-    setCsvData(null);
-    setFieldMappings([]);
-    setImportSettings({
-      categoryId: null,
-      cityId: null,
-      expiryDays: 30
-    });
-    setSelectedCategoryPath([]);
-    setAvailableCategories(categories);
-    setImportProgress(0);
-    setImportedCount(0);
-    setErrorCount(0);
-  };
-
-  const updateFieldMapping = (csvField: string, systemField: string) => {
-    setFieldMappings(prev => 
-      prev.map(mapping => 
-        mapping.csvField === csvField 
-          ? { ...mapping, systemField }
-          : mapping
-      )
-    );
-  };
-
-  const renderStep1 = () => (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-lg font-medium mb-2">Шаг 1: Выбор CSV-файла</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Загрузите CSV файл с объявлениями для импорта
-        </p>
-      </div>
-
-      {!selectedFile ? (
-        <div className="border-2 border-dashed rounded-lg p-8 text-center">
-          <FileSpreadsheet className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-          <h3 className="text-lg font-medium mb-2">Загрузите CSV файл</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Файл должен содержать поля: title, desc, image, regularprice, saleprice, link
-          </p>
-          <Button 
-            variant="outline" 
-            onClick={() => document.getElementById('csv-file-input')?.click()}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Выбрать файл
-          </Button>
-          <input 
-            id="csv-file-input" 
-            type="file" 
-            accept=".csv" 
-            className="hidden"
-            onChange={handleFileSelect}
-          />
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="bg-muted rounded-md p-4 flex items-center">
-            <File className="h-5 w-5 mr-2 text-muted-foreground" />
-            <span className="text-sm font-medium">{selectedFile.name}</span>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="ml-auto"
-              onClick={resetImport}
-            >
-              Выбрать другой файл
-            </Button>
-          </div>
-          
-          {csvData && (
-            <div className="border rounded-md overflow-x-auto">
-              <div className="bg-muted p-2">
-                <p className="text-sm font-medium">Предпросмотр (первые 5 строк)</p>
-              </div>
-              <table className="min-w-full divide-y divide-border">
-                <thead>
-                  <tr className="bg-muted/50">
-                    {csvData.headers.map((header, index) => (
-                      <th 
-                        key={index} 
-                        className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase"
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {csvData.rows.slice(0, 5).map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                      {row.map((cell, cellIndex) => (
-                        <td key={cellIndex} className="px-4 py-2 text-sm">
-                          {cell.length > 50 ? `${cell.substring(0, 50)}...` : cell}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="p-2 bg-muted/25 text-xs text-muted-foreground">
-                Всего строк для импорта: {csvData.rows.length}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-2">Шаг 2: Общие настройки</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Настройки применятся ко всем импортируемым объявлениям
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <Label className="text-base font-medium">Категория *</Label>
-          <p className="text-xs text-muted-foreground mb-2">
-            Выберите категорию для всех импортируемых объявлений
-          </p>
-          
-          {/* Хлебные крошки */}
-          {selectedCategoryPath.length > 0 && (
-            <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSelectedCategoryPath([]);
-                  setAvailableCategories(categories);
-                  setImportSettings(prev => ({ ...prev, categoryId: null }));
-                }}
-                className="p-0 h-auto"
-              >
-                Все категории
-              </Button>
-              {selectedCategoryPath.map((cat, index) => (
-                <div key={cat.id} className="flex items-center gap-2">
-                  <ChevronRight className="h-3 w-3" />
-                  <span>{cat.name_ru}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Навигация назад */}
-          {selectedCategoryPath.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCategoryBack}
-              className="mb-2"
-            >
-              <ArrowLeft className="h-3 w-3 mr-1" />
-              Назад
-            </Button>
-          )}
-
-          {/* Список доступных категорий */}
-          <div className="border rounded-md max-h-64 overflow-y-auto">
-            {availableCategories.map((category) => (
-              <div
-                key={category.id}
-                className={`p-3 border-b cursor-pointer hover:bg-muted/50 flex items-center justify-between ${
-                  importSettings.categoryId === category.id ? 'bg-primary/10 border-primary/20' : ''
-                }`}
-                onClick={() => handleCategorySelect(category)}
-              >
-                <span className="text-sm">{category.name_ru}</span>
-                <div className="flex items-center gap-2">
-                  {importSettings.categoryId === category.id && (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  )}
-                  {category.children && category.children.length > 0 && (
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="city">Город</Label>
-            <Select 
-              value={importSettings.cityId?.toString() || ''} 
-              onValueChange={(value) => 
-                setImportSettings(prev => ({
-                  ...prev,
-                  cityId: value ? parseInt(value) : null
-                }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите город" />
-              </SelectTrigger>
-              <SelectContent>
-                {cities.map((city) => (
-                  <SelectItem key={city.id} value={city.id.toString()}>
-                    {city.name_ru}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="expiry">Срок действия (дни)</Label>
-            <Input
-              id="expiry"
-              type="number"
-              value={importSettings.expiryDays}
-              onChange={(e) => 
-                setImportSettings(prev => ({
-                  ...prev,
-                  expiryDays: parseInt(e.target.value) || 30
-                }))
-              }
-              min="1"
-              max="365"
-            />
-          </div>
-        </div>
-
-        {isCreatingAdmin && (
-          <Alert>
-            <AlertDescription>
-              Создается админ пользователь Skidqi для импорта...
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {adminUser && (
-          <Alert>
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertDescription>
-              Админ пользователь Skidqi готов: {adminUser.email}
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-lg font-medium mb-2">Шаг 3: Сопоставление полей</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Сопоставьте поля CSV с полями системы
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        {fieldMappings.map((mapping, index) => (
-          <div key={index} className="grid grid-cols-3 gap-4 items-center p-3 border rounded-lg">
-            <div>
-              <Label className="text-sm font-medium">
-                {mapping.csvField}
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Пример: {csvData?.rows[0]?.[csvData.headers.indexOf(mapping.csvField)] || 'Нет данных'}
-              </p>
-            </div>
-            
-            <div>
-              <Select 
-                value={mapping.systemField} 
-                onValueChange={(value) => updateFieldMapping(mapping.csvField, value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите поле" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">-- Не импортировать --</SelectItem>
-                  {csvFields.map(field => (
-                    <SelectItem key={field.key} value={field.key}>
-                      {field.label} {field.required && '*'}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex items-center">
-              {mapping.systemField ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-              ) : (
-                <div className="h-4 w-4 rounded-full border-2 border-muted-foreground" />
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <Alert>
-        <AlertDescription>
-          Поля отмеченные * являются обязательными и должны быть сопоставлены
-        </AlertDescription>
-      </Alert>
-    </div>
-  );
-
-  const renderStep4 = () => {
-    const mappedData = csvData?.rows.slice(0, 3).map(row => {
-      const mapped: any = {};
-      fieldMappings.forEach(mapping => {
-        if (mapping.systemField && mapping.csvField) {
-          const columnIndex = csvData.headers.indexOf(mapping.csvField);
-          if (columnIndex !== -1) {
-            mapped[mapping.systemField] = row[columnIndex];
-          }
+  // Обработка загрузки CSV файла
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    setCsvFile(file);
+    
+    try {
+      const text = await file.text();
+      const lines = text.split('\n');
+      
+      // Первая строка - заголовки
+      const headers = lines[0].split(',').map(header => header.trim());
+      
+      // Остальные строки - данные
+      const rows = lines.slice(1).filter(line => line.trim() !== '').map(line => {
+        return line.split(',').map(cell => cell.trim());
+      });
+      
+      setCsvData({ headers, rows });
+      
+      // Автоматическое сопоставление полей по названиям
+      const mappings: FieldMapping[] = [];
+      headers.forEach(header => {
+        const normalizedHeader = header.toLowerCase();
+        
+        // Проверяем совпадения по ключам системных полей
+        const matchingSystemField = systemFields.find(field => 
+          field.key.toLowerCase() === normalizedHeader || 
+          field.label.toLowerCase().includes(normalizedHeader)
+        );
+        
+        if (matchingSystemField) {
+          mappings.push({
+            csvField: header,
+            systemField: matchingSystemField.key,
+          });
         }
       });
-      return mapped;
-    });
-
-    const getSelectedCategoryName = () => {
-      if (selectedCategoryPath.length === 0) return 'Не выбрана';
-      return selectedCategoryPath[selectedCategoryPath.length - 1].name_ru;
-    };
-
-    return (
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-medium mb-2">Шаг 4: Предпросмотр и подтверждение</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Проверьте настройки и данные перед импортом
-          </p>
-        </div>
-
-        <div className="grid gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Настройки импорта</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div><strong>Категория:</strong> {getSelectedCategoryName()}</div>
-              <div><strong>Город:</strong> {importSettings.cityId ? cities.find(c => c.id === importSettings.cityId)?.name_ru : 'Не выбран'}</div>
-              <div><strong>Срок действия:</strong> {importSettings.expiryDays} дней</div>
-              <div><strong>Количество записей:</strong> {csvData?.rows.length || 0}</div>
-              <div><strong>Владелец объявлений:</strong> {adminUser ? `Skidqi (${adminUser.email})` : 'Не найден'}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Предпросмотр данных (первые 3 записи)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {mappedData?.map((item, index) => (
-                  <div key={index} className="p-3 border rounded text-sm">
-                    <div><strong>Заголовок:</strong> {item.title || 'Не указан'}</div>
-                    <div><strong>Описание:</strong> {item.description ? `${item.description.substring(0, 100)}...` : 'Не указано'}</div>
-                    <div><strong>Цена:</strong> {item.regular_price || 'Не указана'}</div>
-                    <div><strong>Скидочная цена:</strong> {item.discount_price || 'Не указана'}</div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {isImporting && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Импорт в процессе...</span>
-              <span>{Math.round(importProgress)}%</span>
-            </div>
-            <Progress value={importProgress} />
-            <div className="text-xs text-muted-foreground">
-              Импортировано: {importedCount}, ошибок: {errorCount}
-            </div>
-          </div>
-        )}
-      </div>
-    );
+      
+      setFieldMappings(mappings);
+      
+      toast({
+        title: "Файл успешно загружен",
+        description: `Обнаружено ${headers.length} колонок и ${rows.length} строк данных`,
+      });
+    } catch (error) {
+      console.error('Ошибка при обработке файла:', error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка обработки файла",
+        description: "Не удалось прочитать CSV файл. Проверьте формат файла.",
+      });
+    }
   };
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Импорт CSV объявлений</h2>
-        <p className="text-muted-foreground">
-          Импорт объявлений из CSV файла в 4 простых шага
-        </p>
-      </div>
-
-      <Card className="w-full">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>
-              Шаг {currentStep} из 4
-            </CardTitle>
-            <div className="flex space-x-2">
-              {[1, 2, 3, 4].map((step) => (
-                <div
-                  key={step}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    step === currentStep
-                      ? 'bg-primary text-primary-foreground'
-                      : step < currentStep
-                      ? 'bg-green-500 text-white'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {step}
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {currentStep === 1 && renderStep1()}
-          {currentStep === 2 && renderStep2()}
-          {currentStep === 3 && renderStep3()}
-          {currentStep === 4 && renderStep4()}
-
-          <div className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={goToPreviousStep}
-              disabled={currentStep === 1 || isImporting}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Назад
-            </Button>
-
-            {currentStep < 4 ? (
-              <Button
-                onClick={goToNextStep}
-                disabled={
-                  (currentStep === 1 && !csvData) ||
-                  (currentStep === 2 && (!importSettings.categoryId || !adminUser)) ||
-                  isImporting
-                }
-              >
-                Далее
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            ) : (
-              <Button
-                onClick={startImport}
-                disabled={isImporting || !adminUser}
-              >
-                {isImporting ? 'Импорт...' : 'Начать импорт'}
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
