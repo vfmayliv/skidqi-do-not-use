@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,11 +6,10 @@ import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, File, CheckCircle2, FileSpreadsheet, ArrowLeft, ArrowRight, ChevronDown, ChevronRight } from 'lucide-react';
+import { Upload, File as FileIcon, CheckCircle2, FileSpreadsheet, ArrowLeft, ArrowRight, ChevronDown, ChevronRight } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/lib/supabase';
 import { AuthStatus } from './AuthStatus';
-import { createSkidqiUser, getSkidqiUserId } from '@/utils/createSkidqiUser';
 
 interface CsvData {
   headers: string[];
@@ -29,7 +27,7 @@ interface ImportSettings {
   expiryDays: number;
 }
 
-interface AdminUser {
+interface AdminUser { // Оставим на случай, если понадобится где-то еще
   id: string;
   email: string;
 }
@@ -43,603 +41,456 @@ interface Category {
   children?: Category[];
 }
 
-// Поля CSV файла (только эти 6 полей)
+// Поля CSV (только 6 рабочих)
 const csvFields = [
-  { key: 'title', label: 'Заголовок объявления', required: true },
-  { key: 'description', label: 'Описание объявления', required: true },
-  { key: 'image', label: 'URL изображения', required: false },
-  { key: 'regular_price', label: 'Обычная цена', required: false },
-  { key: 'discount_price', label: 'Цена со скидкой', required: false },
-  { key: 'source_link', label: 'Ссылка на источник', required: false },
+  { key: 'title', label: 'Название (title)' },
+  { key: 'description', label: 'Описание (description)' },
+  { key: 'regular_price', label: 'Обычная цена (regular_price)' },
+  { key: 'discount_price', label: 'Цена со скидкой (discount_price)' },
+  { key: 'images', label: 'Изображения (images, URL через запятую)' },
+  { key: 'source_link', label: 'Ссылка на источник (source_link/link)' },
 ];
 
-// Перечисление системных полей
+// Поля системы, доступные для сопоставления
 const systemFields = [
-  { key: 'title', label: 'Заголовок объявления', required: true },
-  { key: 'description', label: 'Описание объявления', required: true },
-  { key: 'image', label: 'URL изображения', required: false },
-  { key: 'regular_price', label: 'Обычная цена', required: false },
-  { key: 'discount_price', label: 'Цена со скидкой', required: false },
-  { key: 'source_link', label: 'Ссылка на источник', required: false },
+  { key: 'title', label: 'Название объявления' },
+  { key: 'description', label: 'Описание объявления' },
+  { key: 'regular_price', label: 'Обычная цена' },
+  { key: 'discount_price', label: 'Цена со скидкой' },
+  { key: 'images', label: 'Изображения (URL через запятую)' },
+  { key: 'source_link', label: 'Ссылка на источник' },
 ];
+
 
 export const OjahCsvImport = () => {
-  const { toast } = useToast();
-  
-  // Состояния для всего компонента
-  const [currentStep, setCurrentStep] = useState(1);
-  const [csvFile, setCsvFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<CsvData | null>(null);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  const [importedCount, setImportedCount] = useState(0);
+  const [errorCount, setErrorCount] = useState(0);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const { toast } = useToast();
+  
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [cities, setCities] = useState<{ id: number; name_ru: string }[]>([]);
+  
   const [importSettings, setImportSettings] = useState<ImportSettings>({
     categoryId: null,
     cityId: null,
     expiryDays: 30,
   });
-  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [cities, setCities] = useState<{id: number, name: string}[]>([]);
-  const [selectedRootCategory, setSelectedRootCategory] = useState<number | null>(null);
-  const [selectedSubCategory, setSelectedSubCategory] = useState<number | null>(null);
-  const [selectedSubSubCategory, setSelectedSubSubCategory] = useState<number | null>(null);
-  
-  // Состояния для импорта
-  const [isImporting, setIsImporting] = useState(false);
-  const [importProgress, setImportProgress] = useState(0);
-  const [importedCount, setImportedCount] = useState(0);
-  const [errorCount, setErrorCount] = useState(0);
 
-  // Получение категорий и пользователя при монтировании компонента
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .order('name_ru', { ascending: true });
-        
-        if (error) {
-          toast({
-            variant: "destructive",
-            title: "Ошибка загрузки категорий",
-            description: error.message,
-          });
-          return;
-        }
-        
-        if (data) {
-          // Построение древовидной структуры категорий
-          const rootCategories: Category[] = [];
-          const categoryMap: Record<number, Category> = {};
-          
-          // Сначала создаем мапу всех категорий по ID
-          data.forEach((cat: Category) => {
-            categoryMap[cat.id] = { ...cat, children: [] };
-          });
-          
-          // Затем строим дерево категорий
-          data.forEach((cat: Category) => {
-            if (cat.parent_id === null) {
-              rootCategories.push(categoryMap[cat.id]);
-            } else if (categoryMap[cat.parent_id]) {
-              if (!categoryMap[cat.parent_id].children) {
-                categoryMap[cat.parent_id].children = [];
-              }
-              categoryMap[cat.parent_id].children!.push(categoryMap[cat.id]);
-            }
-          });
-          
-          setCategories(rootCategories);
-        }
-      } catch (err) {
-        console.error('Ошибка при загрузке категорий:', err);
+    const fetchInitialData = async () => {
+      // Загрузка категорий
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('categories')
+        .select('id, name_ru, name_kz, parent_id, level')
+        .order('parent_id', { nullsFirst: true })
+        .order('name_ru');
+      
+      if (categoriesError) {
+        toast({ title: 'Ошибка загрузки категорий', description: categoriesError.message, variant: 'destructive' });
+      } else if (categoriesData) {
+        // Простая иерархия (только 2 уровня для примера)
+        const topLevelCategories = categoriesData.filter(c => c.level === 1);
+        const secondLevelCategories = categoriesData.filter(c => c.level === 2);
+        const hierarchicalCategories = topLevelCategories.map(tlc => ({
+            ...tlc,
+            children: secondLevelCategories.filter(slc => slc.parent_id === tlc.id)
+        }));
+        setCategories(hierarchicalCategories);
+      }
+
+      // Загрузка городов
+      const { data: citiesData, error: citiesError } = await supabase
+        .from('cities')
+        .select('id, name_ru')
+        .order('name_ru');
+      
+      if (citiesError) {
+        toast({ title: 'Ошибка загрузки городов', description: citiesError.message, variant: 'destructive' });
+      } else {
+        setCities(citiesData || []);
       }
     };
-    
-    const fetchUser = async () => {
-      try {
-        // Сначала пытаемся получить текущего пользователя
-        const { data, error } = await supabase.auth.getUser();
-        if (error) {
-          console.error('Ошибка при получении пользователя:', error);
-          return;
-        }
-        
-        if (data && data.user) {
-          setAdminUser({
-            id: data.user.id,
-            email: data.user.email || '',
-          });
-        }
-      } catch (err) {
-        console.error('Ошибка при получении пользователя:', err);
-      }
-    };
-    
-    const fetchCities = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('cities')
-          .select('*')
-          .order('name_ru', { ascending: true });
-        
-        if (error) {
-          toast({
-            variant: "destructive",
-            title: "Ошибка загрузки городов",
-            description: error.message,
-          });
-          return;
-        }
-        
-        if (data) {
-          setCities(data.map(city => ({ id: city.id, name: city.name_ru })));
-        }
-      } catch (err) {
-        console.error('Ошибка при загрузке городов:', err);
-      }
-    };
-    
-    fetchCategories();
-    fetchUser();
-    fetchCities();
+
+    fetchInitialData();
   }, [toast]);
 
-  // Обработка загрузки CSV файла
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
-    
-    setCsvFile(file);
-    
-    try {
-      const text = await file.text();
-      const lines = text.split('\n');
-      
-      // Первая строка - заголовки
-      const headers = lines[0].split(',').map(header => header.trim());
-      
-      // Остальные строки - данные
-      const rows = lines.slice(1).filter(line => line.trim() !== '').map(line => {
-        return line.split(',').map(cell => cell.trim());
-      });
-      
-      setCsvData({ headers, rows });
-      
-      // Автоматическое сопоставление полей по названиям
-      const mappings: FieldMapping[] = [];
-      headers.forEach(header => {
-        const normalizedHeader = header.toLowerCase();
-        
-        // Проверяем совпадения по ключам системных полей
-        const matchingSystemField = systemFields.find(field => 
-          field.key.toLowerCase() === normalizedHeader || 
-          field.label.toLowerCase().includes(normalizedHeader)
-        );
-        
-        if (matchingSystemField) {
-          mappings.push({
-            csvField: header,
-            systemField: matchingSystemField.key,
-          });
+    if (file) {
+      setFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const rows = text.split('\n').map(row => row.split(',').map(cell => cell.trim().replace(/^"|"$/g, '')));
+        if (rows.length > 0) {
+          setCsvData({ headers: rows[0], rows: rows.slice(1) });
+          const autoMappings = csvFields
+            .filter(cf => rows[0].includes(cf.key) || rows[0].includes(cf.label.split(' (')[0]))
+            .map(cf => ({
+              csvField: rows[0].find(header => header === cf.key || header === cf.label.split(' (')[0]) || '',
+              systemField: cf.key,
+            }));
+          setFieldMappings(autoMappings);
+          setCurrentStep(2);
+        } else {
+          toast({ title: 'Ошибка', description: 'CSV файл пуст или некорректен.', variant: 'destructive' });
         }
-      });
-      
-      setFieldMappings(mappings);
-      
-      toast({
-        title: "Файл успешно загружен",
-        description: `Обнаружено ${headers.length} колонок и ${rows.length} строк данных`,
-      });
-      
-      setCurrentStep(2);
-    } catch (error) {
-      console.error('Ошибка при обработке файла:', error);
-      toast({
-        variant: "destructive",
-        title: "Ошибка обработки файла",
-        description: "Не удалось прочитать CSV файл. Проверьте формат файла.",
-      });
+      };
+      reader.readAsText(file, 'UTF-8');
     }
   };
 
-  // Обновление сопоставления полей
-  const updateFieldMapping = (csvField: string, systemField: string) => {
+  const handleMappingChange = (csvHeader: string, systemFieldKey: string) => {
     setFieldMappings(prev => {
-      const existing = prev.find(m => m.csvField === csvField);
-      if (existing) {
-        return prev.map(m => m.csvField === csvField ? { ...m, systemField } : m);
-      } else {
-        return [...prev, { csvField, systemField }];
+      const existingMappingIndex = prev.findIndex(m => m.csvField === csvHeader);
+      if (systemFieldKey === '') { // Если выбрано "не сопоставлять"
+        return prev.filter(m => m.csvField !== csvHeader);
       }
+      if (existingMappingIndex !== -1) {
+        const updatedMappings = [...prev];
+        updatedMappings[existingMappingIndex].systemField = systemFieldKey;
+        return updatedMappings;
+      }
+      return [...prev, { csvField: csvHeader, systemField: systemFieldKey }];
     });
   };
-
-  // Функция импорта данных из CSV
+  
   const startImport = async () => {
     setIsImporting(true);
     setImportProgress(0);
     setImportedCount(0);
     setErrorCount(0);
-    
+    console.log('Attempting to start import...');
+
     try {
-      // 1. Получаем или создаем пользователя Skidqi для владения объявлениями
-      let skidqiUserId = await getSkidqiUserId();
-      
-      if (!skidqiUserId) {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        console.error('User session error during import:', userError);
         toast({
-          title: "Создание пользователя Skidqi",
-          description: "Создаем пользователя для импорта объявлений..."
+          variant: "destructive",
+          title: "Ошибка авторизации",
+          description: "Не удалось получить данные пользователя для импорта. Пожалуйста, войдите снова."
         });
-        
-        skidqiUserId = await createSkidqiUser();
-        
-        if (!skidqiUserId) {
-          toast({
-            variant: "destructive",
-            title: "Ошибка создания пользователя",
-            description: "Не удалось создать пользователя Skidqi для импорта"
-          });
-          setIsImporting(false);
-          return;
-        }
+        setIsImporting(false);
+        return;
       }
-      
-      // 2. Подготавливаем дату истечения
+      const currentAuthUserId = userData.user.id;
+      console.log('Importing as user ID:', currentAuthUserId, 'Email:', userData.user.email);
+
       const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + importSettings.expiryDays);
-      
-      // 3. Импорт объявлений
+      expiryDate.setDate(expiryDate.getDate() + (importSettings.expiryDays || 30)); 
+
       if (!csvData || !fieldMappings.length) {
         setIsImporting(false);
         toast({
           variant: "destructive",
           title: "Ошибка импорта",
-          description: "Нет данных для импорта или не настроено сопоставление полей"
+          description: "Нет данных для импорта или не настроено сопоставление полей."
         });
         return;
       }
-      
+      if (!importSettings.categoryId || !importSettings.cityId) {
+        setIsImporting(false);
+        toast({
+          variant: "destructive",
+          title: "Ошибка настроек",
+          description: "Пожалуйста, выберите категорию и город для импорта."
+        });
+        return;
+      }
+
+
       const totalRows = csvData.rows.length;
-      let importedListings = 0;
-      
+      let localImportedCount = 0;
+      let localErrorCount = 0;
+
       for (let i = 0; i < totalRows; i++) {
         const row = csvData.rows[i];
+        if (row.every(cell => cell === null || cell === undefined || cell.trim() === '')) {
+            console.warn(`Skipping empty CSV row at index ${i}`);
+            setImportProgress(((i + 1) / totalRows) * 100);
+            continue;
+        }
+
+        const mappedData: { [key: string]: string | undefined } = {};
         
-        // Создаем объект с данными объявления
-        const rowData: Record<string, any> = {};
-        
-        // Заполняем данные из CSV
         fieldMappings.forEach(mapping => {
-          if (mapping.csvField && mapping.systemField) {
-            const headerIndex = csvData.headers.indexOf(mapping.csvField);
-            if (headerIndex > -1) {
-              // Обработка полей в зависимости от типа
-              if (mapping.systemField === 'regular_price' || mapping.systemField === 'discount_price') {
-                // Конвертация строк с ценами в числа (удаление пробелов, символов валют и т.д.)
-                const priceStr = row[headerIndex] || '';
-                const numericPrice = parseInt(priceStr.replace(/\D/g, ''), 10);
-                rowData[mapping.systemField] = isNaN(numericPrice) ? null : numericPrice;
-              } else {
-                rowData[mapping.systemField] = row[headerIndex] || '';
-              }
-            }
+          const csvHeaderIndex = csvData.headers.indexOf(mapping.csvField);
+          if (csvHeaderIndex !== -1 && row[csvHeaderIndex] !== undefined && row[csvHeaderIndex] !== null && row[csvHeaderIndex].trim() !== '') {
+            mappedData[mapping.systemField] = row[csvHeaderIndex].trim();
           }
         });
+
+        if (Object.keys(mappedData).length === 0 && csvData.headers.length > 0) {
+            console.warn('Skipping row with no mapped data:', row);
+            localErrorCount++;
+            setErrorCount(prev => prev + 1);
+            setImportProgress(((i + 1) / totalRows) * 100);
+            continue;
+        }
         
-        // Добавляем обязательные поля и общие настройки
-        const listingData = {
-          title: rowData.title || '',
-          description: rowData.description || '',
-          regular_price: rowData.regular_price,
-          discount_price: rowData.discount_price,
-          source_link: rowData.source_link,
+        const listingData: any = {
+          title: mappedData.title || '',
+          description: mappedData.description || '',
+          regular_price: mappedData.regular_price ? parseInt(mappedData.regular_price, 10) : null,
+          discount_price: mappedData.discount_price ? parseInt(mappedData.discount_price, 10) : null,
+          images: mappedData.images ? mappedData.images.split(',').map(img => img.trim()).filter(img => img) : [],
+          source_link: mappedData.source_link || '', 
+          
+          user_id: currentAuthUserId, 
+          
           category_id: importSettings.categoryId,
           city_id: importSettings.cityId,
           expires_at: expiryDate.toISOString(),
-          status: 'active',
-          views: 0,
-          is_premium: false,
-          is_free: false,
-          user_id: skidqiUserId, // Используем ID пользователя Skidqi
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          images: rowData.image ? [rowData.image] : null
+          status: 'active', 
         };
         
-        // Удаление null и undefined значений
         Object.keys(listingData).forEach(key => {
-          if (listingData[key] === null || listingData[key] === undefined) {
-            delete listingData[key];
-          }
+            if (listingData[key] === null || listingData[key] === undefined) {
+                if (key !== 'regular_price' && key !== 'discount_price' && key !== 'images') {
+                    delete listingData[key];
+                }
+            } else if (typeof listingData[key] === 'string' && listingData[key].trim() === '') {
+                 if (key !== 'title' && key !== 'description' && key !== 'source_link') {
+                    delete listingData[key];
+                 }
+            }
         });
         
-        // Проверка обязательных полей
-        if (!listingData.title || !listingData.description) {
-          toast({
-            variant: "destructive",
-            title: `Ошибка в строке ${i + 1}`,
-            description: "Отсутствуют обязательные поля: заголовок или описание"
-          });
+        if (listingData.images && listingData.images.length === 0) {
+          delete listingData.images; 
+        }
+
+        if (!listingData.title || !listingData.user_id || !listingData.category_id || !listingData.city_id) {
+          console.error('Пропущены обязательные поля для строки:', row, listingData);
+          toast({ title: 'Пропущены обязательные поля', description: `Строка ${i+1}: ${listingData.title || 'Без заголовка'}`, variant: 'destructive' });
+          localErrorCount++;
           setErrorCount(prev => prev + 1);
-          continue;
+          setImportProgress(((i + 1) / totalRows) * 100);
+          continue; 
         }
         
-        try {
-          // Вставка объявления в базу данных
-          const { data: insertedData, error } = await supabase
-            .from('listings')
-            .insert(listingData)
-            .select();
-          
-          if (error) {
-            console.error("Error importing listing:", error);
-            toast({
-              variant: "destructive",
-              title: `Ошибка в строке ${i + 1}`,
-              description: `${error.message || 'Неизвестная ошибка'}`
-            });
-            setErrorCount(prev => prev + 1);
-          } else {
-            importedListings++;
-            setImportedCount(prev => prev + 1);
-          }
-        } catch (err) {
-          console.error("Exception during import:", err);
-          toast({
-            variant: "destructive",
-            title: `Ошибка в строке ${i + 1}`,
-            description: `${err.message || 'Неизвестная ошибка'}`
-          });
+        console.log("Attempting to insert listing:", JSON.stringify(listingData, null, 2));
+
+        const { data: insertData, error: insertError } = await supabase
+          .from('listings')
+          .insert([listingData])
+          .select(); 
+
+        if (insertError) {
+          console.error('Ошибка импорта строки:', insertError, 'Для данных:', listingData);
+          toast({ title: 'Ошибка импорта строки', description: `${insertError.message} (строка CSV: ${i+1})`, variant: 'destructive' });
+          localErrorCount++;
           setErrorCount(prev => prev + 1);
+        } else {
+          localImportedCount++;
+          setImportedCount(prev => prev + 1);
+          console.log('Успешно импортировано:', insertData);
         }
-        
-        // Обновление прогресса
-        const progress = Math.round(((i + 1) / totalRows) * 100);
-        setImportProgress(progress);
+        setImportProgress(Math.round(((i + 1) / totalRows) * 100));
       }
-      
-      // 4. Проверка результатов импорта
-      const { data: countData } = await supabase
-        .from('listings')
-        .select('id', { count: 'exact' })
-        .eq('user_id', skidqiUserId)
-        .gte('created_at', new Date(Date.now() - 1000 * 60 * 5).toISOString()); // последние 5 минут
-        
-      // 5. Финальное уведомление
-      if (importedListings > 0) {
+
+      if (localImportedCount > 0) {
         toast({
           title: "Импорт завершен",
-          description: `Успешно импортировано ${importedListings} объявлений под пользователем Skidqi`
+          description: `Успешно импортировано ${localImportedCount} объявлений. Ошибок: ${localErrorCount}.`
         });
-      } else {
-        toast({
+      } else if (localErrorCount > 0 && totalRows > 0) {
+          toast({
           variant: "destructive",
           title: "Импорт завершен с ошибками",
-          description: "Не удалось импортировать ни одно объявление"
+          description: `Не удалось импортировать объявления. Ошибок: ${localErrorCount}.`
         });
+      } else if (totalRows === 0) {
+          toast({
+            variant: "default",
+            title: "Импорт не выполнен",
+            description: "Нет данных в CSV файле для импорта."
+          });
+      } else {
+          toast({
+            variant: "default",
+            title: "Импорт завершен",
+            description: "Нет данных для импорта или все строки были пропущены/содержали ошибки."
+          });
       }
       
-    } catch (error) {
-      console.error("Import error:", error);
+    } catch (error: any) {
+      console.error("Import process error:", error);
       toast({
         variant: "destructive",
-        title: "Ошибка импорта",
-        description: error.message || "Неизвестная ошибка при импорте"
+        title: "Критическая ошибка импорта",
+        description: error.message || "Произошла неизвестная ошибка во время процесса импорта."
       });
     } finally {
       setIsImporting(false);
     }
   };
 
+  const renderCategoryOptions = (category: Category, level = 0) => {
+    const prefix = '\u00A0\u00A0'.repeat(level * 2);
+    return (
+      <>
+        <SelectItem key={category.id} value={String(category.id)}>
+          {prefix}{category.name_ru} ({category.name_kz})
+        </SelectItem>
+        {category.children && category.children.map(child => renderCategoryOptions(child, level + 1))}
+      </>
+    );
+  };
+
+
   return (
     <div className="space-y-6">
+      <AuthStatus />
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileSpreadsheet className="h-5 w-5" />
-            Импорт объявлений из CSV
-          </CardTitle>
-          <CardDescription>
-            Загрузите CSV файл с объявлениями для массового импорта. 
-            Объявления будут созданы под пользователем Skidqi.
-          </CardDescription>
+          <CardTitle>Импорт объявлений из CSV</CardTitle>
+          <CardDescription>Загрузите CSV файл, сопоставьте поля и настройте параметры импорта.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Шаг 1: Загрузка файла */}
-          <div className="space-y-4">
-            <AuthStatus />
-            <div className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                currentStep >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-              }`}>
-                1
+        <CardContent className="space-y-8">
+          {currentStep === 1 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Шаг 1: Загрузка CSV файла</h3>
+              <div className="flex items-center justify-center w-full">
+                <label
+                  htmlFor="dropzone-file"
+                  className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted border-border"
+                >
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="w-10 h-10 mb-3 text-muted-foreground" />
+                    <p className="mb-2 text-sm text-muted-foreground">
+                      <span className="font-semibold">Нажмите для загрузки</span> или перетащите файл
+                    </p>
+                    <p className="text-xs text-muted-foreground">CSV (UTF-8, разделитель запятая)</p>
+                    {fileName && <p className="mt-2 text-xs text-green-500">Выбран файл: {fileName}</p>}
+                  </div>
+                  <Input id="dropzone-file" type="file" className="hidden" accept=".csv" onChange={handleFileUpload} />
+                </label>
               </div>
-              <h3 className="text-lg font-semibold">Загрузка CSV файла</h3>
+              {csvData && (
+                <Button onClick={() => setCurrentStep(2)} className="w-full">
+                  Далее <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
             </div>
-            
-            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
-              <div className="flex flex-col items-center gap-4">
-                <Upload className="h-10 w-10 text-muted-foreground" />
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Выберите CSV файл с объявлениями
-                  </p>
-                </div>
-                <Input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileUpload}
-                  className="max-w-xs"
-                />
-              </div>
-            </div>
-            
-            {csvFile && (
+          )}
+
+          {currentStep === 2 && csvData && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Шаг 2: Сопоставление полей</h3>
               <Alert>
-                <File className="h-4 w-4" />
+                <FileSpreadsheet className="w-4 h-4" />
                 <AlertDescription>
-                  Файл загружен: {csvFile.name} ({Math.round(csvFile.size / 1024)} КБ)
+                  Сопоставьте заголовки из вашего CSV файла с системными полями. 
+                  Обязательные поля для импорта: Название, Описание. 
+                  Категория и Город выбираются на следующем шаге для всех объявлений.
+                  Срок публикации устанавливается автоматически.
                 </AlertDescription>
               </Alert>
-            )}
-          </div>
-
-          {/* Шаг 2: Сопоставление полей */}
-          {csvData && currentStep >= 2 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  currentStep >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                }`}>
-                  2
-                </div>
-                <h3 className="text-lg font-semibold">Сопоставление полей</h3>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="text-sm text-muted-foreground mb-4">
-                  Укажите, какие колонки из CSV файла соответствуют полям объявления:
-                </div>
-                
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {csvData.headers.map((header, index) => (
-                  <div key={index} className="flex items-center gap-4 p-3 border rounded-lg">
-                    <div className="w-1/3">
-                      <Label className="text-sm font-medium">{header}</Label>
-                      <div className="text-xs text-muted-foreground">Колонка CSV</div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    <div className="w-1/3">
-                      <Select
-                        value={fieldMappings.find(m => m.csvField === header)?.systemField || ''}
-                        onValueChange={(value) => updateFieldMapping(header, value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите поле" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">-- Не импортировать --</SelectItem>
-                          {systemFields.map(field => (
-                            <SelectItem key={field.key} value={field.key}>
-                              {field.label} {field.required && '*'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="w-1/3 flex items-center gap-2">
-                      {fieldMappings.find(m => m.csvField === header)?.systemField ? (
-                        <>
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                          <span className="text-sm text-green-600">Сопоставлено</span>
-                        </>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">Не выбрано</span>
-                      )}
-                    </div>
+                  <div key={index} className="space-y-1">
+                    <Label htmlFor={`mapping-${index}`}>"{header}" (из CSV)</Label>
+                    <Select
+                      value={fieldMappings.find(m => m.csvField === header)?.systemField || ''}
+                      onValueChange={(value) => handleMappingChange(header, value)}
+                    >
+                      <SelectTrigger id={`mapping-${index}`}>
+                        <SelectValue placeholder="Не сопоставлять" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Не сопоставлять</SelectItem>
+                        {systemFields.map(sf => (
+                          <SelectItem key={sf.key} value={sf.key} disabled={fieldMappings.some(m => m.systemField === sf.key && m.csvField !== header)}>
+                            {sf.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 ))}
               </div>
-              
-              <div className="flex justify-between pt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setCurrentStep(1)}
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Назад
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={() => setCurrentStep(1)}>
+                  <ArrowLeft className="w-4 h-4 mr-2" /> Назад к загрузке
                 </Button>
-                <Button 
-                  onClick={() => setCurrentStep(3)}
-                  disabled={fieldMappings.filter(m => m.systemField).length === 0}
-                >
-                  Далее
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                <Button onClick={() => setCurrentStep(3)}>
+                  Далее к настройкам <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Шаг 3: Настройки импорта */}
-          {csvData && currentStep >= 3 && (
+          {currentStep === 3 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  currentStep >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                }`}>
-                  3
-                </div>
-                <h3 className="text-lg font-semibold">Настройки импорта</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Категория</Label>
-                  <Select 
-                    value={importSettings.categoryId ? importSettings.categoryId.toString() : undefined} 
-                    onValueChange={(value) => setImportSettings(prev => ({ ...prev, categoryId: parseInt(value) }))}
+              <h3 className="text-lg font-medium">Шаг 3: Настройки импорта</h3>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="space-y-1">
+                  <Label htmlFor="category">Категория (для всех объявлений)</Label>
+                  <Select
+                    value={importSettings.categoryId ? String(importSettings.categoryId) : ''}
+                    onValueChange={(value) => setImportSettings(prev => ({ ...prev, categoryId: Number(value) }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="category">
                       <SelectValue placeholder="Выберите категорию" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id.toString()}>
-                          {cat.name_ru}
-                        </SelectItem>
-                      ))}
+                      {categories.map(cat => renderCategoryOptions(cat))}
                     </SelectContent>
                   </Select>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="city">Город</Label>
-                  <Select 
-                    value={importSettings.cityId ? importSettings.cityId.toString() : undefined} 
-                    onValueChange={(value) => setImportSettings(prev => ({ ...prev, cityId: parseInt(value) }))}
+                <div className="space-y-1">
+                  <Label htmlFor="city">Город (для всех объявлений)</Label>
+                  <Select
+                    value={importSettings.cityId ? String(importSettings.cityId) : ''}
+                    onValueChange={(value) => setImportSettings(prev => ({ ...prev, cityId: Number(value) }))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="city">
                       <SelectValue placeholder="Выберите город" />
                     </SelectTrigger>
                     <SelectContent>
-                      {cities.map((city) => (
-                        <SelectItem key={city.id} value={city.id.toString()}>
-                          {city.name}
-                        </SelectItem>
+                      {cities.map(city => (
+                        <SelectItem key={city.id} value={String(city.id)}>{city.name_ru}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="expiry">Срок действия (дни)</Label>
-                  <Input
-                    id="expiry"
-                    type="number"
-                    value={importSettings.expiryDays}
-                    onChange={(e) => setImportSettings(prev => ({ ...prev, expiryDays: parseInt(e.target.value) || 30 }))}
+                <div className="space-y-1 md:col-span-2">
+                  <Label htmlFor="expiryDays">Срок публикации (дней)</Label>
+                  <Input 
+                    id="expiryDays" 
+                    type="number" 
+                    value={importSettings.expiryDays} 
+                    onChange={(e) => setImportSettings(prev => ({ ...prev, expiryDays: Number(e.target.value) || 30 }))} 
                     min="1"
                     max="365"
                   />
+                   <p className="text-xs text-muted-foreground">
+                    Дата истечения будет установлена автоматически от даты импорта + указанное количество дней.
+                  </p>
                 </div>
               </div>
               
-              <div className="space-y-4">
-                <h4 className="font-medium">Предварительный просмотр данных</h4>
-                <div className="text-sm text-muted-foreground">
-                  Обнаружено: {csvData.headers.length} колонок, {csvData.rows.length} строк
-                </div>
-                <div className="text-sm bg-blue-50 p-3 rounded-lg">
-                  <strong>Информация:</strong> Объявления будут созданы под пользователем Skidqi (info@skidqi.ru)
-                </div>
-                
-                <div className="flex justify-between pt-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setCurrentStep(2)}
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Назад
+              <div className="pt-4 space-y-2">
+                <Alert variant="default">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <AlertDescription>
+                    Пожалуйста, убедитесь, что вы авторизованы как администратор (Skidqi) перед началом импорта.
+                    Все объявления будут опубликованы от вашего имени.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:space-y-0">
+                  <Button variant="outline" onClick={() => setCurrentStep(2)}>
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Назад к сопоставлению
                   </Button>
                   <Button 
                     onClick={startImport}
@@ -650,11 +501,12 @@ export const OjahCsvImport = () => {
                 </div>
               </div>
               
+            
               {isImporting && (
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Прогресс импорта</span>
-                    <span>{importProgress}%</span>
+                    <span>{importProgress.toFixed(0)}%</span>
                   </div>
                   <Progress value={importProgress} className="w-full" />
                   <div className="text-sm text-muted-foreground">
