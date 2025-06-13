@@ -1,13 +1,14 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase/client'; // Убедитесь, что путь к клиенту Supabase верный
+import { supabase } from '@/lib/supabase';
 import { Session } from '@supabase/supabase-js';
 
 interface OjahLoginProps {
-  onLoginSuccess: (session: Session) => void; // Обновленный prop для передачи сессии
+  onLoginSuccess: (session: Session) => void;
 }
 
 export const OjahLogin = ({ onLoginSuccess }: OjahLoginProps) => {
@@ -31,40 +32,72 @@ export const OjahLogin = ({ onLoginSuccess }: OjahLoginProps) => {
     }
 
     try {
+      // Авторизация через Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
 
       if (error) {
-        console.error('Supabase login error:', error);
+        console.error('Ошибка авторизации:', error);
         let errorMessage = 'Неверный Email или Пароль.';
         if (error.message.includes('Invalid login credentials')) {
-            errorMessage = 'Неверный Email или Пароль.';
+          errorMessage = 'Неверный Email или Пароль.';
         } else if (error.message.includes('Email not confirmed')) {
-            errorMessage = 'Пожалуйста, подтвердите ваш Email перед входом.';
+          errorMessage = 'Пожалуйста, подтвердите ваш Email перед входом.';
         }
         toast({
           title: 'Ошибка входа',
           description: errorMessage,
           variant: 'destructive',
         });
-      } else if (data.session) {
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.session) {
+        // Проверяем админскую роль через RPC функцию
+        const { data: isAdmin, error: roleError } = await supabase.rpc('check_admin_role');
+        
+        if (roleError) {
+          console.error('Ошибка проверки роли:', roleError);
+          toast({
+            title: 'Ошибка доступа',
+            description: 'Не удалось проверить права доступа.',
+            variant: 'destructive',
+          });
+          await supabase.auth.signOut();
+          setIsLoading(false);
+          return;
+        }
+
+        if (!isAdmin) {
+          toast({
+            title: 'Доступ запрещен',
+            description: 'У вас нет прав администратора для доступа к этой панели.',
+            variant: 'destructive',
+          });
+          await supabase.auth.signOut();
+          setIsLoading(false);
+          return;
+        }
+
+        // Если все проверки пройдены, передаем сессию
         toast({
           title: 'Вход выполнен',
-          description: 'Вы успешно вошли в систему.',
+          description: 'Добро пожаловать в админ-панель!',
           variant: 'default',
         });
-        onLoginSuccess(data.session); // Передаем сессию родительскому компоненту
+        onLoginSuccess(data.session);
       } else {
-         toast({
+        toast({
           title: 'Ошибка входа',
           description: 'Произошла неизвестная ошибка. Попробуйте снова.',
           variant: 'destructive',
         });
       }
     } catch (error) {
-      console.error('Login submission error:', error);
+      console.error('Критическая ошибка входа:', error);
       toast({
         title: 'Ошибка входа',
         description: 'Произошла непредвиденная ошибка. Пожалуйста, попробуйте еще раз.',

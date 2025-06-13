@@ -1,58 +1,112 @@
 
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '@/lib/supabase';
 import { OjahLayout } from '@/components/admin/OjahLayout';
 import { OjahLogin } from '@/components/admin/OjahLogin';
-import { useAdmin } from '@/contexts/AdminContext';
+import { Session } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
 
 const Ojah = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { adminUser } = useAdmin();
+  const [isAdminVerified, setIsAdminVerified] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     checkAuthStatus();
+    
+    // Подписываемся на изменения состояния аутентификации
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
+        
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setIsAdminVerified(false);
+          setIsLoading(false);
+        } else if (event === 'SIGNED_IN' && session) {
+          // Проверяем админскую роль при входе
+          await verifyAdminRole(session);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const checkAuthStatus = () => {
-    const ojahAuth = localStorage.getItem('ojah_authenticated');
-    if (ojahAuth === 'true') {
-      setIsAuthenticated(true);
-    }
-    setIsLoading(false);
-  };
-
-  const handleLogin = async (password: string) => {
+  const checkAuthStatus = async () => {
     try {
-      const { data, error } = await supabase
-        .from('ojpw')
-        .select('id')
-        .limit(1)
-        .single();
-
-      if (error) {
-        console.error('Error checking password:', error);
-        return false;
-      }
-
-      if (data?.id === password) {
-        localStorage.setItem('ojah_authenticated', 'true');
-        setIsAuthenticated(true);
-        return true;
-      }
+      const { data: { session } } = await supabase.auth.getSession();
       
-      return false;
+      if (session) {
+        await verifyAdminRole(session);
+      } else {
+        setIsLoading(false);
+      }
     } catch (error) {
-      console.error('Login error:', error);
-      return false;
+      console.error('Ошибка проверки статуса аутентификации:', error);
+      setIsLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('ojah_authenticated');
-    setIsAuthenticated(false);
+  const verifyAdminRole = async (session: Session) => {
+    try {
+      const { data: isAdmin, error } = await supabase.rpc('check_admin_role');
+      
+      if (error) {
+        console.error('Ошибка проверки админской роли:', error);
+        toast({
+          title: 'Ошибка доступа',
+          description: 'Не удалось проверить права доступа.',
+          variant: 'destructive',
+        });
+        await supabase.auth.signOut();
+        return;
+      }
+
+      if (isAdmin) {
+        setSession(session);
+        setIsAdminVerified(true);
+        console.log('Админская роль подтверждена для:', session.user.email);
+      } else {
+        toast({
+          title: 'Доступ запрещен',
+          description: 'У вас нет прав администратора.',
+          variant: 'destructive',
+        });
+        await supabase.auth.signOut();
+      }
+    } catch (error) {
+      console.error('Критическая ошибка проверки роли:', error);
+      await supabase.auth.signOut();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoginSuccess = (session: Session) => {
+    setSession(session);
+    setIsAdminVerified(true);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setSession(null);
+      setIsAdminVerified(false);
+      toast({
+        title: 'Выход выполнен',
+        description: 'Вы успешно вышли из системы.',
+      });
+    } catch (error) {
+      console.error('Ошибка выхода:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Произошла ошибка при выходе из системы.',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (isLoading) {
@@ -71,8 +125,8 @@ const Ojah = () => {
         <meta name="googlebot" content="noindex, nofollow" />
       </Helmet>
       
-      {!isAuthenticated ? (
-        <OjahLogin onLogin={handleLogin} />
+      {!session || !isAdminVerified ? (
+        <OjahLogin onLoginSuccess={handleLoginSuccess} />
       ) : (
         <OjahLayout onLogout={handleLogout} />
       )}
