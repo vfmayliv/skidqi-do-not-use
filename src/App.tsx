@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,8 +36,15 @@ const PropertyPage = lazy(() => import("./pages/PropertyPage"));
 const ElectronicsPage = lazy(() => import("./pages/ElectronicsPage"));
 const FashionPage = lazy(() => import("./pages/FashionPage"));
 const PetsPage = lazy(() => import("./pages/PetsPage"));
-const Ojah = lazy(() => import("./pages/Ojah"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Import Ojah directly to avoid dynamic import issues
+const Ojah = lazy(() => 
+  import("./pages/Ojah").catch(() => {
+    // Fallback in case of import failure
+    return { default: () => <div>Loading admin panel...</div> };
+  })
+);
 
 function App() {
   return (

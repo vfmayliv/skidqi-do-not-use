@@ -1047,6 +1047,7 @@ export type Database = {
           microdistrict_id: number | null
           phone: string | null
           regular_price: number | null
+          source_link: string | null
           status: string | null
           title: string
           updated_at: string | null
@@ -1068,6 +1069,7 @@ export type Database = {
           microdistrict_id?: number | null
           phone?: string | null
           regular_price?: number | null
+          source_link?: string | null
           status?: string | null
           title: string
           updated_at?: string | null
@@ -1089,6 +1091,7 @@ export type Database = {
           microdistrict_id?: number | null
           phone?: string | null
           regular_price?: number | null
+          source_link?: string | null
           status?: string | null
           title?: string
           updated_at?: string | null
