@@ -61,7 +61,9 @@ function App() {
                   <Route path="/search" element={<SearchResults />} />
                   <Route path="/listing/:id" element={<ListingDetail />} />
                   <Route path="/category/:slug" element={<CategoryPage />} />
+                  <Route path="/skidqi-kz/category/:slug" element={<CategoryPage />} />
                   <Route path="/category/:parentSlug/:slug" element={<SubcategoryPage />} />
+                  <Route path="/skidqi-kz/category/:parentSlug/:slug" element={<SubcategoryPage />} />
                   <Route path="/create-listing" element={<CreateListing />} />
                   <Route path="/profile" element={<UserProfile />} />
                   <Route path="/login" element={<Login />} />

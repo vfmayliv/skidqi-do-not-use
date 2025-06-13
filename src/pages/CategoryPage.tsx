@@ -13,12 +13,15 @@ import { CategoryTreeFilter } from '@/components/filters/CategoryTreeFilter';
 import { useUniversalFiltersStore } from '@/stores/useUniversalFiltersStore';
 
 export default function CategoryPage() {
-  const { categoryId } = useParams<{ categoryId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const { language, t } = useAppWithTranslations();
   const { getListings, listings, loading, error } = useListings();
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | undefined>();
   const { filters, setFilters, resetFilters } = useUniversalFiltersStore();
+
+  // Используем slug напрямую как categoryId
+  const categoryId = slug;
 
   // Маппинг ID категорий от строковых к числовым
   const getCategoryIdNumber = (categoryStr: string): number | undefined => {
