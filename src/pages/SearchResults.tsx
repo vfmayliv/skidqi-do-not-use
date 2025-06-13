@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ListingCard } from '@/components/ListingCard';
-import { useAppContext } from '@/contexts/AppContext';
+import { useAppWithTranslations } from '@/stores/useAppStore';
 import { useSearchContext } from '@/contexts/SearchContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,7 @@ import {
 import { Label } from "@/components/ui/label";
 
 const SearchResults = () => {
-  const { language, t } = useAppContext();
+  const { language, t } = useAppWithTranslations();
   const { 
     searchTerm, 
     searchResults, 
