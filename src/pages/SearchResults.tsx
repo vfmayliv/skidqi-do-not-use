@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -44,20 +43,57 @@ import {
   CommandItem,
 } from '@/components/ui/command';
 import { Label } from "@/components/ui/label";
+import { useListings } from "@/hooks/useListings";
 
 const SearchResults = () => {
   const { language, t } = useAppWithTranslations();
   const { 
     searchTerm, 
-    searchResults, 
+    searchResults: contextSearchResults, 
     filters, 
     setSearchTerm, 
     setFilters, 
     resetFilters, 
-    performSearch 
+    performSearch: performContextSearch 
   } = useSearchContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  const { getListings, listings, loading, error } = useListings();
+  const [hasInitialLoaded, setHasInitialLoaded] = useState(false);
+  
+  // Выполнение поиска с использованием Supabase
+  const performSearch = async () => {
+    const filterParams: any = {
+      searchQuery: searchTerm
+    };
+    
+    if (filters.category) {
+      const categoryId = parseInt(filters.category);
+      if (!isNaN(categoryId)) {
+        filterParams.categoryId = categoryId;
+      }
+    }
+    
+    if (filters.city) {
+      filterParams.city = filters.city;
+    }
+    
+    if (filters.priceRange.min !== null || filters.priceRange.max !== null) {
+      filterParams.priceRange = filters.priceRange;
+    }
+    
+    if (filters.isFeatured !== null) {
+      filterParams.isPremium = filters.isFeatured;
+    }
+    
+    // Скидка в базе данных - это поле discount_percent > 0
+    if (filters.hasDiscount !== null) {
+      // В будущем будет использоваться, когда API сможет фильтровать по скидкам
+    }
+    
+    await getListings(filterParams);
+  };
   
   // Initialize search from URL query parameters
   useEffect(() => {
@@ -103,9 +139,13 @@ const SearchResults = () => {
     // Only update filters if we have some
     if (Object.keys(newFilters).length > 0) {
       setFilters(newFilters);
-    } else {
-      // If no filters, still perform search
-      performSearch(term);
+    }
+
+    // Загружаем объявления из Supabase
+    if (!hasInitialLoaded) {
+      performSearch().then(() => {
+        setHasInitialLoaded(true);
+      });
     }
   }, []);
   
@@ -142,7 +182,12 @@ const SearchResults = () => {
     }
     
     setSearchParams(params);
-  }, [searchTerm, filters, setSearchParams]);
+
+    // Загружаем новые объявления при изменении фильтров
+    if (hasInitialLoaded) {
+      performSearch();
+    }
+  }, [searchTerm, filters, hasInitialLoaded]);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,22 +225,22 @@ const SearchResults = () => {
     ]);
   }, [filters.priceRange.min, filters.priceRange.max]);
 
-  // Helper function to adapt multilingual listings to simple string format
-  const adaptListingForCard = (listing: any) => ({
+  // Адаптируем данные из Supabase к интерфейсу ListingCard
+  const adaptedListings = listings.map(listing => ({
     id: listing.id,
-    title: typeof listing.title === 'string' ? listing.title : listing.title?.[language] || listing.title?.ru || '',
-    description: typeof listing.description === 'string' ? listing.description : listing.description?.[language] || listing.description?.ru || '',
-    imageUrl: listing.imageUrl,
-    originalPrice: listing.originalPrice,
-    discountPrice: listing.discountPrice,
-    discount: listing.discount,
-    city: typeof listing.city === 'string' ? listing.city : listing.city?.[language] || listing.city?.ru || '',
-    categoryId: listing.categoryId,
-    subcategoryId: listing.subcategoryId,
-    isFeatured: listing.isFeatured,
-    createdAt: listing.createdAt,
-    views: listing.views
-  });
+    title: listing.title,
+    description: listing.description,
+    imageUrl: listing.images?.[0] || '/placeholder.svg',
+    originalPrice: listing.regular_price || 0,
+    discountPrice: listing.discount_price || listing.regular_price || 0,
+    discount: listing.discount_percent || 0,
+    city: (listing as any).cities?.name_ru || 'Не указан',
+    categoryId: listing.category_id?.toString() || '',
+    subcategoryId: '',
+    isFeatured: listing.is_premium || false,
+    createdAt: listing.created_at,
+    views: listing.views || 0
+  }));
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -405,7 +450,7 @@ const SearchResults = () => {
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button onClick={() => performSearch()}>
+                    <Button onClick={performSearch}>
                       <CheckCircle className="mr-2 h-4 w-4" />
                       {language === 'ru' ? 'Применить' : 'Қолдану'}
                     </Button>
@@ -531,20 +576,24 @@ const SearchResults = () => {
         <div className="mb-6">
           <p className="text-sm text-muted-foreground">
             {language === 'ru' 
-              ? `Найдено объявлений: ${searchResults.length}`
-              : `Табылған хабарландырулар: ${searchResults.length}`}
+              ? `Найдено объявлений: ${adaptedListings.length}`
+              : `Табылған хабарландырулар: ${adaptedListings.length}`}
           </p>
         </div>
         
         {/* Search results */}
-        {searchResults.length > 0 ? (
+        {loading && !hasInitialLoaded ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          </div>
+        ) : adaptedListings.length > 0 ? (
           <div className={
             viewMode === 'grid' 
               ? "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" 
               : "space-y-4"
           }>
-            {searchResults.map(listing => (
-              <ListingCard key={listing.id} listing={adaptListingForCard(listing)} />
+            {adaptedListings.map(listing => (
+              <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
         ) : (

@@ -19,6 +19,7 @@ export default function CategoryPage() {
   const { getListings, listings, loading, error } = useListings();
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | undefined>();
   const { filters, setFilters, resetFilters } = useUniversalFiltersStore();
+  const [hasInitialLoaded, setHasInitialLoaded] = useState(false);
 
   // Используем slug напрямую как categoryId
   const categoryId = slug;
@@ -26,7 +27,7 @@ export default function CategoryPage() {
   // Маппинг ID категорий от строковых к числовым
   const getCategoryIdNumber = (categoryStr: string): number | undefined => {
     const categoryMap: Record<string, number> = {
-      'electronics': 1, // ID категории "Техника и электроника" в базе
+      'electronics': 1,
       'fashion': 2,
       'home': 3,
       'transport': 4,
@@ -42,8 +43,9 @@ export default function CategoryPage() {
     return categoryMap[categoryStr];
   };
 
+  // Загружаем объявления только один раз при инициализации
   useEffect(() => {
-    if (categoryId) {
+    if (categoryId && !hasInitialLoaded) {
       const numericCategoryId = getCategoryIdNumber(categoryId);
       console.log(`Загружаем объявления для категории: ${categoryId} (ID: ${numericCategoryId})`);
       
@@ -54,12 +56,31 @@ export default function CategoryPage() {
           condition: filters.condition !== 'any' ? filters.condition : undefined
         };
         
-        getListings(filterParams);
+        getListings(filterParams).then(() => {
+          setHasInitialLoaded(true);
+        });
       } else {
         console.warn(`Неизвестная категория: ${categoryId}`);
+        setHasInitialLoaded(true);
       }
     }
-  }, [categoryId, filters, getListings]);
+  }, [categoryId, hasInitialLoaded, getCategoryIdNumber, getListings]);
+
+  // Обновляем объявления только при изменении фильтров (не при инициализации)
+  useEffect(() => {
+    if (hasInitialLoaded && categoryId) {
+      const numericCategoryId = getCategoryIdNumber(categoryId);
+      if (numericCategoryId) {
+        const filterParams = {
+          categoryId: numericCategoryId,
+          priceRange: filters.priceRange,
+          condition: filters.condition !== 'any' ? filters.condition : undefined
+        };
+        
+        getListings(filterParams);
+      }
+    }
+  }, [filters, hasInitialLoaded, categoryId, getListings]);
 
   const config = categoryId ? getCategoryConfig(categoryId) : null;
 
@@ -225,7 +246,7 @@ export default function CategoryPage() {
               </div>
               
               {/* Listings grid */}
-              {loading ? (
+              {loading && !hasInitialLoaded ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
                 </div>
@@ -237,7 +258,7 @@ export default function CategoryPage() {
                 </div>
               )}
               
-              {!loading && adaptedListings.length === 0 && (
+              {!loading && adaptedListings.length === 0 && hasInitialLoaded && (
                 <div className="text-center py-8">
                   <p className="text-gray-500">{t('noListingsFound', 'Объявлений не найдено')}</p>
                   <p className="text-sm text-gray-400 mt-2">

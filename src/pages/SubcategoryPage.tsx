@@ -4,7 +4,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { BreadcrumbNavigation } from '@/components/BreadcrumbNavigation';
-import { mockListings } from '@/data/mockListings';
+import { useListings } from '@/hooks/useListings';
 import { Listing } from '@/types/listingType';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 import { getCategoryConfig } from '@/categories/categoryRegistry';
@@ -14,46 +14,71 @@ export default function SubcategoryPage() {
   const { categoryId, subcategoryId } = useParams<{ categoryId: string; subcategoryId: string }>();
   const [searchParams] = useSearchParams();
   const { language, t } = useAppWithTranslations();
-  const [filteredListings, setFilteredListings] = useState<Listing[]>([]);
+  const { getListings, listings, loading, error } = useListings();
+  const [hasInitialLoaded, setHasInitialLoaded] = useState(false);
+  
+  // Маппинг ID категорий от строковых к числовым
+  const getCategoryIdNumber = (categoryStr: string): number | undefined => {
+    const categoryMap: Record<string, number> = {
+      'electronics': 1,
+      'fashion': 2,
+      'home': 3,
+      'transport': 4,
+      'property': 5,
+      'kids': 6,
+      'pharmacy': 7,
+      'food': 8,
+      'services': 9,
+      'pets': 10,
+      'hobby': 11,
+      'beauty': 12
+    };
+    return categoryMap[categoryStr];
+  };
   
   useEffect(() => {
-    // Filter the listings based on both category and subcategory
-    let newListings = mockListings;
-    
-    if (categoryId) {
-      newListings = newListings.filter(listing => listing.categoryId === categoryId);
+    // Загрузка объявлений из Supabase вместо использования моковых данных
+    if (categoryId && !hasInitialLoaded) {
+      const numericCategoryId = getCategoryIdNumber(categoryId);
+      
+      if (numericCategoryId) {
+        // Здесь также можно добавить логику для фильтрации по подкатегории
+        // когда бэкенд будет поддерживать эту функциональность
+        getListings({ 
+          categoryId: numericCategoryId
+        }).then(() => {
+          setHasInitialLoaded(true);
+        });
+      } else {
+        console.warn(`Неизвестная категория: ${categoryId}`);
+        setHasInitialLoaded(true);
+      }
     }
-    
-    if (subcategoryId) {
-      newListings = newListings.filter(listing => listing.subcategoryId === subcategoryId);
-    }
-    
-    setFilteredListings(newListings);
-  }, [categoryId, subcategoryId]);
+  }, [categoryId, subcategoryId, getListings, hasInitialLoaded]);
   
   // Get category config to display proper names
   const config = categoryId ? getCategoryConfig(categoryId) : null;
   const categoryName = config?.name?.[language] || categoryId || '';
   
-  // Determine subcategory name (in a real app, you would get this from your subcategories data)
+  // Determine subcategory name (в реальном приложении нужно получать это из данных подкатегорий)
   const subcategoryName = subcategoryId || '';
 
-  // Helper function to adapt multilingual listings to simple string format
-  const adaptListingForCard = (listing: Listing) => ({
+  // Адаптируем данные из Supabase к интерфейсу ListingCard
+  const adaptedListings = listings.map(listing => ({
     id: listing.id,
-    title: typeof listing.title === 'string' ? listing.title : listing.title?.[language] || listing.title?.ru || '',
-    description: typeof listing.description === 'string' ? listing.description : listing.description?.[language] || listing.description?.ru || '',
-    imageUrl: listing.imageUrl,
-    originalPrice: listing.originalPrice,
-    discountPrice: listing.discountPrice,
-    discount: listing.discount,
-    city: typeof listing.city === 'string' ? listing.city : listing.city?.[language] || listing.city?.ru || '',
-    categoryId: listing.categoryId,
-    subcategoryId: listing.subcategoryId,
-    isFeatured: listing.isFeatured,
-    createdAt: listing.createdAt,
-    views: listing.views
-  });
+    title: listing.title,
+    description: listing.description,
+    imageUrl: listing.images?.[0] || '/placeholder.svg',
+    originalPrice: listing.regular_price || 0,
+    discountPrice: listing.discount_price || listing.regular_price || 0,
+    discount: listing.discount_percent || 0,
+    city: (listing as any).cities?.name_ru || 'Не указан',
+    categoryId: categoryId || '',
+    subcategoryId: subcategoryId || '',
+    isFeatured: listing.is_premium || false,
+    createdAt: listing.created_at,
+    views: listing.views || 0
+  }));
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -69,13 +94,25 @@ export default function SubcategoryPage() {
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-2xl font-semibold mb-4">{subcategoryName}</h1>
           
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mt-8">
-            {filteredListings.map(listing => (
-              <ListingCard key={listing.id} listing={adaptListingForCard(listing)} />
-            ))}
-          </div>
+          {error && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+              Ошибка загрузки: {error}
+            </div>
+          )}
           
-          {filteredListings.length === 0 && (
+          {loading && !hasInitialLoaded ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mt-8">
+              {adaptedListings.map(listing => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+          )}
+          
+          {!loading && adaptedListings.length === 0 && hasInitialLoaded && (
             <div className="text-center py-8">
               <p className="text-gray-500">{t('noListingsFound', 'Объявлений не найдено')}</p>
             </div>
