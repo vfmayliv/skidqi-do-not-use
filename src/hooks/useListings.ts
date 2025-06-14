@@ -20,6 +20,43 @@ type ListingFilters = {
 // Типы для параметров сортировки
 type SortOptions = 'newest' | 'price_asc' | 'price_desc' | 'discount';
 
+// Функция для очистки значений от Zustand proxy объектов
+const cleanFilterValue = (value: any): any => {
+  if (value && typeof value === 'object' && value._type === 'undefined') {
+    return undefined;
+  }
+  if (value && typeof value === 'object' && value.value !== undefined) {
+    return value.value;
+  }
+  return value;
+};
+
+// Функция для очистки объекта фильтров
+const cleanFilters = (filters: any): ListingFilters => {
+  const cleaned: any = {};
+  
+  Object.keys(filters).forEach(key => {
+    const value = cleanFilterValue(filters[key]);
+    if (value !== undefined && value !== null && value !== '') {
+      // Особая обработка для priceRange
+      if (key === 'priceRange' && typeof value === 'object') {
+        const cleanedRange = {
+          min: cleanFilterValue(value.min),
+          max: cleanFilterValue(value.max)
+        };
+        // Добавляем priceRange только если есть хотя бы одно значение
+        if (cleanedRange.min !== undefined || cleanedRange.max !== undefined) {
+          cleaned[key] = cleanedRange;
+        }
+      } else {
+        cleaned[key] = value;
+      }
+    }
+  });
+  
+  return cleaned;
+};
+
 export function useListings() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,12 +67,16 @@ export function useListings() {
   const getListings = async (
     filters: ListingFilters = {}, 
     sort: SortOptions = 'newest',
-    limit: number = 100, // Увеличиваем лимит для отображения всех объявлений
+    limit: number = 100,
     offset: number = 0
   ) => {
     setLoading(true);
     setError(null);
-    console.log('Загружаем объявления с фильтрами:', filters);
+    
+    // Очищаем фильтры от Zustand proxy объектов
+    const cleanedFilters = cleanFilters(filters);
+    console.log('Очищенные фильтры:', cleanedFilters);
+    console.log('Загружаем объявления с фильтрами:', cleanedFilters);
     
     try {
       let query = supabase
@@ -48,22 +89,22 @@ export function useListings() {
         .eq('status', 'active'); // Только активные объявления
 
       // Применение фильтров
-      if (filters.categoryId) {
-        console.log('Фильтр по категории:', filters.categoryId);
-        query = query.eq('category_id', filters.categoryId);
+      if (cleanedFilters.categoryId) {
+        console.log('Фильтр по категории:', cleanedFilters.categoryId);
+        query = query.eq('category_id', cleanedFilters.categoryId);
       }
 
-      if (filters.cityId) {
-        query = query.eq('city_id', filters.cityId);
+      if (cleanedFilters.cityId) {
+        query = query.eq('city_id', cleanedFilters.cityId);
       }
 
-      if (filters.microdistrictId) {
-        query = query.eq('microdistrict_id', filters.microdistrictId);
+      if (cleanedFilters.microdistrictId) {
+        query = query.eq('microdistrict_id', cleanedFilters.microdistrictId);
       }
 
-      // Handle priceRange filter - now handles object format
-      if (filters.priceRange) {
-        const { min, max } = filters.priceRange;
+      // Handle priceRange filter
+      if (cleanedFilters.priceRange) {
+        const { min, max } = cleanedFilters.priceRange;
         if (min !== undefined && min > 0) {
           query = query.gte('discount_price', min);
         }
@@ -71,30 +112,29 @@ export function useListings() {
           query = query.lte('discount_price', max);
         }
       } else {
-        if (filters.priceMin !== undefined) {
-          query = query.gte('discount_price', filters.priceMin);
+        if (cleanedFilters.priceMin !== undefined) {
+          query = query.gte('discount_price', cleanedFilters.priceMin);
         }
 
-        if (filters.priceMax !== undefined) {
-          query = query.lte('discount_price', filters.priceMax);
+        if (cleanedFilters.priceMax !== undefined) {
+          query = query.lte('discount_price', cleanedFilters.priceMax);
         }
       }
 
-      if (filters.searchQuery) {
-        query = query.ilike('title', `%${filters.searchQuery}%`);
+      if (cleanedFilters.searchQuery) {
+        query = query.ilike('title', `%${cleanedFilters.searchQuery}%`);
       }
 
-      if (filters.isPremium !== undefined) {
-        query = query.eq('is_premium', filters.isPremium);
+      if (cleanedFilters.isPremium !== undefined) {
+        query = query.eq('is_premium', cleanedFilters.isPremium);
       }
 
-      if (filters.isFree !== undefined) {
-        query = query.eq('is_free', filters.isFree);
+      if (cleanedFilters.isFree !== undefined) {
+        query = query.eq('is_free', cleanedFilters.isFree);
       }
 
-      if (filters.condition && filters.condition !== 'any') {
-        // Добавляем фильтр по condition если он задан в таблице или добавляем его в описание
-        query = query.ilike('description', `%${filters.condition}%`);
+      if (cleanedFilters.condition && cleanedFilters.condition !== 'any') {
+        query = query.ilike('description', `%${cleanedFilters.condition}%`);
       }
 
       // Применение сортировки
@@ -126,14 +166,14 @@ export function useListings() {
       console.log(`Загруженные объявления (${data?.length || 0} из базы данных):`, data);
       
       // Дополнительная проверка: загружаем общее количество объявлений для категории
-      if (filters.categoryId) {
+      if (cleanedFilters.categoryId) {
         const { count: totalCount } = await supabase
           .from('listings')
           .select('*', { count: 'exact', head: true })
-          .eq('category_id', filters.categoryId)
+          .eq('category_id', cleanedFilters.categoryId)
           .eq('status', 'active');
         
-        console.log(`Общее количество объявлений в категории ${filters.categoryId}:`, totalCount);
+        console.log(`Общее количество объявлений в категории ${cleanedFilters.categoryId}:`, totalCount);
       }
 
       setListings(data || []);

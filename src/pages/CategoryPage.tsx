@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useAppWithTranslations } from '@/stores/useAppStore';
@@ -50,10 +51,9 @@ export default function CategoryPage() {
     console.log(`Инициализация загрузки объявлений для категории: ${categoryId} (ID: ${numericCategoryId})`);
     
     if (numericCategoryId) {
+      // Передаем только минимально необходимые фильтры для инициализации
       const filterParams = {
-        categoryId: numericCategoryId,
-        priceRange: filters.priceRange,
-        condition: filters.condition !== 'any' ? filters.condition : undefined
+        categoryId: numericCategoryId
       };
       
       console.log('Параметры фильтрации при инициализации:', filterParams);
