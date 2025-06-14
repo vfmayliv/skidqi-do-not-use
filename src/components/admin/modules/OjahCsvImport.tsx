@@ -89,7 +89,7 @@ const parsePrice = (priceStr: string): number | null => {
   return isNaN(numericPrice) ? null : Math.round(numericPrice);
 };
 
-// Функция для очистки HTML из описания
+// Улучшенная функция для очистки HTML из описания
 const cleanHtmlDescription = (htmlStr: string): string => {
   if (!htmlStr || typeof htmlStr !== 'string') return '';
   
@@ -97,14 +97,26 @@ const cleanHtmlDescription = (htmlStr: string): string => {
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = htmlStr;
   
+  // Добавляем пробелы перед закрывающими тегами блочных элементов
+  let processedHtml = htmlStr
+    .replace(/<\/(div|p|h[1-6]|li|td|th|section|article|header|footer|main|aside)>/gi, ' </$1>')
+    .replace(/<(br|hr)\s*\/?>/gi, ' ')
+    .replace(/<\/(dt|dd)>/gi, ' </$1>')
+    .replace(/,(?=\S)/g, ', '); // Добавляем пробел после запятых, если его нет
+  
+  tempDiv.innerHTML = processedHtml;
+  
   // Получаем только текстовое содержимое
   let cleanText = tempDiv.textContent || tempDiv.innerText || '';
   
-  // Удаляем лишние пробелы и переносы строк
-  cleanText = cleanText.replace(/\s+/g, ' ').trim();
-  
-  // Заменяем множественные пробелы на одинарные
-  cleanText = cleanText.replace(/\s{2,}/g, ' ');
+  // Нормализуем пробелы и переносы строк
+  cleanText = cleanText
+    .replace(/\s+/g, ' ') // Заменяем множественные пробелы на одинарные
+    .replace(/,\s*,/g, ',') // Убираем двойные запятые
+    .replace(/\s*,\s*/g, ', ') // Нормализуем пробелы вокруг запятых
+    .replace(/\.\s*\./g, '.') // Убираем двойные точки
+    .replace(/\s*\.\s*/g, '. ') // Нормализуем пробелы вокруг точек
+    .trim();
   
   console.log(`HTML cleaning: "${htmlStr.substring(0, 100)}..." -> "${cleanText.substring(0, 100)}..."`);
   
