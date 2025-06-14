@@ -1,157 +1,117 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Search, RotateCcw } from 'lucide-react';
 import { useAppWithTranslations } from '@/stores/useAppStore';
-import { supabase } from '@/integrations/supabase/client';
-
-export interface UniversalFiltersData {
-  condition?: 'new' | 'used' | 'any';
-  priceRange: {
-    min?: number;
-    max?: number;
-  };
-  location: {
-    regionId?: number;
-    cityId?: number;
-  };
-}
 
 interface UniversalFiltersProps {
-  filters: UniversalFiltersData;
-  onFilterChange: (filters: UniversalFiltersData) => void;
+  filters: {
+    priceRange: { min: number | null; max: number | null };
+    condition: string;
+    hasPhotos: boolean;
+    hasDiscount: boolean;
+    hasDelivery: boolean;
+  };
+  onFilterChange: (filters: any) => void;
   onReset: () => void;
   onSearch: () => void;
+  categoryTreeFilter?: React.ReactNode;
 }
 
-interface Region {
-  id: number;
-  name_ru: string;
-  name_kz: string;
-}
-
-interface City {
-  id: number;
-  name_ru: string;
-  name_kz: string;
-  region_id: number;
-}
-
-export function UniversalFilters({ filters, onFilterChange, onReset, onSearch }: UniversalFiltersProps) {
+export function UniversalFilters({ 
+  filters, 
+  onFilterChange, 
+  onReset, 
+  onSearch,
+  categoryTreeFilter 
+}: UniversalFiltersProps) {
   const { language } = useAppWithTranslations();
-  const [regions, setRegions] = useState<Region[]>([]);
-  const [cities, setCities] = useState<City[]>([]);
-  const [filteredCities, setFilteredCities] = useState<City[]>([]);
-  
-  // Load regions from Supabase
-  useEffect(() => {
-    const loadRegions = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('regions')
-          .select('*')
-          .order('name_ru');
-        
-        if (error) throw error;
-        setRegions(data || []);
-      } catch (error) {
-        console.error('Error loading regions:', error);
-      }
-    };
-    
-    loadRegions();
-  }, []);
-  
-  // Load cities from Supabase
-  useEffect(() => {
-    const loadCities = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('cities')
-          .select('*')
-          .order('name_ru');
-        
-        if (error) throw error;
-        setCities(data || []);
-      } catch (error) {
-        console.error('Error loading cities:', error);
-      }
-    };
-    
-    loadCities();
-  }, []);
-  
-  // Filter cities by selected region
-  useEffect(() => {
-    if (filters.location.regionId) {
-      const regionCities = cities.filter(city => city.region_id === filters.location.regionId);
-      setFilteredCities(regionCities);
-    } else {
-      setFilteredCities(cities);
-    }
-  }, [filters.location.regionId, cities]);
-  
-  const handleConditionChange = (value: string) => {
-    onFilterChange({
-      ...filters,
-      condition: value === 'any' ? undefined : value as 'new' | 'used'
-    });
+  const [localFilters, setLocalFilters] = useState(filters);
+
+  const handleFilterUpdate = (key: string, value: any) => {
+    const newFilters = { ...localFilters, [key]: value };
+    setLocalFilters(newFilters);
+    onFilterChange(newFilters);
   };
-  
-  const handlePriceChange = (field: 'min' | 'max', value: string) => {
-    const numValue = value ? parseInt(value) : undefined;
-    onFilterChange({
-      ...filters,
-      priceRange: {
-        ...filters.priceRange,
-        [field]: numValue
-      }
-    });
+
+  const handlePriceChange = (type: 'min' | 'max', value: string) => {
+    const numValue = value === '' ? null : parseInt(value);
+    const newPriceRange = { ...localFilters.priceRange, [type]: numValue };
+    handleFilterUpdate('priceRange', newPriceRange);
   };
-  
-  const handleRegionChange = (value: string) => {
-    const regionId = value ? parseInt(value) : undefined;
-    onFilterChange({
-      ...filters,
-      location: {
-        regionId,
-        cityId: undefined // Reset city when region changes
-      }
-    });
+
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (localFilters.priceRange.min !== null || localFilters.priceRange.max !== null) count++;
+    if (localFilters.condition !== 'any') count++;
+    if (localFilters.hasPhotos) count++;
+    if (localFilters.hasDiscount) count++;
+    if (localFilters.hasDelivery) count++;
+    return count;
   };
-  
-  const handleCityChange = (value: string) => {
-    const cityId = value ? parseInt(value) : undefined;
-    onFilterChange({
-      ...filters,
-      location: {
-        ...filters.location,
-        cityId
-      }
-    });
-  };
-  
-  const handleReset = () => {
-    onReset();
-  };
-  
+
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg">
-          {language === 'ru' ? 'Фильтры' : 'Сүзгілер'}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">
+            {language === 'ru' ? 'Фильтры' : 'Сүзгілер'}
+          </CardTitle>
+          {getActiveFiltersCount() > 0 && (
+            <Badge variant="secondary" className="text-xs">
+              {getActiveFiltersCount()}
+            </Badge>
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Condition Filter */}
-        <div className="space-y-2">
-          <Label>{language === 'ru' ? 'Состояние' : 'Жағдайы'}</Label>
-          <Select 
-            value={filters.condition || 'any'} 
-            onValueChange={handleConditionChange}
+
+      <CardContent className="space-y-6">
+        {/* Category Tree Filter в начале */}
+        {categoryTreeFilter && (
+          <>
+            {categoryTreeFilter}
+            <Separator />
+          </>
+        )}
+
+        {/* Price Range */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">
+            {language === 'ru' ? 'Цена' : 'Баға'}
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              placeholder={language === 'ru' ? 'От' : 'Бастап'}
+              type="number"
+              value={localFilters.priceRange.min || ''}
+              onChange={(e) => handlePriceChange('min', e.target.value)}
+              className="flex-1"
+            />
+            <Input
+              placeholder={language === 'ru' ? 'До' : 'Дейін'}
+              type="number"
+              value={localFilters.priceRange.max || ''}
+              onChange={(e) => handlePriceChange('max', e.target.value)}
+              className="flex-1"
+            />
+          </div>
+        </div>
+
+        {/* Condition */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">
+            {language === 'ru' ? 'Состояние' : 'Жағдайы'}
+          </Label>
+          <Select
+            value={localFilters.condition}
+            onValueChange={(value) => handleFilterUpdate('condition', value)}
           >
             <SelectTrigger>
               <SelectValue />
@@ -164,85 +124,68 @@ export function UniversalFilters({ filters, onFilterChange, onReset, onSearch }:
                 {language === 'ru' ? 'Новое' : 'Жаңа'}
               </SelectItem>
               <SelectItem value="used">
-                {language === 'ru' ? 'Б/у' : 'Қолданылған'}
+                {language === 'ru' ? 'Б/у' : 'Пайдаланылған'}
               </SelectItem>
             </SelectContent>
           </Select>
         </div>
-        
-        {/* Price Range Filter */}
-        <div className="space-y-2">
-          <Label>{language === 'ru' ? 'Цена' : 'Бағасы'}</Label>
-          <div className="flex gap-2">
-            <Input
-              type="number"
-              placeholder={language === 'ru' ? 'От' : 'Бастап'}
-              value={filters.priceRange.min || ''}
-              onChange={(e) => handlePriceChange('min', e.target.value)}
+
+        {/* Additional Filters */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="has-photos" className="text-sm">
+              {language === 'ru' ? 'Только с фото' : 'Тек суреттімен'}
+            </Label>
+            <Switch
+              id="has-photos"
+              checked={localFilters.hasPhotos}
+              onCheckedChange={(checked) => handleFilterUpdate('hasPhotos', checked)}
             />
-            <Input
-              type="number"
-              placeholder={language === 'ru' ? 'До' : 'Дейін'}
-              value={filters.priceRange.max || ''}
-              onChange={(e) => handlePriceChange('max', e.target.value)}
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="has-discount" className="text-sm">
+              {language === 'ru' ? 'Со скидкой' : 'Жеңілдікпен'}
+            </Label>
+            <Switch
+              id="has-discount"
+              checked={localFilters.hasDiscount}
+              onCheckedChange={(checked) => handleFilterUpdate('hasDiscount', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="has-delivery" className="text-sm">
+              {language === 'ru' ? 'С доставкой' : 'Жеткізумен'}
+            </Label>
+            <Switch
+              id="has-delivery"
+              checked={localFilters.hasDelivery}
+              onCheckedChange={(checked) => handleFilterUpdate('hasDelivery', checked)}
             />
           </div>
         </div>
-        
-        {/* Region Filter */}
-        <div className="space-y-2">
-          <Label>{language === 'ru' ? 'Регион' : 'Аймақ'}</Label>
-          <Select 
-            value={filters.location.regionId?.toString() || ''} 
-            onValueChange={handleRegionChange}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={language === 'ru' ? 'Выберите регион' : 'Аймақты таңдаңыз'} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">
-                {language === 'ru' ? 'Все регионы' : 'Барлық аймақтар'}
-              </SelectItem>
-              {regions.map((region) => (
-                <SelectItem key={region.id} value={region.id.toString()}>
-                  {language === 'ru' ? region.name_ru : region.name_kz}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        {/* City Filter */}
-        <div className="space-y-2">
-          <Label>{language === 'ru' ? 'Город' : 'Қала'}</Label>
-          <Select 
-            value={filters.location.cityId?.toString() || ''} 
-            onValueChange={handleCityChange}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={language === 'ru' ? 'Выберите город' : 'Қаланы таңдаңыз'} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">
-                {language === 'ru' ? 'Все города' : 'Барлық қалалар'}
-              </SelectItem>
-              {filteredCities.map((city) => (
-                <SelectItem key={city.id} value={city.id.toString()}>
-                  {language === 'ru' ? city.name_ru : city.name_kz}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
+
+        <Separator />
+
         {/* Action Buttons */}
-        <div className="flex gap-2 pt-4">
-          <Button onClick={onSearch} className="flex-1">
+        <div className="space-y-2">
+          <Button onClick={onSearch} className="w-full" size="lg">
+            <Search className="w-4 h-4 mr-2" />
             {language === 'ru' ? 'Найти' : 'Табу'}
           </Button>
-          <Button onClick={handleReset} variant="outline">
-            {language === 'ru' ? 'Сбросить' : 'Тазалау'}
-          </Button>
+          
+          {getActiveFiltersCount() > 0 && (
+            <Button 
+              onClick={onReset} 
+              variant="outline" 
+              className="w-full"
+              size="sm"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              {language === 'ru' ? 'Сбросить' : 'Тазарту'}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

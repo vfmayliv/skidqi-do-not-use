@@ -26,22 +26,20 @@ export function CategoryFiltersSection({
 
   return (
     <div className="w-80 flex-shrink-0 space-y-6">
-      {/* Category Tree Filter */}
-      {shouldShowCategoryTree && (
-        <CategoryTreeFilter
-          categoryId={categoryId}
-          onCategorySelect={onSubcategorySelect}
-          selectedCategoryId={selectedSubcategory}
-        />
-      )}
-      
-      {/* Universal Filters */}
+      {/* Universal Filters с интегрированным Category Tree Filter */}
       {shouldShowUniversalFilters && (
         <UniversalFilters
           filters={filters}
           onFilterChange={setFilters}
           onReset={resetFilters}
           onSearch={onSearch}
+          categoryTreeFilter={shouldShowCategoryTree ? (
+            <CategoryTreeFilter
+              categoryId={categoryId}
+              onCategorySelect={onSubcategorySelect}
+              selectedCategoryId={selectedSubcategory}
+            />
+          ) : undefined}
         />
       )}
       
