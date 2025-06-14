@@ -9,6 +9,7 @@ import { CitySelectionModal } from "@/components/CitySelectionModal";
 import { SupabaseProvider } from "@/contexts/SupabaseContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import { SearchProvider } from "@/contexts/SearchContext";
+import { AppProvider } from "@/contexts/AppContext";
 import ElectronicsPageWrapper from "@/components/ElectronicsPageWrapper";
 import Ojah from "./pages/Ojah";
 
@@ -51,158 +52,160 @@ function App() {
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <SupabaseProvider>
-          <AdminProvider>
-            <SearchProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Routes>
-                  {/* Admin panel route */}
-                  <Route path="/ojah" element={<Ojah />} />
-                  
-                  <Route path="/" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <CitySelectionModal />
-                      <Index />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/search" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <SearchResults />
-                    </Suspense>
-                  } />
-                  
-                  {/* SEO-friendly listing URLs БЕЗ ID */}
-                  <Route path="/category/:categorySlug/:titleSlug" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <ListingDetail />
-                    </Suspense>
-                  } />
-                  
-                  {/* Fallback for old listing URLs */}
-                  <Route path="/listing/:id" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <ListingDetail />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/category/:slug" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <CategoryPage />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/category/:parentSlug/:slug" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <SubcategoryPage />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/create-listing" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <CreateListing />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/profile" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <UserProfile />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/login" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <Login />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/register" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <Register />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/confirm-email" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <ConfirmEmail />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/dashboard" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <Dashboard />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/about" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <About />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/contact" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <Contact />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/help" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <Help />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/privacy-policy" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <PrivacyPolicy />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/terms-of-service" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <TermsOfService />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/transport" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <TransportPage />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/property" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <PropertyPage />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/electronics" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <ElectronicsPageWrapper />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/fashion" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <FashionPage />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="/pets" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <PetsPage />
-                    </Suspense>
-                  } />
-                  
-                  <Route path="*" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <NotFound />
-                    </Suspense>
-                  } />
-                </Routes>
-              </TooltipProvider>
-            </SearchProvider>
-          </AdminProvider>
+          <AppProvider>
+            <AdminProvider>
+              <SearchProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Routes>
+                    {/* Admin panel route */}
+                    <Route path="/ojah" element={<Ojah />} />
+                    
+                    <Route path="/" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <CitySelectionModal />
+                        <Index />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/search" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <SearchResults />
+                      </Suspense>
+                    } />
+                    
+                    {/* SEO-friendly listing URLs БЕЗ ID */}
+                    <Route path="/category/:categorySlug/:titleSlug" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <ListingDetail />
+                      </Suspense>
+                    } />
+                    
+                    {/* Fallback for old listing URLs */}
+                    <Route path="/listing/:id" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <ListingDetail />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/category/:slug" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <CategoryPage />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/category/:parentSlug/:slug" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <SubcategoryPage />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/create-listing" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <CreateListing />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/profile" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <UserProfile />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/login" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <Login />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/register" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <Register />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/confirm-email" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <ConfirmEmail />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/dashboard" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <Dashboard />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/about" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <About />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/contact" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <Contact />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/help" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <Help />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/privacy-policy" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <PrivacyPolicy />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/terms-of-service" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <TermsOfService />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/transport" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <TransportPage />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/property" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <PropertyPage />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/electronics" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <ElectronicsPageWrapper />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/fashion" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <FashionPage />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/pets" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <PetsPage />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="*" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <NotFound />
+                      </Suspense>
+                    } />
+                  </Routes>
+                </TooltipProvider>
+              </SearchProvider>
+            </AdminProvider>
+          </AppProvider>
         </SupabaseProvider>
       </QueryClientProvider>
     </HelmetProvider>
