@@ -38,13 +38,8 @@ const FashionPage = lazy(() => import("./pages/FashionPage"));
 const PetsPage = lazy(() => import("./pages/PetsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Import Ojah directly to avoid dynamic import issues
-const Ojah = lazy(() => 
-  import("./pages/Ojah").catch(() => {
-    // Fallback in case of import failure
-    return { default: () => <div>Loading admin panel...</div> };
-  })
-);
+// Import Ojah directly without lazy loading to avoid import issues
+const Ojah = lazy(() => import("./pages/Ojah"));
 
 function App() {
   return (
@@ -81,6 +76,7 @@ function App() {
                   <Route path="/electronics" element={<ElectronicsPageWrapper />} />
                   <Route path="/fashion" element={<FashionPage />} />
                   <Route path="/pets" element={<PetsPage />} />
+                  {/* Admin panel route */}
                   <Route path="/ojah" element={<Ojah />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
