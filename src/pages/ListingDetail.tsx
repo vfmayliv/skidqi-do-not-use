@@ -17,7 +17,7 @@ import { mockListings } from '@/data/mockListings';
 import { Listing } from '@/types/listingType';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 import { getCategoryConfig } from '@/categories/categoryRegistry';
-import { parseListingUrl, findListingBySlug, transliterate } from '@/utils/urlUtils';
+import { parseListingUrl, findListingBySlug, transliterate, getCategoryIdBySlug } from '@/utils/urlUtils';
 import { useListings } from '@/hooks/useListings';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -46,28 +46,26 @@ export default function ListingDetail() {
         
         try {
           // Получаем ID категории по slug
-          const { data: categories } = await supabase
-            .from('categories')
-            .select('id')
-            .eq('slug', categorySlug)
-            .single();
+          const categoryId = getCategoryIdBySlug(categorySlug);
+          console.log('📁 Найден ID категории:', { categorySlug, categoryId });
 
-          if (categories) {
-            console.log('📁 Найдена категория:', categories);
-            
+          if (categoryId) {
             // Ищем объявления в этой категории
-            const { data: listings } = await supabase
+            const { data: listings, error } = await supabase
               .from('listings')
               .select(`
                 *,
                 cities(name_ru, name_kz),
                 categories(name_ru, name_kz)
               `)
-              .eq('category_id', categories.id)
+              .eq('category_id', categoryId)
               .eq('status', 'active');
 
-            if (listings) {
+            if (error) {
+              console.error('❌ Ошибка при поиске объявлений:', error);
+            } else if (listings) {
               console.log('📋 Найдено объявлений в категории:', listings.length);
+              console.log('📋 Первые 3 объявления:', listings.slice(0, 3));
               
               // Ищем объявление по совпадению slug
               for (const listingItem of listings) {
@@ -75,7 +73,8 @@ export default function ListingDetail() {
                 console.log('🔎 Сравниваем slugs:', { 
                   generated: listingTitleSlug, 
                   target: titleSlug,
-                  title: listingItem.title 
+                  title: listingItem.title,
+                  match: listingTitleSlug === titleSlug
                 });
                 
                 if (listingTitleSlug === titleSlug) {
@@ -105,6 +104,41 @@ export default function ListingDetail() {
                   
                   console.log('✅ Найдено объявление по slug:', targetListing);
                   break;
+                }
+              }
+              
+              // Если точное совпадение не найдено, ищем частичное
+              if (!targetListing && listings.length > 0) {
+                console.log('🔄 Поиск частичного совпадения...');
+                for (const listingItem of listings) {
+                  const listingTitleSlug = transliterate(listingItem.title || '');
+                  // Проверяем частичное совпадение (первые 20 символов)
+                  if (listingTitleSlug.includes(titleSlug.slice(0, 20)) || titleSlug.includes(listingTitleSlug.slice(0, 20))) {
+                    targetListing = {
+                      id: listingItem.id,
+                      title: listingItem.title,
+                      description: listingItem.description || '',
+                      originalPrice: listingItem.regular_price || 0,
+                      discountPrice: listingItem.discount_price || listingItem.regular_price || 0,
+                      discount: listingItem.discount_percent || 0,
+                      city: listingItem.cities?.name_ru || '',
+                      categoryId: categorySlug,
+                      createdAt: listingItem.created_at,
+                      imageUrl: listingItem.images?.[0] || '/placeholder.svg',
+                      images: listingItem.images || ['/placeholder.svg'],
+                      isFeatured: listingItem.is_premium || false,
+                      views: listingItem.views || 0,
+                      seller: {
+                        name: 'Продавец',
+                        phone: listingItem.phone || '+7 XXX XXX XX XX',
+                        rating: 4.8,
+                        reviews: 25
+                      },
+                      coordinates: undefined
+                    };
+                    console.log('✅ Найдено объявление по частичному совпадению:', targetListing);
+                    break;
+                  }
                 }
               }
             }

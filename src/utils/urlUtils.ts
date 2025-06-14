@@ -25,6 +25,23 @@ export function transliterate(text: string): string {
     .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
 }
 
+// Маппинг slug категорий к их ID
+const categorySlugToId: Record<string, number> = {
+  'electronics': 3,
+  'transport': 1,
+  'property': 2,
+  'fashion': 4,
+  'kids': 5,
+  'pets': 6,
+  'home': 7,
+  'services': 8,
+  'hobby': 9,
+  'beauty': 10,
+  'food': 11,
+  'pharmacy': 12,
+  'free': 13
+};
+
 // Создание SEO-friendly URL для объявления БЕЗ ID
 export function createListingUrl(categorySlug: string, title: string): string {
   const titleSlug = transliterate(title);
@@ -42,6 +59,11 @@ export function findListingBySlug(listings: any[], categorySlug: string, titleSl
     
     return listingTitleSlug === titleSlug;
   });
+}
+
+// Получение ID категории по slug
+export function getCategoryIdBySlug(categorySlug: string): number | null {
+  return categorySlugToId[categorySlug] || null;
 }
 
 // Парсинг URL объявления 
