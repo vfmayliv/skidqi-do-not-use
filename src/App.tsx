@@ -8,6 +8,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { CitySelectionModal } from "@/components/CitySelectionModal";
 import { SupabaseProvider } from "@/contexts/SupabaseContext";
 import { AdminProvider } from "@/contexts/AdminContext";
+import ElectronicsPageWrapper from "@/components/ElectronicsPageWrapper";
 
 // Import i18n configuration
 import "./i18n";
@@ -33,7 +34,6 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const TransportPage = lazy(() => import("./pages/TransportPage"));
 const PropertyPage = lazy(() => import("./pages/PropertyPage"));
-const ElectronicsPage = lazy(() => import("./pages/ElectronicsPage"));
 const FashionPage = lazy(() => import("./pages/FashionPage"));
 const PetsPage = lazy(() => import("./pages/PetsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -75,7 +75,8 @@ function App() {
                   <Route path="/terms-of-service" element={<TermsOfService />} />
                   <Route path="/transport" element={<TransportPage />} />
                   <Route path="/property" element={<PropertyPage />} />
-                  <Route path="/electronics" element={<ElectronicsPage />} />
+                  {/* Fixed: Use wrapper component to handle /electronics routing */}
+                  <Route path="/electronics" element={<ElectronicsPageWrapper />} />
                   <Route path="/fashion" element={<FashionPage />} />
                   <Route path="/pets" element={<PetsPage />} />
                   <Route path="/ojah" element={<Ojah />} />

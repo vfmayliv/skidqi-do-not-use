@@ -75,8 +75,8 @@ export function useListings() {
     
     // Очищаем фильтры от Zustand proxy объектов
     const cleanedFilters = cleanFilters(filters);
-    console.log('Очищенные фильтры:', cleanedFilters);
-    console.log('Загружаем объявления с фильтрами:', cleanedFilters);
+    console.log('🧹 Очищенные фильтры:', cleanedFilters);
+    console.log('📊 Загружаем объявления с фильтрами:', cleanedFilters);
     
     try {
       let query = supabase
@@ -90,15 +90,17 @@ export function useListings() {
 
       // Применение фильтров
       if (cleanedFilters.categoryId) {
-        console.log('Фильтр по категории:', cleanedFilters.categoryId);
+        console.log('🎯 Фильтр по категории:', cleanedFilters.categoryId);
         query = query.eq('category_id', cleanedFilters.categoryId);
       }
 
       if (cleanedFilters.cityId) {
+        console.log('🏙️ Фильтр по городу:', cleanedFilters.cityId);
         query = query.eq('city_id', cleanedFilters.cityId);
       }
 
       if (cleanedFilters.microdistrictId) {
+        console.log('🏘️ Фильтр по микрорайону:', cleanedFilters.microdistrictId);
         query = query.eq('microdistrict_id', cleanedFilters.microdistrictId);
       }
 
@@ -106,34 +108,42 @@ export function useListings() {
       if (cleanedFilters.priceRange) {
         const { min, max } = cleanedFilters.priceRange;
         if (min !== undefined && min > 0) {
+          console.log('💰 Фильтр мин. цена:', min);
           query = query.gte('discount_price', min);
         }
         if (max !== undefined && max > 0) {
+          console.log('💰 Фильтр макс. цена:', max);
           query = query.lte('discount_price', max);
         }
       } else {
         if (cleanedFilters.priceMin !== undefined) {
+          console.log('💰 Фильтр мин. цена (старый):', cleanedFilters.priceMin);
           query = query.gte('discount_price', cleanedFilters.priceMin);
         }
 
         if (cleanedFilters.priceMax !== undefined) {
+          console.log('💰 Фильтр макс. цена (старый):', cleanedFilters.priceMax);
           query = query.lte('discount_price', cleanedFilters.priceMax);
         }
       }
 
       if (cleanedFilters.searchQuery) {
+        console.log('🔍 Поиск по тексту:', cleanedFilters.searchQuery);
         query = query.ilike('title', `%${cleanedFilters.searchQuery}%`);
       }
 
       if (cleanedFilters.isPremium !== undefined) {
+        console.log('⭐ Фильтр премиум:', cleanedFilters.isPremium);
         query = query.eq('is_premium', cleanedFilters.isPremium);
       }
 
       if (cleanedFilters.isFree !== undefined) {
+        console.log('🆓 Фильтр бесплатно:', cleanedFilters.isFree);
         query = query.eq('is_free', cleanedFilters.isFree);
       }
 
       if (cleanedFilters.condition && cleanedFilters.condition !== 'any') {
+        console.log('📦 Фильтр состояние:', cleanedFilters.condition);
         query = query.ilike('description', `%${cleanedFilters.condition}%`);
       }
 
@@ -156,14 +166,15 @@ export function useListings() {
       // Применение пагинации
       query = query.range(offset, offset + limit - 1);
 
+      console.log('🚀 Выполняем запрос к Supabase...');
       const { data, error, count } = await query;
 
       if (error) {
-        console.error('Ошибка Supabase:', error);
+        console.error('❌ Ошибка Supabase:', error);
         throw error;
       }
 
-      console.log(`Загруженные объявления (${data?.length || 0} из базы данных):`, data);
+      console.log(`✅ Загруженные объявления (${data?.length || 0} из базы данных):`, data);
       
       // Дополнительная проверка: загружаем общее количество объявлений для категории
       if (cleanedFilters.categoryId) {
@@ -173,7 +184,23 @@ export function useListings() {
           .eq('category_id', cleanedFilters.categoryId)
           .eq('status', 'active');
         
-        console.log(`Общее количество объявлений в категории ${cleanedFilters.categoryId}:`, totalCount);
+        console.log(`📊 Общее количество объявлений в категории ${cleanedFilters.categoryId}:`, totalCount);
+      }
+
+      // Дополнительная отладочная информация
+      if (data && data.length > 0) {
+        console.log('📋 Первое объявление:', data[0]);
+        console.log('🏷️ Категории объявлений:', data.map(d => d.category_id));
+      } else {
+        console.warn('⚠️ Объявления не найдены. Проверяем параметры запроса...');
+        
+        // Дополнительный запрос без фильтров для диагностики
+        const { data: allListings } = await supabase
+          .from('listings')
+          .select('id, title, category_id, status')
+          .limit(5);
+        
+        console.log('🔍 Всего объявлений в базе (первые 5):', allListings);
       }
 
       setListings(data || []);
@@ -181,7 +208,7 @@ export function useListings() {
     } catch (err: any) {
       const errorMessage = err.message || 'Неизвестная ошибка';
       setError(errorMessage);
-      console.error('Ошибка при загрузке объявлений:', err);
+      console.error('💥 Ошибка при загрузке объявлений:', err);
       return [];
     } finally {
       setLoading(false);

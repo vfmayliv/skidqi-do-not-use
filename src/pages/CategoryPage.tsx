@@ -24,10 +24,10 @@ export default function CategoryPage() {
   // Используем slug напрямую как categoryId
   const categoryId = slug;
 
-  // Маппинг ID категорий от строковых к числовым
+  // Исправленный маппинг ID категорий от строковых к числовым (согласно реальным данным в Supabase)
   const getCategoryIdNumber = (categoryStr: string): number | undefined => {
     const categoryMap: Record<string, number> = {
-      'electronics': 1,
+      'electronics': 3, // Исправлено с 1 на 3 для соответствия данным в Supabase
       'fashion': 2,
       'home': 3,
       'transport': 4,
@@ -48,7 +48,7 @@ export default function CategoryPage() {
     if (!categoryId || isInitialized) return;
 
     const numericCategoryId = getCategoryIdNumber(categoryId);
-    console.log(`Инициализация загрузки объявлений для категории: ${categoryId} (ID: ${numericCategoryId})`);
+    console.log(`🔍 Инициализация загрузки объявлений для категории: ${categoryId} (ID: ${numericCategoryId})`);
     
     if (numericCategoryId) {
       // Передаем только минимально необходимые фильтры для инициализации
@@ -56,16 +56,17 @@ export default function CategoryPage() {
         categoryId: numericCategoryId
       };
       
-      console.log('Параметры фильтрации при инициализации:', filterParams);
+      console.log('📋 Параметры фильтрации при инициализации:', filterParams);
+      console.log('🎯 Загружаем объявления для категории Electronics (ID: 3)');
       
       getListings(filterParams, 'newest', 100).finally(() => {
         setIsInitialized(true);
       });
     } else {
-      console.warn(`Неизвестная категория: ${categoryId}`);
+      console.warn(`❌ Неизвестная категория: ${categoryId}`);
       setIsInitialized(true);
     }
-  }, [categoryId]); // Только categoryId в зависимостях
+  }, [categoryId, getListings]); // Добавил getListings в зависимости
 
   // Отдельный useEffect для обновления при изменении фильтров
   useEffect(() => {
@@ -79,10 +80,10 @@ export default function CategoryPage() {
         condition: filters.condition !== 'any' ? filters.condition : undefined
       };
       
-      console.log('Параметры фильтрации при обновлении:', filterParams);
+      console.log('🔄 Параметры фильтрации при обновлении:', filterParams);
       getListings(filterParams, 'newest', 100);
     }
-  }, [filters, isInitialized]); // Только filters и isInitialized
+  }, [filters, isInitialized, categoryId, getListings]); // Добавил все зависимости
 
   const config = categoryId ? getCategoryConfig(categoryId) : null;
 
@@ -147,7 +148,7 @@ export default function CategoryPage() {
       : (language === 'ru' ? 'Товары' : 'Тауарлар'));
 
   const handleSearch = () => {
-    console.log('Search triggered with filters:', filters, 'subcategory:', selectedSubcategory);
+    console.log('🔍 Search triggered with filters:', filters, 'subcategory:', selectedSubcategory);
     if (categoryId) {
       const numericCategoryId = getCategoryIdNumber(categoryId);
       if (numericCategoryId) {
@@ -181,7 +182,9 @@ export default function CategoryPage() {
     views: listing.views || 0
   }));
 
-  console.log(`Отображаем ${adaptedListings.length} адаптированных объявлений для категории ${categoryId}`);
+  console.log(`📊 Отображаем ${adaptedListings.length} адаптированных объявлений для категории ${categoryId}`);
+  console.log('📋 Данные объявлений из Supabase:', listings);
+  console.log('✨ Адаптированные объявления для отображения:', adaptedListings);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -249,9 +252,12 @@ export default function CategoryPage() {
                 </p>
                 {/* Отладочная информация */}
                 {process.env.NODE_ENV === 'development' && (
-                  <p className="text-xs text-gray-400 mt-2">
-                    Загружено из базы: {listings.length}, Категория ID: {getCategoryIdNumber(categoryId || '')}
-                  </p>
+                  <div className="text-xs text-gray-400 mt-2 space-y-1">
+                    <p>📊 Загружено из базы: {listings.length}</p>
+                    <p>🎯 Категория ID: {getCategoryIdNumber(categoryId || '')}</p>
+                    <p>🔍 Активные фильтры: {JSON.stringify(filters)}</p>
+                    <p>⚡ Инициализация завершена: {isInitialized ? 'Да' : 'Нет'}</p>
+                  </div>
                 )}
               </div>
               
@@ -277,6 +283,12 @@ export default function CategoryPage() {
                       'Сүзгілерді өзгертіп көріңіз немесе басқа санатты таңдаңыз'
                     }
                   </p>
+                  <div className="mt-4 text-xs text-gray-400">
+                    <p>🔧 Debug info:</p>
+                    <p>Category: {categoryId} (ID: {getCategoryIdNumber(categoryId || '')})</p>
+                    <p>Listings in DB: {listings.length}</p>
+                    <p>Is initialized: {isInitialized ? 'Yes' : 'No'}</p>
+                  </div>
                 </div>
               )}
             </div>
