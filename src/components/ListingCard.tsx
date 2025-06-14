@@ -47,46 +47,50 @@ export function ListingCard({ listing }: ListingCardProps) {
   const city = listing.city || '';
 
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
-      <Link to={`/listing/${listing.id}`}>
-        <div className="relative aspect-[4/3] overflow-hidden">
+    <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
+      <Link to={`/listing/${listing.id}`} className="flex flex-col h-full">
+        <div className="relative w-full h-48 overflow-hidden bg-gray-200">
           <img
             src={listing.imageUrl || '/placeholder.svg'}
             alt={title}
             className="w-full h-full object-cover transition-transform hover:scale-105"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder.svg';
+            }}
           />
           
           {listing.discount > 0 && (
-            <Badge className="absolute top-2 right-2 bg-discount">
+            <Badge className="absolute top-2 right-2 bg-red-500 text-white">
               -{listing.discount}%
             </Badge>
           )}
           
           {listing.isFeatured && (
             <Badge className="absolute top-2 left-2 bg-primary">
-              {t('featured')}
+              {language === 'ru' ? 'Премиум' : 'Премиум'}
             </Badge>
           )}
         </div>
         
-        <CardContent className="p-4">
-          <h3 className="font-medium line-clamp-2 h-12">{title}</h3>
+        <CardContent className="p-4 flex-1 flex flex-col">
+          <h3 className="font-medium line-clamp-2 h-12 mb-2">{title}</h3>
           
-          <div className="mt-2 space-y-1">
+          <div className="mt-auto space-y-2">
             <div className="flex flex-col">
               {listing.discount > 0 && listing.originalPrice > listing.discountPrice && (
                 <span className="text-sm text-muted-foreground line-through">
                   {formatPrice(listing.originalPrice)}
                 </span>
               )}
-              <span className="text-lg font-bold text-discount">
+              <span className="text-lg font-bold text-red-600">
                 {formatPrice(listing.discountPrice)}
               </span>
             </div>
             
             <div className="flex items-center text-sm text-muted-foreground">
-              <MapPin className="h-3 w-3 mr-1" />
-              <span>{city}</span>
+              <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="truncate">{city}</span>
             </div>
           </div>
         </CardContent>
