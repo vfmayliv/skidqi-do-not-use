@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -49,6 +48,11 @@ export function ListingCard({ listing }: ListingCardProps) {
   // Calculate if there's actually a discount
   const hasDiscount = listing.originalPrice > listing.discountPrice && listing.discountPrice > 0;
 
+  // Calculate discount percentage
+  const discountPercentage = hasDiscount 
+    ? Math.round(((listing.originalPrice - listing.discountPrice) / listing.originalPrice) * 100)
+    : 0;
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
       <Link to={`/listing/${listing.id}`} className="flex flex-col h-full">
@@ -63,9 +67,9 @@ export function ListingCard({ listing }: ListingCardProps) {
             }}
           />
           
-          {listing.discount > 0 && (
+          {hasDiscount && (
             <Badge className="absolute top-2 right-2 bg-red-500 text-white">
-              -{listing.discount}%
+              -{discountPercentage}%
             </Badge>
           )}
           
