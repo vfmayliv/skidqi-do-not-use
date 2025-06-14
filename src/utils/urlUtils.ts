@@ -31,9 +31,8 @@ export function createListingUrl(categorySlug: string, title: string): string {
   return `/category/${categorySlug}/${titleSlug}`;
 }
 
-// Функция для поиска объявления по slug
+// Функция для поиска объявления по slug в мок данных
 export function findListingBySlug(listings: any[], categorySlug: string, titleSlug: string): any | null {
-  // Ищем объявление по категории и совпадению slug
   return listings.find(listing => {
     if (listing.categoryId !== categorySlug) return false;
     

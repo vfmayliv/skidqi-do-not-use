@@ -17,8 +17,9 @@ import { mockListings } from '@/data/mockListings';
 import { Listing } from '@/types/listingType';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 import { getCategoryConfig } from '@/categories/categoryRegistry';
-import { parseListingUrl, findListingBySlug } from '@/utils/urlUtils';
+import { parseListingUrl, findListingBySlug, transliterate } from '@/utils/urlUtils';
 import { useListings } from '@/hooks/useListings';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function ListingDetail() {
   const { id: listingId, categorySlug, titleSlug } = useParams<{ 
@@ -43,11 +44,79 @@ export default function ListingDetail() {
       if (categorySlug && titleSlug) {
         console.log('🔍 Поиск по SEO URL:', { categorySlug, titleSlug });
         
-        // Ищем в мок данных по slug
-        targetListing = findListingBySlug(mockListings, categorySlug, titleSlug);
-        
-        if (targetListing) {
-          console.log('✅ Найдено объявление по slug:', targetListing);
+        try {
+          // Получаем ID категории по slug
+          const { data: categories } = await supabase
+            .from('categories')
+            .select('id')
+            .eq('slug', categorySlug)
+            .single();
+
+          if (categories) {
+            console.log('📁 Найдена категория:', categories);
+            
+            // Ищем объявления в этой категории
+            const { data: listings } = await supabase
+              .from('listings')
+              .select(`
+                *,
+                cities(name_ru, name_kz),
+                categories(name_ru, name_kz)
+              `)
+              .eq('category_id', categories.id)
+              .eq('status', 'active');
+
+            if (listings) {
+              console.log('📋 Найдено объявлений в категории:', listings.length);
+              
+              // Ищем объявление по совпадению slug
+              for (const listingItem of listings) {
+                const listingTitleSlug = transliterate(listingItem.title || '');
+                console.log('🔎 Сравниваем slugs:', { 
+                  generated: listingTitleSlug, 
+                  target: titleSlug,
+                  title: listingItem.title 
+                });
+                
+                if (listingTitleSlug === titleSlug) {
+                  // Преобразуем данные из Supabase в формат Listing
+                  targetListing = {
+                    id: listingItem.id,
+                    title: listingItem.title,
+                    description: listingItem.description || '',
+                    originalPrice: listingItem.regular_price || 0,
+                    discountPrice: listingItem.discount_price || listingItem.regular_price || 0,
+                    discount: listingItem.discount_percent || 0,
+                    city: listingItem.cities?.name_ru || '',
+                    categoryId: categorySlug,
+                    createdAt: listingItem.created_at,
+                    imageUrl: listingItem.images?.[0] || '/placeholder.svg',
+                    images: listingItem.images || ['/placeholder.svg'],
+                    isFeatured: listingItem.is_premium || false,
+                    views: listingItem.views || 0,
+                    seller: {
+                      name: 'Продавец',
+                      phone: listingItem.phone || '+7 XXX XXX XX XX',
+                      rating: 4.8,
+                      reviews: 25
+                    },
+                    coordinates: undefined
+                  };
+                  
+                  console.log('✅ Найдено объявление по slug:', targetListing);
+                  break;
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('❌ Ошибка при поиске объявления:', error);
+        }
+
+        // Fallback к мок данным, если не найдено в Supabase
+        if (!targetListing) {
+          console.log('🔄 Fallback к мок данным');
+          targetListing = findListingBySlug(mockListings, categorySlug, titleSlug);
         }
       } 
       // Если есть старый формат URL с ID
