@@ -75,7 +75,7 @@ export function ListingCard({ listing }: ListingCardProps) {
           />
           
           {hasDiscount && (
-            <Badge className="absolute top-2 right-2 bg-red-500 text-white">
+            <Badge className="absolute top-2 right-2 bg-red-500 text-white font-bold">
               -{discountPercentage}%
             </Badge>
           )}
@@ -93,11 +93,11 @@ export function ListingCard({ listing }: ListingCardProps) {
           <div className="mt-auto space-y-2">
             <div className="flex flex-col">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-lg font-bold text-red-600">
+                <span className="text-lg font-bold text-red-500">
                   {formatPrice(listing.discountPrice)}
                 </span>
                 {hasDiscount && (
-                  <span className="text-sm text-black line-through">
+                  <span className="text-sm text-gray-600 line-through">
                     {formatPrice(listing.originalPrice)}
                   </span>
                 )}
