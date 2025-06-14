@@ -42,7 +42,7 @@ const categorySlugToId: Record<string, number> = {
   'free': 13
 };
 
-// Создание SEO-friendly URL для объявления БЕЗ ID
+// Создание SEO-friendly URL для объявления БЕЗ ID - чистый путь без префиксов
 export function createListingUrl(categorySlug: string, title: string): string {
   const titleSlug = transliterate(title);
   return `/category/${categorySlug}/${titleSlug}`;
@@ -66,7 +66,7 @@ export function getCategoryIdBySlug(categorySlug: string): number | null {
   return categorySlugToId[categorySlug] || null;
 }
 
-// Парсинг URL объявления 
+// Парсинг URL объявления - чистый путь без префиксов
 export function parseListingUrl(url: string): { categorySlug: string; titleSlug: string } | null {
   const match = url.match(/\/category\/([^\/]+)\/(.+)$/);
   if (!match) return null;

@@ -10,7 +10,8 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
-  base: '/skidqi-kz/',
+  // Remove base path for production deployment to skidqi.kz
+  base: '/',
   server: {
     host: "::",
     port: 8080

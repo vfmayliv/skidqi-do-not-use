@@ -9,6 +9,7 @@ export default function ElectronicsPageWrapper() {
 
   useEffect(() => {
     // Redirect /electronics to /category/electronics to ensure proper slug handling
+    // Clean redirect without any prefixes
     if (location.pathname === '/electronics') {
       navigate('/category/electronics', { replace: true });
       return;
