@@ -61,6 +61,32 @@ const systemFields = [
   { key: 'source_link', label: 'Ссылка на источник' },
 ];
 
+// Функция для правильного парсинга цены
+const parsePrice = (priceStr: string): number | null => {
+  if (!priceStr || typeof priceStr !== 'string') return null;
+  
+  // Удаляем символы валюты (₸, $, €, etc.) и лишние пробелы в начале/конце
+  let cleanPrice = priceStr.trim();
+  
+  // Удаляем символы валют
+  cleanPrice = cleanPrice.replace(/[₸$€£¥₽]/g, '');
+  
+  // Удаляем лишние пробелы в начале и конце
+  cleanPrice = cleanPrice.trim();
+  
+  // Заменяем запятые на точки для корректного парсинга десятичных чисел
+  cleanPrice = cleanPrice.replace(',', '.');
+  
+  // Удаляем все пробелы (разделители тысяч)
+  cleanPrice = cleanPrice.replace(/\s/g, '');
+  
+  // Конвертируем в число
+  const numericPrice = parseFloat(cleanPrice);
+  
+  console.log(`Price parsing: "${priceStr}" -> "${cleanPrice}" -> ${numericPrice}`);
+  
+  return isNaN(numericPrice) ? null : Math.round(numericPrice);
+};
 
 export const OjahCsvImport = () => {
   const [csvData, setCsvData] = useState<CsvData | null>(null);
@@ -206,7 +232,6 @@ export const OjahCsvImport = () => {
         return;
       }
 
-
       const totalRows = csvData.rows.length;
       let localImportedCount = 0;
       let localErrorCount = 0;
@@ -239,8 +264,8 @@ export const OjahCsvImport = () => {
         const listingData: any = {
           title: mappedData.title || '',
           description: mappedData.description || '',
-          regular_price: mappedData.regular_price ? parseInt(mappedData.regular_price, 10) : null,
-          discount_price: mappedData.discount_price ? parseInt(mappedData.discount_price, 10) : null,
+          regular_price: mappedData.regular_price ? parsePrice(mappedData.regular_price) : null,
+          discount_price: mappedData.discount_price ? parsePrice(mappedData.discount_price) : null,
           images: mappedData.images ? mappedData.images.split(',').map(img => img.trim()).filter(img => img) : [],
           source_link: mappedData.source_link || '', 
           
