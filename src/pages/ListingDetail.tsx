@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -20,15 +21,35 @@ import { parseListingUrl, findListingBySlug, transliterate, getCategoryIdBySlug 
 import { useListings } from '@/hooks/useListings';
 import { supabase } from '@/integrations/supabase/client';
 
+// Extended seller interface
+interface ExtendedSeller {
+  name: string;
+  phone: string;
+  rating: number;
+  reviews?: number;
+  memberSince: string;
+  response: string;
+  lastOnline: string;
+}
+
+// Extended listing interface
+interface ExtendedListing extends Omit<Listing, 'seller'> {
+  seller: ExtendedSeller;
+}
+
 export default function ListingDetail() {
-  const { id: listingId, categorySlug, titleSlug } = useParams<{ 
+  const params = useParams<{ 
     id?: string; 
     categorySlug?: string; 
     titleSlug?: string; 
   }>();
+  
+  // Handle case where params might be undefined
+  const { id: listingId, categorySlug, titleSlug } = params || {};
+  
   const { language } = useAppWithTranslations();
   const location = useLocation();
-  const [listing, setListing] = useState<Listing | null>(null);
+  const [listing, setListing] = useState<ExtendedListing | null>(null);
   const [breadcrumbItems, setBreadcrumbItems] = useState<{label: string, link?: string}[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isPhoneVisible, setIsPhoneVisible] = useState(false);
@@ -96,7 +117,10 @@ export default function ListingDetail() {
                       name: 'Продавец',
                       phone: listingItem.phone || '+7 XXX XXX XX XX',
                       rating: 4.8,
-                      reviews: 25
+                      reviews: 25,
+                      memberSince: '2022',
+                      response: language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді',
+                      lastOnline: language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'
                     },
                     coordinates: undefined
                   };
@@ -131,7 +155,10 @@ export default function ListingDetail() {
                         name: 'Продавец',
                         phone: listingItem.phone || '+7 XXX XXX XX XX',
                         rating: 4.8,
-                        reviews: 25
+                        reviews: 25,
+                        memberSince: '2022',
+                        response: language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді',
+                        lastOnline: language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'
                       },
                       coordinates: undefined
                     };
@@ -149,7 +176,21 @@ export default function ListingDetail() {
         // Fallback к мок данным, если не найдено в Supabase
         if (!targetListing) {
           console.log('🔄 Fallback к мок данным');
-          targetListing = findListingBySlug(mockListings, categorySlug, titleSlug);
+          const mockListing = findListingBySlug(mockListings, categorySlug, titleSlug);
+          if (mockListing) {
+            targetListing = {
+              ...mockListing,
+              seller: {
+                name: mockListing.seller.name,
+                phone: mockListing.seller.phone,
+                rating: mockListing.seller.rating,
+                reviews: mockListing.seller.reviews,
+                memberSince: '2022',
+                response: language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді',
+                lastOnline: language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'
+              }
+            };
+          }
         }
       } 
       // Если есть старый формат URL с ID
@@ -159,10 +200,35 @@ export default function ListingDetail() {
         // Пробуем найти в Supabase
         const supabaseListing = await getListingById(listingId);
         if (supabaseListing) {
-          targetListing = supabaseListing;
+          targetListing = {
+            ...supabaseListing,
+            seller: {
+              name: supabaseListing.seller.name,
+              phone: supabaseListing.seller.phone,
+              rating: supabaseListing.seller.rating,
+              reviews: supabaseListing.seller.reviews,
+              memberSince: '2022',
+              response: language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді',
+              lastOnline: language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'
+            }
+          };
         } else {
           // Fallback к мок данным
-          targetListing = mockListings.find(item => item.id === listingId);
+          const mockListing = mockListings.find(item => item.id === listingId);
+          if (mockListing) {
+            targetListing = {
+              ...mockListing,
+              seller: {
+                name: mockListing.seller.name,
+                phone: mockListing.seller.phone,
+                rating: mockListing.seller.rating,
+                reviews: mockListing.seller.reviews,
+                memberSince: '2022',
+                response: language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береди',
+                lastOnline: language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'
+              }
+            };
+          }
         }
       }
 
@@ -334,9 +400,9 @@ export default function ListingDetail() {
               phone={listing.seller.phone}
               rating={listing.seller.rating}
               deals={listing.seller.reviews || 156}
-              memberSince={listing.seller.memberSince || '2022'}
-              response={listing.seller.response || (language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді')}
-              lastOnline={listing.seller.lastOnline || (language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды')}
+              memberSince={listing.seller.memberSince}
+              response={listing.seller.response}
+              lastOnline={listing.seller.lastOnline}
               isPhoneVisible={isPhoneVisible}
               language={language}
               onShowPhone={handleShowPhone}
@@ -401,9 +467,9 @@ export default function ListingDetail() {
                 phone={listing.seller.phone}
                 rating={listing.seller.rating}
                 deals={listing.seller.reviews || 156}
-                memberSince={listing.seller.memberSince || '2022'}
-                response={listing.seller.response || (language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді')}
-                lastOnline={listing.seller.lastOnline || (language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды')}
+                memberSince={listing.seller.memberSince}
+                response={listing.seller.response}
+                lastOnline={listing.seller.lastOnline}
                 isPhoneVisible={isPhoneVisible}
                 language={language}
                 onShowPhone={handleShowPhone}
