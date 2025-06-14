@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -86,6 +87,28 @@ const parsePrice = (priceStr: string): number | null => {
   console.log(`Price parsing: "${priceStr}" -> "${cleanPrice}" -> ${numericPrice}`);
   
   return isNaN(numericPrice) ? null : Math.round(numericPrice);
+};
+
+// Функция для очистки HTML из описания
+const cleanHtmlDescription = (htmlStr: string): string => {
+  if (!htmlStr || typeof htmlStr !== 'string') return '';
+  
+  // Создаем временный элемент для парсинга HTML
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = htmlStr;
+  
+  // Получаем только текстовое содержимое
+  let cleanText = tempDiv.textContent || tempDiv.innerText || '';
+  
+  // Удаляем лишние пробелы и переносы строк
+  cleanText = cleanText.replace(/\s+/g, ' ').trim();
+  
+  // Заменяем множественные пробелы на одинарные
+  cleanText = cleanText.replace(/\s{2,}/g, ' ');
+  
+  console.log(`HTML cleaning: "${htmlStr.substring(0, 100)}..." -> "${cleanText.substring(0, 100)}..."`);
+  
+  return cleanText;
 };
 
 export const OjahCsvImport = () => {
@@ -249,7 +272,14 @@ export const OjahCsvImport = () => {
         fieldMappings.forEach(mapping => {
           const csvHeaderIndex = csvData.headers.indexOf(mapping.csvField);
           if (csvHeaderIndex !== -1 && row[csvHeaderIndex] !== undefined && row[csvHeaderIndex] !== null && row[csvHeaderIndex].trim() !== '') {
-            mappedData[mapping.systemField] = row[csvHeaderIndex].trim();
+            let value = row[csvHeaderIndex].trim();
+            
+            // Специальная обработка для описания - очищаем HTML
+            if (mapping.systemField === 'description') {
+              value = cleanHtmlDescription(value);
+            }
+            
+            mappedData[mapping.systemField] = value;
           }
         });
 
@@ -378,7 +408,7 @@ export const OjahCsvImport = () => {
       <Card>
         <CardHeader>
           <CardTitle>Импорт объявлений из CSV</CardTitle>
-          <CardDescription>Загрузите CSV файл, сопоставьте поля и настройте параметры импорта.</CardDescription>
+          <CardDescription>Загрузите CSV файл, сопоставьте поля и настройте параметры импорта. HTML теги в описании будут автоматически очищены.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
           {currentStep === 1 && (
@@ -416,6 +446,7 @@ export const OjahCsvImport = () => {
                 <AlertDescription>
                   Сопоставьте заголовки из вашего CSV файла с системными полями. 
                   Обязательные поля для импорта: Название, Описание. 
+                  HTML теги в описании будут автоматически удалены и преобразованы в читаемый текст.
                   Категория и Город выбираются на следующем шаге для всех объявлений.
                   Срок публикации устанавливается автоматически.
                 </AlertDescription>
