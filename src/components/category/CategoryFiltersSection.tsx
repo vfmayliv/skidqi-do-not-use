@@ -26,11 +26,14 @@ export function CategoryFiltersSection({
 
   // Ensure filters match the expected interface
   const adaptedFilters = {
-    priceRange: filters.priceRange || { min: null, max: null },
+    priceRange: { 
+      min: filters.priceRange?.min || null, 
+      max: filters.priceRange?.max || null 
+    },
     condition: filters.condition || 'any',
-    hasPhotos: filters.hasPhotos || false,
-    hasDiscount: filters.hasDiscount || false,
-    hasDelivery: filters.hasDelivery || false
+    hasPhotos: filters.hasPhotos,
+    hasDiscount: filters.hasDiscount,
+    hasDelivery: filters.hasDelivery
   };
 
   return (
