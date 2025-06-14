@@ -38,8 +38,8 @@ const FashionPage = lazy(() => import("./pages/FashionPage"));
 const PetsPage = lazy(() => import("./pages/PetsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Import Ojah directly without lazy loading to avoid import issues
-const Ojah = lazy(() => import("./pages/Ojah"));
+// Import Ojah directly without lazy loading
+import Ojah from "./pages/Ojah";
 
 function App() {
   return (
@@ -49,38 +49,151 @@ function App() {
           <AdminProvider>
             <TooltipProvider>
               <Toaster />
-              <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-                <CitySelectionModal />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/search" element={<SearchResults />} />
-                  {/* SEO-friendly listing URLs БЕЗ ID */}
-                  <Route path="/category/:categorySlug/:titleSlug" element={<ListingDetail />} />
-                  {/* Fallback for old listing URLs */}
-                  <Route path="/listing/:id" element={<ListingDetail />} />
-                  <Route path="/category/:slug" element={<CategoryPage />} />
-                  <Route path="/category/:parentSlug/:slug" element={<SubcategoryPage />} />
-                  <Route path="/create-listing" element={<CreateListing />} />
-                  <Route path="/profile" element={<UserProfile />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/confirm-email" element={<ConfirmEmail />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/help" element={<Help />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-of-service" element={<TermsOfService />} />
-                  <Route path="/transport" element={<TransportPage />} />
-                  <Route path="/property" element={<PropertyPage />} />
-                  <Route path="/electronics" element={<ElectronicsPageWrapper />} />
-                  <Route path="/fashion" element={<FashionPage />} />
-                  <Route path="/pets" element={<PetsPage />} />
-                  {/* Admin panel route */}
-                  <Route path="/ojah" element={<Ojah />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
+              <Routes>
+                {/* Admin panel route - no Suspense needed */}
+                <Route path="/ojah" element={<Ojah />} />
+                
+                <Route path="/" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <CitySelectionModal />
+                    <Index />
+                  </Suspense>
+                } />
+                
+                <Route path="/search" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <SearchResults />
+                  </Suspense>
+                } />
+                
+                {/* SEO-friendly listing URLs БЕЗ ID */}
+                <Route path="/category/:categorySlug/:titleSlug" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <ListingDetail />
+                  </Suspense>
+                } />
+                
+                {/* Fallback for old listing URLs */}
+                <Route path="/listing/:id" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <ListingDetail />
+                  </Suspense>
+                } />
+                
+                <Route path="/category/:slug" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <CategoryPage />
+                  </Suspense>
+                } />
+                
+                <Route path="/category/:parentSlug/:slug" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <SubcategoryPage />
+                  </Suspense>
+                } />
+                
+                <Route path="/create-listing" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <CreateListing />
+                  </Suspense>
+                } />
+                
+                <Route path="/profile" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <UserProfile />
+                  </Suspense>
+                } />
+                
+                <Route path="/login" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <Login />
+                  </Suspense>
+                } />
+                
+                <Route path="/register" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <Register />
+                  </Suspense>
+                } />
+                
+                <Route path="/confirm-email" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <ConfirmEmail />
+                  </Suspense>
+                } />
+                
+                <Route path="/dashboard" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <Dashboard />
+                  </Suspense>
+                } />
+                
+                <Route path="/about" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <About />
+                  </Suspense>
+                } />
+                
+                <Route path="/contact" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <Contact />
+                  </Suspense>
+                } />
+                
+                <Route path="/help" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <Help />
+                  </Suspense>
+                } />
+                
+                <Route path="/privacy-policy" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <PrivacyPolicy />
+                  </Suspense>
+                } />
+                
+                <Route path="/terms-of-service" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <TermsOfService />
+                  </Suspense>
+                } />
+                
+                <Route path="/transport" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <TransportPage />
+                  </Suspense>
+                } />
+                
+                <Route path="/property" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <PropertyPage />
+                  </Suspense>
+                } />
+                
+                <Route path="/electronics" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <ElectronicsPageWrapper />
+                  </Suspense>
+                } />
+                
+                <Route path="/fashion" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <FashionPage />
+                  </Suspense>
+                } />
+                
+                <Route path="/pets" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <PetsPage />
+                  </Suspense>
+                } />
+                
+                <Route path="*" element={
+                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                    <NotFound />
+                  </Suspense>
+                } />
+              </Routes>
             </TooltipProvider>
           </AdminProvider>
         </SupabaseProvider>
