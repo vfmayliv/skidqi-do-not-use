@@ -46,15 +46,17 @@ export function ListingCard({ listing }: ListingCardProps) {
   // Ensure we get a string for city
   const city = listing.city || '';
 
+  // Calculate if there's actually a discount
+  const hasDiscount = listing.originalPrice > listing.discountPrice && listing.discountPrice > 0;
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
       <Link to={`/listing/${listing.id}`} className="flex flex-col h-full">
-        <div className="relative w-full bg-gray-200">
+        <div className="relative w-full bg-gray-50 flex items-center justify-center" style={{ minHeight: '200px' }}>
           <img
             src={listing.imageUrl || '/placeholder.svg'}
             alt={title}
-            className="w-full h-auto object-contain transition-transform hover:scale-105"
-            style={{ maxHeight: '200px' }}
+            className="max-w-full max-h-[200px] object-contain transition-transform hover:scale-105"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder.svg';
@@ -79,11 +81,11 @@ export function ListingCard({ listing }: ListingCardProps) {
           
           <div className="mt-auto space-y-2">
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-lg font-bold text-red-600">
                   {formatPrice(listing.discountPrice)}
                 </span>
-                {listing.discount > 0 && listing.originalPrice > listing.discountPrice && (
+                {hasDiscount && (
                   <span className="text-sm text-black line-through">
                     {formatPrice(listing.originalPrice)}
                   </span>
