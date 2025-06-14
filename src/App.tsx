@@ -59,7 +59,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/search" element={<SearchResults />} />
-                  {/* SEO-friendly listing URLs */}
+                  {/* SEO-friendly listing URLs БЕЗ ID */}
                   <Route path="/category/:categorySlug/:titleSlug" element={<ListingDetail />} />
                   {/* Fallback for old listing URLs */}
                   <Route path="/listing/:id" element={<ListingDetail />} />
@@ -78,7 +78,6 @@ function App() {
                   <Route path="/terms-of-service" element={<TermsOfService />} />
                   <Route path="/transport" element={<TransportPage />} />
                   <Route path="/property" element={<PropertyPage />} />
-                  {/* Fixed: Use wrapper component to handle /electronics routing */}
                   <Route path="/electronics" element={<ElectronicsPageWrapper />} />
                   <Route path="/fashion" element={<FashionPage />} />
                   <Route path="/pets" element={<PetsPage />} />

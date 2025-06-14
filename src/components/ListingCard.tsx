@@ -55,9 +55,9 @@ export function ListingCard({ listing }: ListingCardProps) {
     ? Math.round(((listing.originalPrice - listing.discountPrice) / listing.originalPrice) * 100)
     : 0;
 
-  // Create SEO-friendly URL
+  // Create SEO-friendly URL БЕЗ ID
   const listingUrl = listing.categoryId 
-    ? createListingUrl(listing.categoryId, title, listing.id)
+    ? createListingUrl(listing.categoryId, title)
     : `/listing/${listing.id}`;
 
   return (

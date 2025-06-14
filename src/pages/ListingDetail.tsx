@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -16,12 +17,12 @@ import { mockListings } from '@/data/mockListings';
 import { Listing } from '@/types/listingType';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 import { getCategoryConfig } from '@/categories/categoryRegistry';
-import { parseListingUrl } from '@/utils/urlUtils';
+import { parseListingUrl, findListingBySlug } from '@/utils/urlUtils';
 import { useListings } from '@/hooks/useListings';
 
 export default function ListingDetail() {
-  const { listingId, categorySlug, titleSlug } = useParams<{ 
-    listingId?: string; 
+  const { id: listingId, categorySlug, titleSlug } = useParams<{ 
+    id?: string; 
     categorySlug?: string; 
     titleSlug?: string; 
   }>();
@@ -36,107 +37,66 @@ export default function ListingDetail() {
 
   useEffect(() => {
     const loadListing = async () => {
-      let targetListingId = listingId;
+      let targetListing = null;
       
-      // If we have SEO-friendly URL, extract listing ID from titleSlug
-      if (categorySlug && titleSlug && !listingId) {
-        const parsed = parseListingUrl(location.pathname);
-        if (parsed) {
-          targetListingId = parsed.listingId;
+      // Если есть SEO URL (category + title slug)
+      if (categorySlug && titleSlug) {
+        console.log('🔍 Поиск по SEO URL:', { categorySlug, titleSlug });
+        
+        // Ищем в мок данных по slug
+        targetListing = findListingBySlug(mockListings, categorySlug, titleSlug);
+        
+        if (targetListing) {
+          console.log('✅ Найдено объявление по slug:', targetListing);
+        }
+      } 
+      // Если есть старый формат URL с ID
+      else if (listingId) {
+        console.log('🔍 Поиск по ID:', listingId);
+        
+        // Пробуем найти в Supabase
+        const supabaseListing = await getListingById(listingId);
+        if (supabaseListing) {
+          targetListing = supabaseListing;
+        } else {
+          // Fallback к мок данным
+          targetListing = mockListings.find(item => item.id === listingId);
         }
       }
 
-      if (!targetListingId) return;
-
-      console.log('🔍 Loading listing with ID:', targetListingId);
-      
-      // Try to fetch from Supabase first
-      const supabaseListing = await getListingById(targetListingId);
-      if (supabaseListing) {
-        console.log('✅ Found listing in Supabase:', supabaseListing);
-        setListing(supabaseListing);
-        
-        // Build breadcrumbs
-        const categoryItems = [];
-        categoryItems.push({
-          label: language === 'ru' ? 'Главная' : 'Басты бет',
-          link: '/'
-        });
-        
-        if (supabaseListing.categories) {
-          categoryItems.push({
-            label: supabaseListing.categories.name_ru || 'Категория',
-            link: `/category/${categorySlug || 'unknown'}`
-          });
-        }
-        
-        setBreadcrumbItems(categoryItems);
+      if (!targetListing) {
+        console.error('❌ Объявление не найдено');
         return;
       }
 
-      // Fallback to mock data
-      const foundListing = mockListings.find(item => item.id === targetListingId);
-      if (foundListing) {
-        console.log('✅ Found listing in mock data:', foundListing);
-        setListing(foundListing);
-        
-        // Find similar listings (same category, different ID)
-        const similar = mockListings
-          .filter(item => item.categoryId === foundListing.categoryId && item.id !== foundListing.id)
-          .slice(0, 4);
-        setSimilarListings(similar);
-        
-        // Build improved breadcrumbs with category hierarchy
-        const categoryItems = [];
-        
-        // Add Home
-        categoryItems.push({
-          label: language === 'ru' ? 'Главная' : 'Басты бет',
-          link: '/'
-        });
-        
-        // Add main category
-        if (foundListing.categoryId) {
-          const categoryConfig = getCategoryConfig(foundListing.categoryId);
-          if (categoryConfig) {
-            categoryItems.push({
-              label: categoryConfig.name[language] || foundListing.categoryId,
-              link: `/category/${foundListing.categoryId}`
-            });
-          }
-        }
-        
-        // Add subcategory if exists
-        if (foundListing.subcategoryId) {
-          // Format subcategory ID for display
-          const subcategoryLabel = foundListing.subcategoryId
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          
+      console.log('✅ Загружено объявление:', targetListing);
+      setListing(targetListing);
+      
+      // Найти похожие объявления
+      const similar = mockListings
+        .filter(item => item.categoryId === targetListing.categoryId && item.id !== targetListing.id)
+        .slice(0, 4);
+      setSimilarListings(similar);
+      
+      // Построить breadcrumbs
+      const categoryItems = [];
+      
+      categoryItems.push({
+        label: language === 'ru' ? 'Главная' : 'Басты бет',
+        link: '/'
+      });
+      
+      if (targetListing.categoryId) {
+        const categoryConfig = getCategoryConfig(targetListing.categoryId);
+        if (categoryConfig) {
           categoryItems.push({
-            label: subcategoryLabel,
-            link: `/category/${foundListing.categoryId}?subcategory=${foundListing.subcategoryId}`
+            label: categoryConfig.name[language] || targetListing.categoryId,
+            link: `/category/${targetListing.categoryId}`
           });
         }
-        
-        // Add sub-subcategory if exists (in real data structure)
-        if (foundListing.subSubcategoryId) {
-          const subSubcategoryLabel = foundListing.subSubcategoryId
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          
-          categoryItems.push({
-            label: subSubcategoryLabel,
-            link: `/category/${foundListing.categoryId}?subcategory=${foundListing.subcategoryId}&subSubcategory=${foundListing.subSubcategoryId}`
-          });
-        }
-        
-        setBreadcrumbItems(categoryItems);
-      } else {
-        console.error('❌ Listing not found:', targetListingId);
       }
+      
+      setBreadcrumbItems(categoryItems);
     };
 
     loadListing();
@@ -144,6 +104,7 @@ export default function ListingDetail() {
 
   // Utility functions for formatting
   const formatPrice = (price: number) => {
+    if (price === 0) return language === 'ru' ? 'Бесплатно' : 'Тегін';
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' ₸';
   };
   
@@ -162,7 +123,6 @@ export default function ListingDetail() {
   };
   
   const handleShare = () => {
-    // Share functionality would go here
     if (navigator.share) {
       navigator.share({
         title: listing?.title[language] || '',
@@ -210,16 +170,87 @@ export default function ListingDetail() {
     : '';
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       <BreadcrumbNavigation 
         items={breadcrumbItems} 
         currentPage={title} 
       />
       <main className="flex-1 py-6">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
+        <div className="container mx-auto px-4 max-w-7xl">
+          {/* Mobile layout */}
+          <div className="lg:hidden space-y-4">
+            <ListingGallery 
+              images={listing.images || [listing.imageUrl]} 
+              title={title}
+              language={language}
+            />
+            <ListingHeader 
+              title={title}
+              city={city}
+              createdAt={listing.createdAt}
+              views={listing.views}
+              id={listing.id}
+              price={listing.discountPrice}
+              originalPrice={listing.originalPrice}
+              discount={listing.discount}
+              isFeatured={listing.isFeatured || false}
+              isFavorite={isFavorite}
+              language={language}
+              formatPrice={formatPrice}
+              formatDate={formatDate}
+              onToggleFavorite={handleToggleFavorite}
+              onShare={handleShare}
+              isMobile={true}
+            />
+            <ListingPrice 
+              price={listing.discountPrice}
+              originalPrice={listing.originalPrice}
+              discount={listing.discount}
+              formatPrice={formatPrice}
+              isFavorite={isFavorite}
+              onToggleFavorite={handleToggleFavorite}
+              onShare={handleShare}
+            />
+            <SellerInfo 
+              name={listing.seller.name}
+              phone={listing.seller.phone}
+              rating={listing.seller.rating}
+              deals={listing.seller.reviews || 0}
+              memberSince="2022"
+              response={language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді'}
+              lastOnline={language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'}
+              isPhoneVisible={isPhoneVisible}
+              language={language}
+              onShowPhone={handleShowPhone}
+              isMobile={true}
+            />
+            <ListingDescription 
+              description={descriptionText} 
+              language={language}
+            />
+            <ListingStats 
+              createdAt={listing.createdAt}
+              id={listing.id}
+              views={listing.views}
+              isFavorite={isFavorite}
+              language={language}
+              formatDate={formatDate}
+              onToggleFavorite={handleToggleFavorite}
+              onShare={handleShare}
+              isMobile={true}
+            />
+            <LocationMap 
+              city={city} 
+              coordinates={listing.coordinates}
+              language={language}
+            />
+            <SafetyTips language={language} />
+          </div>
+
+          {/* Desktop layout */}
+          <div className="hidden lg:grid grid-cols-3 gap-6">
+            <div className="col-span-2 space-y-6">
               <ListingGallery 
                 images={listing.images || [listing.imageUrl]} 
                 title={title}
@@ -242,31 +273,12 @@ export default function ListingDetail() {
                 onToggleFavorite={handleToggleFavorite}
                 onShare={handleShare}
               />
-              <ListingPrice 
-                price={listing.discountPrice}
-                originalPrice={listing.originalPrice}
-                discount={listing.discount}
-                formatPrice={formatPrice}
-                isFavorite={isFavorite}
-                onToggleFavorite={handleToggleFavorite}
-                onShare={handleShare}
-              />
               <ListingDescription 
                 description={descriptionText} 
                 language={language}
               />
-              <ListingStats 
-                createdAt={listing.createdAt}
-                id={listing.id}
-                views={listing.views}
-                isFavorite={isFavorite}
-                language={language}
-                formatDate={formatDate}
-                onToggleFavorite={handleToggleFavorite}
-                onShare={handleShare}
-              />
             </div>
-            <div>
+            <div className="space-y-6">
               <SellerInfo 
                 name={listing.seller.name}
                 phone={listing.seller.phone}
@@ -285,14 +297,26 @@ export default function ListingDetail() {
                 coordinates={listing.coordinates}
                 language={language}
               />
+              <ListingStats 
+                createdAt={listing.createdAt}
+                id={listing.id}
+                views={listing.views}
+                isFavorite={isFavorite}
+                language={language}
+                formatDate={formatDate}
+                onToggleFavorite={handleToggleFavorite}
+                onShare={handleShare}
+              />
             </div>
           </div>
           
-          <SimilarListings 
-            listings={similarListings}
-            language={language}
-            formatPrice={formatPrice}
-          />
+          <div className="mt-8">
+            <SimilarListings 
+              listings={similarListings}
+              language={language}
+              formatPrice={formatPrice}
+            />
+          </div>
         </div>
       </main>
       <Footer />

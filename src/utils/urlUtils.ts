@@ -25,20 +25,33 @@ export function transliterate(text: string): string {
     .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
 }
 
-// Создание SEO-friendly URL для объявления
-export function createListingUrl(categorySlug: string, title: string, listingId: string): string {
+// Создание SEO-friendly URL для объявления БЕЗ ID
+export function createListingUrl(categorySlug: string, title: string): string {
   const titleSlug = transliterate(title);
-  return `/category/${categorySlug}/${titleSlug}-${listingId}`;
+  return `/category/${categorySlug}/${titleSlug}`;
 }
 
-// Парсинг URL объявления для получения ID
-export function parseListingUrl(url: string): { categorySlug: string; titleSlug: string; listingId: string } | null {
-  const match = url.match(/\/category\/([^\/]+)\/(.+)-([a-f0-9-]{36})$/);
+// Функция для поиска объявления по slug
+export function findListingBySlug(listings: any[], categorySlug: string, titleSlug: string): any | null {
+  // Ищем объявление по категории и совпадению slug
+  return listings.find(listing => {
+    if (listing.categoryId !== categorySlug) return false;
+    
+    const listingTitleSlug = transliterate(
+      typeof listing.title === 'string' ? listing.title : listing.title?.ru || listing.title?.kz || ''
+    );
+    
+    return listingTitleSlug === titleSlug;
+  });
+}
+
+// Парсинг URL объявления 
+export function parseListingUrl(url: string): { categorySlug: string; titleSlug: string } | null {
+  const match = url.match(/\/category\/([^\/]+)\/(.+)$/);
   if (!match) return null;
   
   return {
     categorySlug: match[1],
-    titleSlug: match[2],
-    listingId: match[3]
+    titleSlug: match[2]
   };
 }
