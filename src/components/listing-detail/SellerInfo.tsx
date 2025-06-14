@@ -1,7 +1,8 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, MessageSquare, User } from 'lucide-react';
+import { Phone, MessageSquare } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface SellerInfoProps {
   name: string;
@@ -42,9 +43,12 @@ export const SellerInfo = ({
               {lastOnline}
             </div>
           </div>
-          <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center text-primary">
-            <User className="h-5 w-5" />
-          </div>
+          <Avatar className="h-10 w-10">
+            <AvatarImage src="/lovable-uploads/efc5977e-3e13-47ef-acce-d8bf850bcfae.png" alt={name} />
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              АС
+            </AvatarFallback>
+          </Avatar>
         </div>
         
         <div className="space-y-3">
@@ -77,9 +81,12 @@ export const SellerInfo = ({
               {lastOnline}
             </div>
           </div>
-          <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center text-primary">
-            <User className="h-5 w-5" />
-          </div>
+          <Avatar className="h-10 w-10">
+            <AvatarImage src="/lovable-uploads/efc5977e-3e13-47ef-acce-d8bf850bcfae.png" alt={name} />
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              АС
+            </AvatarFallback>
+          </Avatar>
         </div>
         
         <div className="flex justify-between text-sm mb-4">
