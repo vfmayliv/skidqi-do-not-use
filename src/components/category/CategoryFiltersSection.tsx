@@ -24,12 +24,21 @@ export function CategoryFiltersSection({
 }: CategoryFiltersSectionProps) {
   const { filters, setFilters, resetFilters } = useUniversalFiltersStore();
 
+  // Ensure filters match the expected interface
+  const adaptedFilters = {
+    priceRange: filters.priceRange || { min: null, max: null },
+    condition: filters.condition || 'any',
+    hasPhotos: filters.hasPhotos || false,
+    hasDiscount: filters.hasDiscount || false,
+    hasDelivery: filters.hasDelivery || false
+  };
+
   return (
     <div className="w-80 flex-shrink-0 space-y-6">
       {/* Universal Filters с интегрированным Category Tree Filter */}
       {shouldShowUniversalFilters && (
         <UniversalFilters
-          filters={filters}
+          filters={adaptedFilters}
           onFilterChange={setFilters}
           onReset={resetFilters}
           onSearch={onSearch}

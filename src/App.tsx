@@ -59,6 +59,9 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/search" element={<SearchResults />} />
+                  {/* SEO-friendly listing URLs */}
+                  <Route path="/category/:categorySlug/:titleSlug" element={<ListingDetail />} />
+                  {/* Fallback for old listing URLs */}
                   <Route path="/listing/:id" element={<ListingDetail />} />
                   <Route path="/category/:slug" element={<CategoryPage />} />
                   <Route path="/category/:parentSlug/:slug" element={<SubcategoryPage />} />

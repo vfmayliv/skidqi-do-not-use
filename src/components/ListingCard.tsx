@@ -1,8 +1,10 @@
+
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Eye } from 'lucide-react';
 import { useAppWithTranslations } from '@/stores/useAppStore';
+import { createListingUrl } from '@/utils/urlUtils';
 
 interface ListingCardProps {
   listing: {
@@ -53,9 +55,14 @@ export function ListingCard({ listing }: ListingCardProps) {
     ? Math.round(((listing.originalPrice - listing.discountPrice) / listing.originalPrice) * 100)
     : 0;
 
+  // Create SEO-friendly URL
+  const listingUrl = listing.categoryId 
+    ? createListingUrl(listing.categoryId, title, listing.id)
+    : `/listing/${listing.id}`;
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
-      <Link to={`/listing/${listing.id}`} className="flex flex-col h-full">
+      <Link to={listingUrl} className="flex flex-col h-full">
         <div className="relative w-full bg-gray-50 flex items-center justify-center" style={{ minHeight: '200px' }}>
           <img
             src={listing.imageUrl || '/placeholder.svg'}
