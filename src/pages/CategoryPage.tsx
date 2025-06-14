@@ -250,15 +250,6 @@ export default function CategoryPage() {
                     `${language === 'ru' ? 'Найдено' : 'Табылды'} ${adaptedListings.length} ${language === 'ru' ? 'объявлений' : 'хабарландыру'}`
                   }
                 </p>
-                {/* Отладочная информация */}
-                {process.env.NODE_ENV === 'development' && (
-                  <div className="text-xs text-gray-400 mt-2 space-y-1">
-                    <p>📊 Загружено из базы: {listings.length}</p>
-                    <p>🎯 Категория ID: {getCategoryIdNumber(categoryId || '')}</p>
-                    <p>🔍 Активные фильтры: {JSON.stringify(filters)}</p>
-                    <p>⚡ Инициализация завершена: {isInitialized ? 'Да' : 'Нет'}</p>
-                  </div>
-                )}
               </div>
               
               {/* Listings grid - строго 3 колонки */}
@@ -283,12 +274,6 @@ export default function CategoryPage() {
                       'Сүзгілерді өзгертіп көріңіз немесе басқа санатты таңдаңыз'
                     }
                   </p>
-                  <div className="mt-4 text-xs text-gray-400">
-                    <p>🔧 Debug info:</p>
-                    <p>Category: {categoryId} (ID: {getCategoryIdNumber(categoryId || '')})</p>
-                    <p>Listings in DB: {listings.length}</p>
-                    <p>Is initialized: {isInitialized ? 'Yes' : 'No'}</p>
-                  </div>
                 </div>
               )}
             </div>
