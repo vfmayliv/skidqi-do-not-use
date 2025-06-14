@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useAppWithTranslations } from '@/stores/useAppStore';
@@ -57,7 +56,9 @@ export default function CategoryPage() {
         condition: filters.condition !== 'any' ? filters.condition : undefined
       };
       
-      getListings(filterParams).finally(() => {
+      console.log('Параметры фильтрации при инициализации:', filterParams);
+      
+      getListings(filterParams, 'newest', 100).finally(() => {
         setIsInitialized(true);
       });
     } else {
@@ -78,7 +79,8 @@ export default function CategoryPage() {
         condition: filters.condition !== 'any' ? filters.condition : undefined
       };
       
-      getListings(filterParams);
+      console.log('Параметры фильтрации при обновлении:', filterParams);
+      getListings(filterParams, 'newest', 100);
     }
   }, [filters, isInitialized]); // Только filters и isInitialized
 
@@ -153,7 +155,7 @@ export default function CategoryPage() {
           categoryId: numericCategoryId,
           priceRange: filters.priceRange,
           condition: filters.condition !== 'any' ? filters.condition : undefined
-        });
+        }, 'newest', 100);
       }
     }
   };
@@ -178,6 +180,8 @@ export default function CategoryPage() {
     createdAt: listing.created_at,
     views: listing.views || 0
   }));
+
+  console.log(`Отображаем ${adaptedListings.length} адаптированных объявлений для категории ${categoryId}`);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -243,6 +247,12 @@ export default function CategoryPage() {
                     `${language === 'ru' ? 'Найдено' : 'Табылды'} ${adaptedListings.length} ${language === 'ru' ? 'объявлений' : 'хабарландыру'}`
                   }
                 </p>
+                {/* Отладочная информация */}
+                {process.env.NODE_ENV === 'development' && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    Загружено из базы: {listings.length}, Категория ID: {getCategoryIdNumber(categoryId || '')}
+                  </p>
+                )}
               </div>
               
               {/* Listings grid */}

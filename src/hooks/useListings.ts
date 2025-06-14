@@ -30,10 +30,11 @@ export function useListings() {
   const getListings = async (
     filters: ListingFilters = {}, 
     sort: SortOptions = 'newest',
-    limit: number = 20,
+    limit: number = 100, // Увеличиваем лимит для отображения всех объявлений
     offset: number = 0
   ) => {
     setLoading(true);
+    setError(null);
     console.log('Загружаем объявления с фильтрами:', filters);
     
     try {
@@ -91,6 +92,11 @@ export function useListings() {
         query = query.eq('is_free', filters.isFree);
       }
 
+      if (filters.condition && filters.condition !== 'any') {
+        // Добавляем фильтр по condition если он задан в таблице или добавляем его в описание
+        query = query.ilike('description', `%${filters.condition}%`);
+      }
+
       // Применение сортировки
       switch (sort) {
         case 'newest':
@@ -110,17 +116,31 @@ export function useListings() {
       // Применение пагинации
       query = query.range(offset, offset + limit - 1);
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
 
       if (error) {
+        console.error('Ошибка Supabase:', error);
         throw error;
       }
 
-      console.log('Загруженные объявления:', data);
+      console.log(`Загруженные объявления (${data?.length || 0} из базы данных):`, data);
+      
+      // Дополнительная проверка: загружаем общее количество объявлений для категории
+      if (filters.categoryId) {
+        const { count: totalCount } = await supabase
+          .from('listings')
+          .select('*', { count: 'exact', head: true })
+          .eq('category_id', filters.categoryId)
+          .eq('status', 'active');
+        
+        console.log(`Общее количество объявлений в категории ${filters.categoryId}:`, totalCount);
+      }
+
       setListings(data || []);
       return data || [];
     } catch (err: any) {
-      setError(err.message);
+      const errorMessage = err.message || 'Неизвестная ошибка';
+      setError(errorMessage);
       console.error('Ошибка при загрузке объявлений:', err);
       return [];
     } finally {
