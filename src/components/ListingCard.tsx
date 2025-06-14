@@ -79,14 +79,16 @@ export function ListingCard({ listing }: ListingCardProps) {
           
           <div className="mt-auto space-y-2">
             <div className="flex flex-col">
-              {listing.discount > 0 && listing.originalPrice > listing.discountPrice && (
-                <span className="text-sm text-muted-foreground line-through">
-                  {formatPrice(listing.originalPrice)}
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-red-600">
+                  {formatPrice(listing.discountPrice)}
                 </span>
-              )}
-              <span className="text-lg font-bold text-red-600">
-                {formatPrice(listing.discountPrice)}
-              </span>
+                {listing.discount > 0 && listing.originalPrice > listing.discountPrice && (
+                  <span className="text-sm text-black line-through">
+                    {formatPrice(listing.originalPrice)}
+                  </span>
+                )}
+              </div>
             </div>
             
             <div className="flex items-center text-sm text-muted-foreground">
