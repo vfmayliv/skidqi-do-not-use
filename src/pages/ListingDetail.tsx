@@ -243,8 +243,8 @@ export default function ListingDetail() {
       const listingWithRealSeller = {
         ...targetListing,
         seller: {
-          name: language === 'ru' ? 'админ Skidqi' : 'Skidqi әкімшісі',
-          phone: targetListing.phone || '+7 777 123 45 67',
+          name: 'Skidqi',
+          phone: '+7 777 123 45 67',
           rating: 4.9,
           reviews: 156,
           memberSince: '2022',

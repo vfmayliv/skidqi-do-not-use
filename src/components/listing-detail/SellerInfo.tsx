@@ -44,9 +44,9 @@ export const SellerInfo = ({
             </div>
           </div>
           <Avatar className="h-10 w-10">
-            <AvatarImage src="/lovable-uploads/efc5977e-3e13-47ef-acce-d8bf850bcfae.png" alt={name} />
+            <AvatarImage src="/logo.png" alt={name} />
             <AvatarFallback className="bg-primary text-primary-foreground">
-              АС
+              S
             </AvatarFallback>
           </Avatar>
         </div>
@@ -82,9 +82,9 @@ export const SellerInfo = ({
             </div>
           </div>
           <Avatar className="h-10 w-10">
-            <AvatarImage src="/lovable-uploads/efc5977e-3e13-47ef-acce-d8bf850bcfae.png" alt={name} />
+            <AvatarImage src="/logo.png" alt={name} />
             <AvatarFallback className="bg-primary text-primary-foreground">
-              АС
+              S
             </AvatarFallback>
           </Avatar>
         </div>
