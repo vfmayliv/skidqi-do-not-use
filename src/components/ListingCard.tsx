@@ -49,11 +49,12 @@ export function ListingCard({ listing }: ListingCardProps) {
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
       <Link to={`/listing/${listing.id}`} className="flex flex-col h-full">
-        <div className="relative w-full h-48 overflow-hidden bg-gray-200">
+        <div className="relative w-full bg-gray-200">
           <img
             src={listing.imageUrl || '/placeholder.svg'}
             alt={title}
-            className="w-full h-full object-cover transition-transform hover:scale-105"
+            className="w-full h-auto object-contain transition-transform hover:scale-105"
+            style={{ maxHeight: '200px' }}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder.svg';

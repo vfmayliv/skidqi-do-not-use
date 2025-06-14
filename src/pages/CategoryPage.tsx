@@ -261,13 +261,13 @@ export default function CategoryPage() {
                 )}
               </div>
               
-              {/* Listings grid - исправленная сетка 3 в ряд */}
+              {/* Listings grid - строго 3 колонки */}
               {loading && !isInitialized ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-3 gap-6">
                   {adaptedListings.map(listing => (
                     <CardComponent key={listing.id} listing={listing} />
                   ))}
