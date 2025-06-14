@@ -8,7 +8,7 @@ import { BreadcrumbNavigation } from '@/components/BreadcrumbNavigation';
 import { useListings } from '@/hooks/useListings';
 import { getCategoryConfig } from '@/categories/categoryRegistry';
 import { ListingCard } from '@/components/ListingCard';
-import { UniversalFilters, UniversalFiltersData } from '@/components/filters/UniversalFilters';
+import { UniversalFilters } from '@/components/filters/UniversalFilters';
 import { CategoryTreeFilter } from '@/components/filters/CategoryTreeFilter';
 import { useUniversalFiltersStore } from '@/stores/useUniversalFiltersStore';
 
@@ -19,7 +19,7 @@ export default function CategoryPage() {
   const { getListings, listings, loading, error } = useListings();
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | undefined>();
   const { filters, setFilters, resetFilters } = useUniversalFiltersStore();
-  const [hasInitialLoaded, setHasInitialLoaded] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Используем slug напрямую как categoryId
   const categoryId = slug;
@@ -43,44 +43,44 @@ export default function CategoryPage() {
     return categoryMap[categoryStr];
   };
 
-  // Загружаем объявления только один раз при инициализации
+  // Единственный useEffect для инициализации и загрузки данных
   useEffect(() => {
-    if (categoryId && !hasInitialLoaded) {
-      const numericCategoryId = getCategoryIdNumber(categoryId);
-      console.log(`Загружаем объявления для категории: ${categoryId} (ID: ${numericCategoryId})`);
-      
-      if (numericCategoryId) {
-        const filterParams = {
-          categoryId: numericCategoryId,
-          priceRange: filters.priceRange,
-          condition: filters.condition !== 'any' ? filters.condition : undefined
-        };
-        
-        getListings(filterParams).then(() => {
-          setHasInitialLoaded(true);
-        });
-      } else {
-        console.warn(`Неизвестная категория: ${categoryId}`);
-        setHasInitialLoaded(true);
-      }
-    }
-  }, [categoryId, hasInitialLoaded, getCategoryIdNumber, getListings]);
+    if (!categoryId || isInitialized) return;
 
-  // Обновляем объявления только при изменении фильтров (не при инициализации)
-  useEffect(() => {
-    if (hasInitialLoaded && categoryId) {
-      const numericCategoryId = getCategoryIdNumber(categoryId);
-      if (numericCategoryId) {
-        const filterParams = {
-          categoryId: numericCategoryId,
-          priceRange: filters.priceRange,
-          condition: filters.condition !== 'any' ? filters.condition : undefined
-        };
-        
-        getListings(filterParams);
-      }
+    const numericCategoryId = getCategoryIdNumber(categoryId);
+    console.log(`Инициализация загрузки объявлений для категории: ${categoryId} (ID: ${numericCategoryId})`);
+    
+    if (numericCategoryId) {
+      const filterParams = {
+        categoryId: numericCategoryId,
+        priceRange: filters.priceRange,
+        condition: filters.condition !== 'any' ? filters.condition : undefined
+      };
+      
+      getListings(filterParams).finally(() => {
+        setIsInitialized(true);
+      });
+    } else {
+      console.warn(`Неизвестная категория: ${categoryId}`);
+      setIsInitialized(true);
     }
-  }, [filters, hasInitialLoaded, categoryId, getListings]);
+  }, [categoryId]); // Только categoryId в зависимостях
+
+  // Отдельный useEffect для обновления при изменении фильтров
+  useEffect(() => {
+    if (!isInitialized || !categoryId) return;
+
+    const numericCategoryId = getCategoryIdNumber(categoryId);
+    if (numericCategoryId) {
+      const filterParams = {
+        categoryId: numericCategoryId,
+        priceRange: filters.priceRange,
+        condition: filters.condition !== 'any' ? filters.condition : undefined
+      };
+      
+      getListings(filterParams);
+    }
+  }, [filters, isInitialized]); // Только filters и isInitialized
 
   const config = categoryId ? getCategoryConfig(categoryId) : null;
 
@@ -238,7 +238,7 @@ export default function CategoryPage() {
             <div className="flex-1">
               <div className="mb-6">
                 <p className="text-gray-600">
-                  {loading ? 
+                  {loading && !isInitialized ? 
                     (language === 'ru' ? 'Загружаем...' : 'Жүктеу...') :
                     `${language === 'ru' ? 'Найдено' : 'Табылды'} ${adaptedListings.length} ${language === 'ru' ? 'объявлений' : 'хабарландыру'}`
                   }
@@ -246,7 +246,7 @@ export default function CategoryPage() {
               </div>
               
               {/* Listings grid */}
-              {loading && !hasInitialLoaded ? (
+              {loading && !isInitialized ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
                 </div>
@@ -258,7 +258,7 @@ export default function CategoryPage() {
                 </div>
               )}
               
-              {!loading && adaptedListings.length === 0 && hasInitialLoaded && (
+              {!loading && adaptedListings.length === 0 && isInitialized && (
                 <div className="text-center py-8">
                   <p className="text-gray-500">{t('noListingsFound', 'Объявлений не найдено')}</p>
                   <p className="text-sm text-gray-400 mt-2">

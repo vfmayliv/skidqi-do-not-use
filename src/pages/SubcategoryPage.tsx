@@ -5,7 +5,6 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { BreadcrumbNavigation } from '@/components/BreadcrumbNavigation';
 import { useListings } from '@/hooks/useListings';
-import { Listing } from '@/types/listingType';
 import { useAppWithTranslations } from '@/stores/useAppStore';
 import { getCategoryConfig } from '@/categories/categoryRegistry';
 import { ListingCard } from '@/components/ListingCard';
@@ -15,7 +14,7 @@ export default function SubcategoryPage() {
   const [searchParams] = useSearchParams();
   const { language, t } = useAppWithTranslations();
   const { getListings, listings, loading, error } = useListings();
-  const [hasInitialLoaded, setHasInitialLoaded] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   // Маппинг ID категорий от строковых к числовым
   const getCategoryIdNumber = (categoryStr: string): number | undefined => {
@@ -37,24 +36,25 @@ export default function SubcategoryPage() {
   };
   
   useEffect(() => {
-    // Загрузка объявлений из Supabase вместо использования моковых данных
-    if (categoryId && !hasInitialLoaded) {
-      const numericCategoryId = getCategoryIdNumber(categoryId);
-      
-      if (numericCategoryId) {
-        // Здесь также можно добавить логику для фильтрации по подкатегории
-        // когда бэкенд будет поддерживать эту функциональность
-        getListings({ 
-          categoryId: numericCategoryId
-        }).then(() => {
-          setHasInitialLoaded(true);
-        });
-      } else {
-        console.warn(`Неизвестная категория: ${categoryId}`);
-        setHasInitialLoaded(true);
-      }
+    // Загрузка объявлений из Supabase только один раз при инициализации
+    if (!categoryId || isInitialized) return;
+
+    const numericCategoryId = getCategoryIdNumber(categoryId);
+    console.log(`Инициализация загрузки объявлений для подкатегории: ${categoryId}/${subcategoryId} (ID: ${numericCategoryId})`);
+    
+    if (numericCategoryId) {
+      // Здесь также можно добавить логику для фильтрации по подкатегории
+      // когда бэкенд будет поддерживать эту функциональность
+      getListings({ 
+        categoryId: numericCategoryId
+      }).finally(() => {
+        setIsInitialized(true);
+      });
+    } else {
+      console.warn(`Неизвестная категория: ${categoryId}`);
+      setIsInitialized(true);
     }
-  }, [categoryId, subcategoryId, getListings, hasInitialLoaded]);
+  }, [categoryId, subcategoryId]); // Только categoryId и subcategoryId в зависимостях
   
   // Get category config to display proper names
   const config = categoryId ? getCategoryConfig(categoryId) : null;
@@ -100,7 +100,7 @@ export default function SubcategoryPage() {
             </div>
           )}
           
-          {loading && !hasInitialLoaded ? (
+          {loading && !isInitialized ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
             </div>
@@ -112,7 +112,7 @@ export default function SubcategoryPage() {
             </div>
           )}
           
-          {!loading && adaptedListings.length === 0 && hasInitialLoaded && (
+          {!loading && adaptedListings.length === 0 && isInitialized && (
             <div className="text-center py-8">
               <p className="text-gray-500">{t('noListingsFound', 'Объявлений не найдено')}</p>
             </div>
