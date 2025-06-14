@@ -9,6 +9,7 @@ import { CitySelectionModal } from "@/components/CitySelectionModal";
 import { SupabaseProvider } from "@/contexts/SupabaseContext";
 import { AdminProvider } from "@/contexts/AdminContext";
 import ElectronicsPageWrapper from "@/components/ElectronicsPageWrapper";
+import Ojah from "./pages/Ojah";
 
 // Import i18n configuration
 import "./i18n";
@@ -38,8 +39,11 @@ const FashionPage = lazy(() => import("./pages/FashionPage"));
 const PetsPage = lazy(() => import("./pages/PetsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Import Ojah directly without lazy loading
-import Ojah from "./pages/Ojah";
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
 
 function App() {
   return (
@@ -50,146 +54,146 @@ function App() {
             <TooltipProvider>
               <Toaster />
               <Routes>
-                {/* Admin panel route - no Suspense needed */}
+                {/* Admin panel route */}
                 <Route path="/ojah" element={<Ojah />} />
                 
                 <Route path="/" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <CitySelectionModal />
                     <Index />
                   </Suspense>
                 } />
                 
                 <Route path="/search" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <SearchResults />
                   </Suspense>
                 } />
                 
                 {/* SEO-friendly listing URLs БЕЗ ID */}
                 <Route path="/category/:categorySlug/:titleSlug" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <ListingDetail />
                   </Suspense>
                 } />
                 
                 {/* Fallback for old listing URLs */}
                 <Route path="/listing/:id" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <ListingDetail />
                   </Suspense>
                 } />
                 
                 <Route path="/category/:slug" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <CategoryPage />
                   </Suspense>
                 } />
                 
                 <Route path="/category/:parentSlug/:slug" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <SubcategoryPage />
                   </Suspense>
                 } />
                 
                 <Route path="/create-listing" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <CreateListing />
                   </Suspense>
                 } />
                 
                 <Route path="/profile" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <UserProfile />
                   </Suspense>
                 } />
                 
                 <Route path="/login" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <Login />
                   </Suspense>
                 } />
                 
                 <Route path="/register" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <Register />
                   </Suspense>
                 } />
                 
                 <Route path="/confirm-email" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <ConfirmEmail />
                   </Suspense>
                 } />
                 
                 <Route path="/dashboard" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <Dashboard />
                   </Suspense>
                 } />
                 
                 <Route path="/about" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <About />
                   </Suspense>
                 } />
                 
                 <Route path="/contact" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <Contact />
                   </Suspense>
                 } />
                 
                 <Route path="/help" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <Help />
                   </Suspense>
                 } />
                 
                 <Route path="/privacy-policy" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <PrivacyPolicy />
                   </Suspense>
                 } />
                 
                 <Route path="/terms-of-service" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <TermsOfService />
                   </Suspense>
                 } />
                 
                 <Route path="/transport" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <TransportPage />
                   </Suspense>
                 } />
                 
                 <Route path="/property" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <PropertyPage />
                   </Suspense>
                 } />
                 
                 <Route path="/electronics" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <ElectronicsPageWrapper />
                   </Suspense>
                 } />
                 
                 <Route path="/fashion" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <FashionPage />
                   </Suspense>
                 } />
                 
                 <Route path="/pets" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <PetsPage />
                   </Suspense>
                 } />
                 
                 <Route path="*" element={
-                  <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <Suspense fallback={<LoadingSpinner />}>
                     <NotFound />
                   </Suspense>
                 } />
