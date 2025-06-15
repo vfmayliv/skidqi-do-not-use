@@ -54,7 +54,7 @@ const TABLE_MAPPING = {
   'excavators': { brands: 'excavator_brands', models: 'excavator_models' },
   'bulldozers': { brands: 'bulldozer_brands', models: 'bulldozer_models' },
   'municipal': { brands: 'municipal_brands', models: 'municipal_models' }
-};
+} as const;
 
 // Функция для загрузки всех записей из таблицы с пагинацией
 const fetchAllRecords = async (tableName: string) => {
@@ -65,7 +65,7 @@ const fetchAllRecords = async (tableName: string) => {
 
   while (hasMore) {
     const { data, error } = await supabase
-      .from(tableName)
+      .from(tableName as any) // Используем as any для обхода TypeScript ограничений
       .select('*')
       .range(from, from + pageSize - 1)
       .order('name');
