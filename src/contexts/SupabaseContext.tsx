@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
@@ -6,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 type SupabaseContextType = {
   session: Session | null;
   user: User | null;
+  supabase: typeof supabase;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string) => Promise<{ error: any, data: any }>;
   signOut: () => Promise<{ error: any }>;
@@ -60,6 +62,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const value = {
     session,
     user,
+    supabase,
     signIn,
     signUp,
     signOut,
