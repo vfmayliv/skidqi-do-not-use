@@ -9,11 +9,56 @@ interface LocationMapProps {
   language: string;
 }
 
+// Координаты основных городов Казахстана
+const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
+  'Алматы': { lat: 43.2381, lng: 76.9452 },
+  'Астана': { lat: 51.1694, lng: 71.4491 },
+  'Нур-Султан': { lat: 51.1694, lng: 71.4491 },
+  'Шымкент': { lat: 42.3417, lng: 69.5901 },
+  'Актобе': { lat: 50.2839, lng: 57.1670 },
+  'Тараз': { lat: 42.9000, lng: 71.3667 },
+  'Павлодар': { lat: 52.2873, lng: 76.9674 },
+  'Усть-Каменогорск': { lat: 49.9787, lng: 82.6067 },
+  'Семей': { lat: 50.4119, lng: 80.2275 },
+  'Атырау': { lat: 47.1164, lng: 51.8826 },
+  'Костанай': { lat: 53.2141, lng: 63.6246 },
+  'Кызылорда': { lat: 44.8479, lng: 65.5093 },
+  'Уральск': { lat: 51.2333, lng: 51.3667 },
+  'Петропавловск': { lat: 54.8833, lng: 69.1500 },
+  'Актау': { lat: 43.6481, lng: 51.1801 },
+  'Темиртау': { lat: 50.0547, lng: 72.9405 },
+  'Туркестан': { lat: 43.3061, lng: 68.2539 },
+  'Балхаш': { lat: 46.8667, lng: 75.0000 },
+  'Жезказган': { lat: 47.7833, lng: 67.7167 },
+  'Рудный': { lat: 52.9667, lng: 63.1167 }
+};
+
 const LocationMap = ({ city, coordinates, language }: LocationMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState<boolean>(false);
   
+  // Функция для получения координат города
+  const getCityCoordinates = (cityName: string) => {
+    // Сначала ищем точное совпадение
+    let coords = CITY_COORDINATES[cityName];
+    
+    if (!coords) {
+      // Ищем частичное совпадение (игнорируя регистр)
+      const cityKey = Object.keys(CITY_COORDINATES).find(key => 
+        key.toLowerCase().includes(cityName.toLowerCase()) ||
+        cityName.toLowerCase().includes(key.toLowerCase())
+      );
+      
+      if (cityKey) {
+        coords = CITY_COORDINATES[cityKey];
+      }
+    }
+    
+    // Если не нашли, используем Алматы по умолчанию
+    return coords || CITY_COORDINATES['Алматы'];
+  };
+
   // Load Yandex Maps script
   useEffect(() => {
     if (document.getElementById('yandex-maps-script')) {
@@ -64,10 +109,24 @@ const LocationMap = ({ city, coordinates, language }: LocationMapProps) => {
         mapRef.current.destroy();
       }
       
+      // Определяем координаты для карты
+      let mapCenter;
+      
+      if (coordinates) {
+        // Если есть точные координаты объявления
+        mapCenter = [coordinates.lat, coordinates.lng];
+        console.log(`Используем точные координаты: ${mapCenter}`);
+      } else {
+        // Если нет точных координат, используем координаты города
+        const cityCoords = getCityCoordinates(city);
+        mapCenter = [cityCoords.lat, cityCoords.lng];
+        console.log(`Используем координаты города ${city}: ${mapCenter}`);
+      }
+      
       // Create map instance
       mapRef.current = new ymaps.Map(mapContainer.current, {
-        center: coordinates ? [coordinates.lat, coordinates.lng] : [43.25, 76.85], // Default to Almaty if no coords
-        zoom: 12,
+        center: mapCenter,
+        zoom: coordinates ? 15 : 12, // Больший зум для точных координат
         controls: ['zoomControl', 'fullscreenControl']
       });
       
@@ -108,8 +167,34 @@ const LocationMap = ({ city, coordinates, language }: LocationMapProps) => {
               mapRef.current.setBounds(bounds, {
                 checkZoomRange: true
               });
+            } else {
+              // Если bounds недоступен, центрируем карту на найденных координатах
+              mapRef.current.setCenter(coords, 12);
             }
+          } else {
+            // Если геокодирование не дало результатов, используем предустановленные координаты
+            const fallbackCoords = getCityCoordinates(city);
+            const placemark = new ymaps.Placemark([fallbackCoords.lat, fallbackCoords.lng], {
+              hintContent: city
+            }, {
+              preset: 'islands#redDotIconWithCaption'
+            });
+            
+            mapRef.current.geoObjects.add(placemark);
+            mapRef.current.setCenter([fallbackCoords.lat, fallbackCoords.lng], 12);
           }
+        }).catch((error: any) => {
+          console.error('Geocoding error:', error);
+          // В случае ошибки используем предустановленные координаты
+          const fallbackCoords = getCityCoordinates(city);
+          const placemark = new ymaps.Placemark([fallbackCoords.lat, fallbackCoords.lng], {
+            hintContent: city
+          }, {
+            preset: 'islands#redDotIconWithCaption'
+          });
+          
+          mapRef.current.geoObjects.add(placemark);
+          mapRef.current.setCenter([fallbackCoords.lat, fallbackCoords.lng], 12);
         });
       }
     });
