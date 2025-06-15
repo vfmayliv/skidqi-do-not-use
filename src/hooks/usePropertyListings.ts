@@ -1,9 +1,8 @@
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useSupabase } from '@/contexts/SupabaseContext';
 
-// Типы для фильтров недвижимости
+// Types for property listing filters
 type PropertyListingFilters = {
   propertyTypes?: string[];
   dealType?: string;
@@ -25,7 +24,7 @@ type PropertyListingFilters = {
   sortBy?: string;
 };
 
-// Типы для параметров сортировки
+// Sort options for property listings
 type PropertySortOptions = 'newest' | 'price_asc' | 'price_desc' | 'area_asc' | 'area_desc';
 
 export function usePropertyListings() {
@@ -33,9 +32,9 @@ export function usePropertyListings() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
-  const { user } = useSupabase();
+  const { supabase, user } = useSupabase();
 
-  // Функция для очистки значений от Zustand proxy объектов
+  // Clean filter values from Zustand proxy objects
   const cleanFilterValue = (value: any): any => {
     if (value && typeof value === 'object' && value._type === 'undefined') {
       return undefined;
@@ -46,7 +45,7 @@ export function usePropertyListings() {
     return value;
   };
 
-  // Функция для очистки объекта фильтров
+  // Clean filters object
   const cleanFilters = (filters: any): PropertyListingFilters => {
     const cleaned: any = {};
     
@@ -86,7 +85,7 @@ export function usePropertyListings() {
     return cleaned;
   };
 
-  // Основная функция для получения объявлений недвижимости
+  // Main function to get property listings
   const getPropertyListings = async (
     filters: PropertyListingFilters = {}, 
     sort: PropertySortOptions = 'newest',
@@ -97,10 +96,10 @@ export function usePropertyListings() {
     setError(null);
     
     const cleanedFilters = cleanFilters(filters);
-    console.log('🏠 Загружаем объявления недвижимости с фильтрами:', cleanedFilters);
+    console.log('🏠 Loading property listings with filters:', cleanedFilters);
     
     try {
-      // Подготавливаем параметры для функции поиска
+      // Prepare parameters for the search function
       const searchParams = {
         p_limit: limit,
         p_offset: offset,
@@ -130,36 +129,38 @@ export function usePropertyListings() {
         p_sort_order: 'desc'
       };
 
-      console.log('📊 Параметры поиска недвижимости:', searchParams);
+      console.log('📊 Search parameters for property listings:', searchParams);
 
-      // Вызываем функцию поиска
+      // Call the search function
       const { data, error } = await supabase.rpc('search_property_listings', searchParams);
 
       if (error) {
-        console.error('❌ Ошибка при загрузке объявлений недвижимости:', error);
+        console.error('❌ Error loading property listings:', error);
         throw error;
       }
 
-      console.log(`✅ Загружено объявлений недвижимости: ${data?.length || 0}`);
+      console.log(`✅ Loaded ${data?.length || 0} property listings`);
       
       if (data && data.length > 0) {
         setTotalCount(data[0].total_count || 0);
-        console.log(`📊 Общее количество объявлений: ${data[0].total_count}`);
+        console.log(`📊 Total property listings count: ${data[0].total_count}`);
+      } else {
+        setTotalCount(0);
       }
 
       setListings(data || []);
       return data || [];
     } catch (err: any) {
-      const errorMessage = err.message || 'Неизвестная ошибка';
+      const errorMessage = err.message || 'Unknown error occurred';
       setError(errorMessage);
-      console.error('💥 Ошибка при загрузке объявлений недвижимости:', err);
+      console.error('💥 Error loading property listings:', err);
       return [];
     } finally {
       setLoading(false);
     }
   };
 
-  // Функция для маппинга типов сортировки
+  // Map sort options to SQL function parameters
   const mapSortOption = (sort: PropertySortOptions): string => {
     switch (sort) {
       case 'price_asc':
@@ -176,7 +177,7 @@ export function usePropertyListings() {
     }
   };
 
-  // Получение объявления недвижимости по ID
+  // Get property listing by ID
   const getPropertyListingById = async (id: string) => {
     try {
       const { data, error } = await supabase
@@ -188,14 +189,14 @@ export function usePropertyListings() {
         `)
         .eq('id', id)
         .eq('status', 'active')
-        .not('property_type', 'is', null) // Только объявления недвижимости
+        .not('property_type', 'is', null) // Only property listings
         .single();
 
       if (error) {
         throw error;
       }
 
-      // Увеличиваем счётчик просмотров
+      // Increment view count
       await supabase
         .from('listings')
         .update({ views: (data.views || 0) + 1 })
@@ -203,15 +204,15 @@ export function usePropertyListings() {
 
       return data;
     } catch (err: any) {
-      console.error(`Ошибка при загрузке объявления недвижимости ${id}:`, err);
+      console.error(`Error loading property listing ${id}:`, err);
       return null;
     }
   };
 
-  // Создание нового объявления недвижимости
+  // Create new property listing
   const createPropertyListing = async (listingData: any) => {
     if (!user) {
-      setError('Пользователь не авторизован');
+      setError('User not authenticated');
       return null;
     }
 
@@ -234,7 +235,7 @@ export function usePropertyListings() {
       return data;
     } catch (err: any) {
       setError(err.message);
-      console.error('Ошибка при создании объявления недвижимости:', err);
+      console.error('Error creating property listing:', err);
       return null;
     }
   };
