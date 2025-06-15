@@ -3,17 +3,14 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAppContext } from '@/contexts/AppContext';
 import { useSupabase } from '@/contexts/SupabaseContext';
-import { User } from '@supabase/supabase-js';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { processImageForUpload, uploadImage } from '@/utils/imageUtils';
-import { Bell, MessageSquare, User as UserIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Listing } from '@/types/listingType';
+import { processImageForUpload } from '@/utils/imageUtils';
+import { useNavigate } from 'react-router-dom';
 
 // Import profile components
 import { MyListings } from '@/components/profile/MyListings';
@@ -28,12 +25,16 @@ const USER_REVIEWS_KEY = 'userReviews';
 const USER_NOTIFICATIONS_KEY = 'userNotifications';
 
 const UserProfile = () => {
-  const { language, setLanguage } = useAppContext();
-  const { user: authUser, supabase, loading: appContextLoading } = useSupabase();
+  const { language } = useAppContext();
+  const { user: authUser, supabase, loading: authLoading } = useSupabase();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   
-  // User profile state
+  // Loading states
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  
+  // User profile state (start with empty values, no mock data)
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -44,13 +45,8 @@ const UserProfile = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [newAvatarFile, setNewAvatarFile] = useState<File | null>(null);
   
-  // Password change
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  
   // User listings (temporary localStorage)
-  const [userListings, setUserListings] = useState<Listing[]>([]);
+  const [userListings, setUserListings] = useState<any[]>([]);
   
   // User messages (temporary localStorage)
   const [messages, setMessages] = useState<any[]>([]);
@@ -61,54 +57,77 @@ const UserProfile = () => {
   // User notifications (temporary localStorage)
   const [notifications, setNotifications] = useState<any[]>([]);
   
-  // Load profile data from Supabase and other data from localStorage
+  // Authentication and profile data loading
   useEffect(() => {
-    if (appContextLoading) return;
-
-    if (authUser && supabase) {
-      setEmail(authUser.email || '');
-
-      const fetchProfileData = async () => {
-        try {
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('first_name, last_name, phone, avatar_url')
-            .eq('id', authUser.id)
-            .single();
-
-          if (profileError && profileError.code !== 'PGRST116') {
-            console.error('Ошибка загрузки профиля:', profileError);
-            toast({
-              title: language === 'ru' ? 'Ошибка загрузки профиля' : 'Профильді жүктеу қатесі',
-              description: profileError.message,
-              variant: 'destructive'
-            });
-          } else if (profileData) {
-            setFirstName(profileData.first_name || '');
-            setLastName(profileData.last_name || '');
-            setPhone(profileData.phone || '');
-            setAvatarUrl(profileData.avatar_url || null);
-          }
-        } catch (e) {
-          console.error('Исключение при загрузке профиля:', e);
-          toast({
-            title: language === 'ru' ? 'Исключение при загрузке профиля' : 'Профильді жүктеу кезіндегі қате',
-            description: (e as Error).message,
-            variant: 'destructive'
-          });
-        }
-      };
-
-      fetchProfileData();
-    } else if (!appContextLoading) {
-      toast({
-        title: language === 'ru' ? 'Сессия не найдена' : 'Сессия табылмады',
-        description: language === 'ru' ? 'Пожалуйста, войдите в систему.' : 'Жүйеге кіріңіз.',
-        variant: 'destructive'
-      });
+    // If still loading auth state, wait
+    if (authLoading) {
+      return;
     }
 
-    // Load other data from localStorage (temporary)
+    // If user is not authenticated, redirect to login
+    if (!authUser) {
+      toast({
+        title: language === 'ru' ? 'Доступ запрещен' : 'Қол жеткізу тыйым салынған',
+        description: language === 'ru' 
+          ? 'Пожалуйста, войдите в систему.' 
+          : 'Жүйеге кіріңіз.',
+        variant: 'destructive'
+      });
+      navigate('/login');
+      return;
+    }
+
+    // If user is authenticated, load profile data
+    setEmail(authUser.email || '');
+    
+    const fetchProfileData = async () => {
+      setIsLoadingProfile(true);
+      
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('first_name, last_name, phone, avatar_url')
+          .eq('id', authUser.id)
+          .single();
+
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('Ошибка загрузки профиля:', profileError);
+          toast({
+            title: language === 'ru' ? 'Ошибка загрузки профиля' : 'Профильді жүктеу қатесі',
+            description: profileError.message,
+            variant: 'destructive'
+          });
+        } else if (profileData) {
+          // Load real data from Supabase
+          setFirstName(profileData.first_name || '');
+          setLastName(profileData.last_name || '');
+          setPhone(profileData.phone || '');
+          setAvatarUrl(profileData.avatar_url || null);
+        }
+        // If no profile data exists yet (new user), keep empty strings
+        
+      } catch (e) {
+        console.error('Исключение при загрузке профиля:', e);
+        toast({
+          title: language === 'ru' ? 'Исключение при загрузке профиля' : 'Профильді жүктеу кезіндегі қате',
+          description: (e as Error).message,
+          variant: 'destructive'
+        });
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
+    fetchProfileData();
+
+    // Load temporary data from localStorage
+    loadTemporaryData();
+
+  }, [authUser, authLoading, supabase, language, toast, navigate]);
+
+  // Function to load temporary data (messages, reviews, etc.)
+  const loadTemporaryData = () => {
+    // Load listings
     const savedListings = localStorage.getItem(USER_LISTINGS_KEY);
     if (savedListings) {
       try {
@@ -116,15 +135,20 @@ const UserProfile = () => {
         setUserListings(listingsData);
       } catch (error) {
         console.error('Error loading user listings:', error);
+        setUserListings([]);
       }
+    } else {
+      setUserListings([]);
     }
     
+    // Load messages
     const savedMessages = localStorage.getItem(USER_MESSAGES_KEY);
     if (savedMessages) {
       try {
         setMessages(JSON.parse(savedMessages));
       } catch (error) {
         console.error('Error loading messages:', error);
+        setMessages([]);
       }
     } else {
       const exampleMessages = [
@@ -140,12 +164,14 @@ const UserProfile = () => {
       localStorage.setItem(USER_MESSAGES_KEY, JSON.stringify(exampleMessages));
     }
     
+    // Load reviews
     const savedReviews = localStorage.getItem(USER_REVIEWS_KEY);
     if (savedReviews) {
       try {
         setReviews(JSON.parse(savedReviews));
       } catch (error) {
         console.error('Error loading reviews:', error);
+        setReviews([]);
       }
     } else {
       const exampleReviews = [
@@ -161,12 +187,14 @@ const UserProfile = () => {
       localStorage.setItem(USER_REVIEWS_KEY, JSON.stringify(exampleReviews));
     }
     
+    // Load notifications
     const savedNotifications = localStorage.getItem(USER_NOTIFICATIONS_KEY);
     if (savedNotifications) {
       try {
         setNotifications(JSON.parse(savedNotifications));
       } catch (error) {
         console.error('Error loading notifications:', error);
+        setNotifications([]);
       }
     } else {
       const exampleNotifications = [
@@ -188,7 +216,7 @@ const UserProfile = () => {
       setNotifications(exampleNotifications);
       localStorage.setItem(USER_NOTIFICATIONS_KEY, JSON.stringify(exampleNotifications));
     }
-  }, [authUser, supabase, appContextLoading, language, toast]);
+  };
   
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -294,35 +322,9 @@ const UserProfile = () => {
     }
   };
   
-  const handlePasswordChange = () => {
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: language === 'ru' ? 'Ошибка' : 'Қате',
-        description: language === 'ru' 
-          ? 'Пароли не совпадают' 
-          : 'Құпия сөздер сәйкес келмейді',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    // Here would be the API call to change the password
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    
-    toast({
-      title: language === 'ru' ? 'Пароль обновлен' : 'Құпия сөз жаңартылды',
-      description: language === 'ru' 
-        ? 'Ваш пароль был успешно изменен' 
-        : 'Сіздің құпия сөзіңіз сәтті өзгертілді',
-    });
-  };
-  
   const handleLanguageChange = (lang: 'ru' | 'kz') => {
     if (language !== lang) {
-      setLanguage(lang);
-      
+      // This should be handled by AppContext
       toast({
         title: lang === 'ru' ? 'Язык изменен' : 'Тіл өзгертілді',
         description: lang === 'ru' 
@@ -344,10 +346,6 @@ const UserProfile = () => {
     }).format(date);
   };
   
-  const formatPrice = (price: number) => {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' ₸';
-  };
-  
   const markNotificationAsRead = (id: number) => {
     const updatedNotifications = notifications.map(notification => {
       if (notification.id === id) {
@@ -363,6 +361,29 @@ const UserProfile = () => {
   const getUnreadCount = (items: any[]) => {
     return items.filter(item => !item.read).length;
   };
+
+  // Show loading spinner while checking authentication or loading profile
+  if (authLoading || isLoadingProfile) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">
+              {language === 'ru' ? 'Загрузка...' : 'Жүктеу...'}
+            </p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // If user is not authenticated, this should not render (redirect happens in useEffect)
+  if (!authUser) {
+    return null;
+  }
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -412,9 +433,13 @@ const UserProfile = () => {
                         </div>
                       )}
                     </div>
-                    <h2 className="text-xl font-bold">{firstName} {lastName}</h2>
+                    <h2 className="text-xl font-bold">
+                      {firstName || lastName ? `${firstName} ${lastName}` : (
+                        language === 'ru' ? 'Пользователь' : 'Пайдаланушы'
+                      )}
+                    </h2>
                     <p className="text-sm text-muted-foreground">{email}</p>
-                    <p className="text-sm text-muted-foreground">{phone}</p>
+                    {phone && <p className="text-sm text-muted-foreground">{phone}</p>}
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -595,13 +620,13 @@ const UserProfile = () => {
                               <div className="font-medium text-sm text-muted-foreground mb-1">
                                 {language === 'ru' ? 'Имя' : 'Аты'}
                               </div>
-                              <div>{firstName}</div>
+                              <div>{firstName || (language === 'ru' ? 'Не указано' : 'Көрсетілмеген')}</div>
                             </div>
                             <div>
                               <div className="font-medium text-sm text-muted-foreground mb-1">
                                 {language === 'ru' ? 'Фамилия' : 'Тегі'}
                               </div>
-                              <div>{lastName}</div>
+                              <div>{lastName || (language === 'ru' ? 'Не указано' : 'Көрсетілмеген')}</div>
                             </div>
                           </div>
                           
@@ -616,7 +641,7 @@ const UserProfile = () => {
                             <div className="font-medium text-sm text-muted-foreground mb-1">
                               {language === 'ru' ? 'Телефон' : 'Телефон'}
                             </div>
-                            <div>{phone}</div>
+                            <div>{phone || (language === 'ru' ? 'Не указано' : 'Көрсетілмеген')}</div>
                           </div>
                         </div>
                       )}
