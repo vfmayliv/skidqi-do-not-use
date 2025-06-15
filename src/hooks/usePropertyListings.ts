@@ -1,28 +1,7 @@
 
 import { useState } from 'react';
 import { useSupabase } from '@/contexts/SupabaseContext';
-
-// Types for property listing filters
-type PropertyListingFilters = {
-  propertyTypes?: string[];
-  dealType?: string;
-  priceRange?: { min?: number; max?: number; };
-  areaRange?: { min?: number; max?: number; };
-  floorRange?: { min?: number; max?: number; };
-  cityId?: number;
-  regionId?: number;
-  microdistrictId?: number;
-  buildingTypes?: string[];
-  renovationTypes?: string[];
-  bathroomTypes?: string[];
-  hasPhoto?: boolean;
-  furnished?: boolean;
-  allowPets?: boolean;
-  hasParking?: boolean;
-  hasBalcony?: boolean;
-  hasElevator?: boolean;
-  sortBy?: string;
-};
+import { PropertyListingFilters } from '@/utils/filterTypeConverters';
 
 // Sort options for property listings
 type PropertySortOptions = 'newest' | 'price_asc' | 'price_desc' | 'area_asc' | 'area_desc';

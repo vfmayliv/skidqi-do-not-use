@@ -6,6 +6,7 @@ import PropertyFilters from '@/components/property/PropertyFilters';
 import { useAppStore } from '@/stores/useAppStore';
 import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { usePropertyListings } from '@/hooks/usePropertyListings';
+import { convertToPropertyListingFilters } from '@/utils/filterTypeConverters';
 import { 
   PropertyType,
   BuildingType,
@@ -78,7 +79,8 @@ export default function PropertyPage() {
   // Load property listings when filters change
   useEffect(() => {
     console.log('🔄 Loading property listings with filters:', filters);
-    getPropertyListings(filters, filters.sortBy || 'newest', 50, 0);
+    const convertedFilters = convertToPropertyListingFilters(filters);
+    getPropertyListings(convertedFilters, filters.sortBy || 'newest', 50, 0);
   }, [filters, getPropertyListings]);
 
   // Initialize filters from URL
@@ -115,7 +117,8 @@ export default function PropertyPage() {
 
   const handleSearch = () => {
     console.log('🔍 Search triggered with filters:', filters);
-    getPropertyListings(filters, filters.sortBy || 'newest', 50, 0);
+    const convertedFilters = convertToPropertyListingFilters(filters);
+    getPropertyListings(convertedFilters, filters.sortBy || 'newest', 50, 0);
   };
 
   // Process listings to ensure compatibility with PropertyCard
