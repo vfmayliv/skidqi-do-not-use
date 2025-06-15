@@ -56,6 +56,41 @@ const TABLE_MAPPING = {
   'municipal': { brands: 'municipal_brands', models: 'municipal_models' }
 };
 
+// Функция для загрузки всех записей из таблицы с пагинацией
+const fetchAllRecords = async (tableName: string) => {
+  let allRecords: any[] = [];
+  let from = 0;
+  const pageSize = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('*')
+      .range(from, from + pageSize - 1)
+      .order('name');
+
+    if (error) {
+      console.error(`Error fetching ${tableName}:`, error);
+      throw error;
+    }
+
+    if (data && data.length > 0) {
+      allRecords = [...allRecords, ...data];
+      from += pageSize;
+      
+      // Если получили меньше записей чем размер страницы, значит это последняя страница
+      if (data.length < pageSize) {
+        hasMore = false;
+      }
+    } else {
+      hasMore = false;
+    }
+  }
+
+  return allRecords;
+};
+
 export const useTransportData = (vehicleType: string = 'passenger'): TransportData => {
   const [data, setData] = useState<TransportData>({
     brands: [],
@@ -77,7 +112,7 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
             brands: [],
             models: [],
             loading: false,
-            error: null // Убираем ошибку, чтобы не ломать интерфейс
+            error: null
           });
           return;
         }
@@ -85,39 +120,12 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
         console.log('Using table config:', tableConfig);
 
         // Загружаем бренды
-        const { data: brandsData, error: brandsError } = await supabase
-          .from(tableConfig.brands as any)
-          .select('*')
-          .order('name');
-
-        if (brandsError) {
-          console.error('Error loading brands:', brandsError);
-          // Не выбрасываем ошибку, продолжаем работу
-          setData({
-            brands: [],
-            models: [],
-            loading: false,
-            error: null
-          });
-          return;
-        }
-
+        const brandsData = await fetchAllRecords(tableConfig.brands);
         console.log('Loaded brands:', brandsData?.length || 0);
 
-        // Загружаем ВСЕ модели без ограничений
-        // Используем range для получения большого количества записей
-        const { data: modelsData, error: modelsError } = await supabase
-          .from(tableConfig.models as any)
-          .select('*')
-          .range(0, 50000) // Устанавливаем большой диапазон для получения всех записей
-          .order('name');
-
-        if (modelsError) {
-          console.error('Error loading models:', modelsError);
-          // Продолжаем с брендами даже если модели не загрузились
-        }
-
-        console.log('Loaded ALL models:', modelsData?.length || 0);
+        // Загружаем ВСЕ модели с помощью пагинации
+        const modelsData = await fetchAllRecords(tableConfig.models);
+        console.log('Loaded ALL models with pagination:', modelsData?.length || 0);
 
         // Преобразуем данные в единый формат, обрабатываем как integer, так и UUID ID
         const transformedBrands: Brand[] = (brandsData || []).map((brand: any) => ({
