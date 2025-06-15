@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase, Listing } from '@/lib/supabase';
 import { useSupabase } from '@/contexts/SupabaseContext';
@@ -65,7 +66,7 @@ type PaginationMeta = {
 };
 
 export function useListings() {
-  const { supabaseClient: supabase, user } = useSupabase();
+  const { supabase, user } = useSupabase();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

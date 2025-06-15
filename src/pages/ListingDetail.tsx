@@ -181,10 +181,10 @@ export default function ListingDetail() {
             targetListing = {
               ...mockListing,
               seller: {
-                name: mockListing.seller.name,
-                phone: mockListing.seller.phone,
-                rating: mockListing.seller.rating,
-                reviews: mockListing.seller.reviews,
+                name: mockListing.seller?.name || 'Продавец',
+                phone: mockListing.seller?.phone || '+7 XXX XXX XX XX',
+                rating: mockListing.seller?.rating || 4.8,
+                reviews: mockListing.seller?.reviews || 25,
                 memberSince: '2022',
                 response: language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді',
                 lastOnline: language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'
@@ -203,10 +203,10 @@ export default function ListingDetail() {
           targetListing = {
             ...supabaseListing,
             seller: {
-              name: supabaseListing.seller.name,
-              phone: supabaseListing.seller.phone,
-              rating: supabaseListing.seller.rating,
-              reviews: supabaseListing.seller.reviews,
+              name: 'Продавец',
+              phone: supabaseListing.phone || '+7 XXX XXX XX XX',
+              rating: 4.8,
+              reviews: 25,
               memberSince: '2022',
               response: language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді',
               lastOnline: language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'
@@ -219,10 +219,10 @@ export default function ListingDetail() {
             targetListing = {
               ...mockListing,
               seller: {
-                name: mockListing.seller.name,
-                phone: mockListing.seller.phone,
-                rating: mockListing.seller.rating,
-                reviews: mockListing.seller.reviews,
+                name: mockListing.seller?.name || 'Продавец',
+                phone: mockListing.seller?.phone || '+7 XXX XXX XX XX',
+                rating: mockListing.seller?.rating || 4.8,
+                reviews: mockListing.seller?.reviews || 25,
                 memberSince: '2022',
                 response: language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береди',
                 lastOnline: language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'
