@@ -104,10 +104,12 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
 
         console.log('Loaded brands:', brandsData?.length || 0);
 
-        // Загружаем все модели без лимита
+        // Загружаем ВСЕ модели без ограничений
+        // Используем range для получения большого количества записей
         const { data: modelsData, error: modelsError } = await supabase
           .from(tableConfig.models as any)
           .select('*')
+          .range(0, 50000) // Устанавливаем большой диапазон для получения всех записей
           .order('name');
 
         if (modelsError) {
@@ -115,7 +117,7 @@ export const useTransportData = (vehicleType: string = 'passenger'): TransportDa
           // Продолжаем с брендами даже если модели не загрузились
         }
 
-        console.log('Loaded models:', modelsData?.length || 0);
+        console.log('Loaded ALL models:', modelsData?.length || 0);
 
         // Преобразуем данные в единый формат, обрабатываем как integer, так и UUID ID
         const transformedBrands: Brand[] = (brandsData || []).map((brand: any) => ({
