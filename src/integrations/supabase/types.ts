@@ -1033,70 +1033,151 @@ export type Database = {
       }
       listings: {
         Row: {
+          address: string | null
+          allow_pets: boolean | null
+          area: number | null
+          bathroom_type: string | null
+          building_type: string | null
           category_id: number | null
+          ceiling_height: number | null
           city_id: number | null
           created_at: string | null
+          deal_type: string | null
           description: string
           discount_percent: number | null
           discount_price: number | null
+          district_id: string | null
           expires_at: string | null
+          floor: number | null
+          furnished: boolean | null
+          has_balcony: boolean | null
+          has_elevator: boolean | null
+          has_parking: boolean | null
+          has_playground: boolean | null
+          has_separate_entrance: boolean | null
           id: string
           images: string[] | null
+          is_corner: boolean | null
           is_free: boolean | null
           is_premium: boolean | null
+          is_studio: boolean | null
+          latitude: number | null
+          longitude: number | null
           microdistrict_id: number | null
           phone: string | null
+          property_type: string | null
+          region_id: number | null
           regular_price: number | null
+          renovation_type: string | null
+          rooms: number | null
+          security_guarded: boolean | null
           source_link: string | null
           status: string | null
           title: string
+          total_floors: number | null
           updated_at: string | null
           user_id: string
+          utilities_included: boolean | null
           views: number | null
+          year_built: number | null
         }
         Insert: {
+          address?: string | null
+          allow_pets?: boolean | null
+          area?: number | null
+          bathroom_type?: string | null
+          building_type?: string | null
           category_id?: number | null
+          ceiling_height?: number | null
           city_id?: number | null
           created_at?: string | null
+          deal_type?: string | null
           description: string
           discount_percent?: number | null
           discount_price?: number | null
+          district_id?: string | null
           expires_at?: string | null
+          floor?: number | null
+          furnished?: boolean | null
+          has_balcony?: boolean | null
+          has_elevator?: boolean | null
+          has_parking?: boolean | null
+          has_playground?: boolean | null
+          has_separate_entrance?: boolean | null
           id?: string
           images?: string[] | null
+          is_corner?: boolean | null
           is_free?: boolean | null
           is_premium?: boolean | null
+          is_studio?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           microdistrict_id?: number | null
           phone?: string | null
+          property_type?: string | null
+          region_id?: number | null
           regular_price?: number | null
+          renovation_type?: string | null
+          rooms?: number | null
+          security_guarded?: boolean | null
           source_link?: string | null
           status?: string | null
           title: string
+          total_floors?: number | null
           updated_at?: string | null
           user_id: string
+          utilities_included?: boolean | null
           views?: number | null
+          year_built?: number | null
         }
         Update: {
+          address?: string | null
+          allow_pets?: boolean | null
+          area?: number | null
+          bathroom_type?: string | null
+          building_type?: string | null
           category_id?: number | null
+          ceiling_height?: number | null
           city_id?: number | null
           created_at?: string | null
+          deal_type?: string | null
           description?: string
           discount_percent?: number | null
           discount_price?: number | null
+          district_id?: string | null
           expires_at?: string | null
+          floor?: number | null
+          furnished?: boolean | null
+          has_balcony?: boolean | null
+          has_elevator?: boolean | null
+          has_parking?: boolean | null
+          has_playground?: boolean | null
+          has_separate_entrance?: boolean | null
           id?: string
           images?: string[] | null
+          is_corner?: boolean | null
           is_free?: boolean | null
           is_premium?: boolean | null
+          is_studio?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           microdistrict_id?: number | null
           phone?: string | null
+          property_type?: string | null
+          region_id?: number | null
           regular_price?: number | null
+          renovation_type?: string | null
+          rooms?: number | null
+          security_guarded?: boolean | null
           source_link?: string | null
           status?: string | null
           title?: string
+          total_floors?: number | null
           updated_at?: string | null
           user_id?: string
+          utilities_included?: boolean | null
           views?: number | null
+          year_built?: number | null
         }
         Relationships: [
           {
@@ -1118,6 +1199,13 @@ export type Database = {
             columns: ["microdistrict_id"]
             isOneToOne: false
             referencedRelation: "microdistricts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
             referencedColumns: ["id"]
           },
         ]
@@ -2179,6 +2267,85 @@ export type Database = {
           p_level: number
         }
         Returns: string
+      }
+      search_property_listings: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_property_types?: string[]
+          p_deal_type?: string
+          p_min_price?: number
+          p_max_price?: number
+          p_min_area?: number
+          p_max_area?: number
+          p_min_rooms?: number
+          p_max_rooms?: number
+          p_min_floor?: number
+          p_max_floor?: number
+          p_city_id?: number
+          p_region_id?: number
+          p_microdistrict_id?: number
+          p_building_types?: string[]
+          p_renovation_types?: string[]
+          p_bathroom_types?: string[]
+          p_has_photo?: boolean
+          p_furnished?: boolean
+          p_allow_pets?: boolean
+          p_has_parking?: boolean
+          p_has_balcony?: boolean
+          p_has_elevator?: boolean
+          p_sort_by?: string
+          p_sort_order?: string
+        }
+        Returns: {
+          id: string
+          title: string
+          description: string
+          regular_price: number
+          discount_price: number
+          discount_percent: number
+          is_free: boolean
+          category_id: number
+          user_id: string
+          city_id: number
+          microdistrict_id: number
+          region_id: number
+          images: string[]
+          status: string
+          created_at: string
+          updated_at: string
+          expires_at: string
+          views: number
+          phone: string
+          is_premium: boolean
+          address: string
+          latitude: number
+          longitude: number
+          area: number
+          rooms: number
+          floor: number
+          total_floors: number
+          deal_type: string
+          property_type: string
+          building_type: string
+          renovation_type: string
+          bathroom_type: string
+          year_built: number
+          ceiling_height: number
+          has_balcony: boolean
+          has_elevator: boolean
+          has_parking: boolean
+          allow_pets: boolean
+          furnished: boolean
+          utilities_included: boolean
+          security_guarded: boolean
+          has_playground: boolean
+          has_separate_entrance: boolean
+          is_corner: boolean
+          is_studio: boolean
+          district_id: string
+          total_count: number
+        }[]
       }
       transliterate_cyrillic: {
         Args: { "": string }
