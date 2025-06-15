@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { categories } from '@/data/categories';
@@ -216,8 +215,10 @@ export function CategoryMenu() {
                     </Link>
                     
                     {isLoading(category.id) ? (
-                      <div className="p-2 text-sm text-gray-500">Загрузка...</div>
-                    ) : (
+                      <div className="p-2 text-sm text-gray-500">
+                        {language === 'ru' ? 'Загрузка...' : 'Жүктелуде...'}
+                      </div>
+                    ) : subcategories.length > 0 ? (
                       subcategories.map((subcat) => (
                         <Link
                           key={subcat.id}
@@ -228,6 +229,10 @@ export function CategoryMenu() {
                           <span className="text-sm">{subcat.name[language]}</span>
                         </Link>
                       ))
+                    ) : (
+                      <div className="p-2 text-sm text-gray-500">
+                        {language === 'ru' ? 'Подкатегории не найдены' : 'Ішкі санаттар табылмады'}
+                      </div>
                     )}
                   </div>
                 </PopoverContent>
