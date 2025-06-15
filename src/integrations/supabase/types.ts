@@ -1376,6 +1376,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          link_to: string | null
+          related_item_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link_to?: string | null
+          related_item_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link_to?: string | null
+          related_item_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ojpw: {
         Row: {
           created_at: string | null
@@ -1482,8 +1518,10 @@ export type Database = {
           city_id: number | null
           created_at: string | null
           email: string | null
+          first_name: string | null
           full_name: string | null
           id: string
+          last_name: string | null
           phone: string | null
           updated_at: string | null
         }
@@ -1492,8 +1530,10 @@ export type Database = {
           city_id?: number | null
           created_at?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
           id: string
+          last_name?: string | null
           phone?: string | null
           updated_at?: string | null
         }
@@ -1502,8 +1542,10 @@ export type Database = {
           city_id?: number | null
           created_at?: string | null
           email?: string | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
+          last_name?: string | null
           phone?: string | null
           updated_at?: string | null
         }
@@ -1534,6 +1576,44 @@ export type Database = {
           name_ru?: string
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string
+          listing_id: string | null
+          rating: number
+          reviewer_id: string
+          target_user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          rating: number
+          reviewer_id: string
+          target_user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          rating?: number
+          reviewer_id?: string
+          target_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scooter_brands: {
         Row: {

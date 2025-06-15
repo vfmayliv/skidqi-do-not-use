@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAppContext } from '@/contexts/AppContext';
+import { useSupabase } from '@/contexts/SupabaseContext';
+import { User } from '@supabase/supabase-js';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { processImageForUpload, uploadImage } from '@/utils/imageUtils';
-import { Bell, MessageSquare, User } from 'lucide-react';
+import { Bell, MessageSquare, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Listing } from '@/types/listingType';
 
@@ -19,8 +21,7 @@ import { MessagesInbox } from '@/components/profile/MessagesInbox';
 import { ReviewsList } from '@/components/profile/ReviewsList';
 import { NotificationsList } from '@/components/profile/NotificationsList';
 
-// User profile localstorage key
-const USER_PROFILE_STORAGE_KEY = 'userProfileData';
+// User listings and messages localStorage keys (temporary)
 const USER_LISTINGS_KEY = 'userListings';
 const USER_MESSAGES_KEY = 'userMessages';
 const USER_REVIEWS_KEY = 'userReviews';
@@ -28,57 +29,86 @@ const USER_NOTIFICATIONS_KEY = 'userNotifications';
 
 const UserProfile = () => {
   const { language, setLanguage } = useAppContext();
+  const { user: authUser, supabase, loading: appContextLoading } = useSupabase();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('profile');
   
-  // User state
-  const [firstName, setFirstName] = useState('John');
-  const [lastName, setLastName] = useState('Doe');
-  const [email, setEmail] = useState('john.doe@example.com');
-  const [phone, setPhone] = useState('+7 (777) 123-45-67');
+  // User profile state
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   
   // Profile photo
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
-  const [newProfilePhoto, setNewProfilePhoto] = useState<File | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [newAvatarFile, setNewAvatarFile] = useState<File | null>(null);
   
   // Password change
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // User listings
+  // User listings (temporary localStorage)
   const [userListings, setUserListings] = useState<Listing[]>([]);
   
-  // User messages
+  // User messages (temporary localStorage)
   const [messages, setMessages] = useState<any[]>([]);
   
-  // User reviews
+  // User reviews (temporary localStorage)
   const [reviews, setReviews] = useState<any[]>([]);
   
-  // User notifications
+  // User notifications (temporary localStorage)
   const [notifications, setNotifications] = useState<any[]>([]);
   
-  // Load saved profile data and user listings on component mount
+  // Load profile data from Supabase and other data from localStorage
   useEffect(() => {
-    // Load profile data
-    const savedProfile = localStorage.getItem(USER_PROFILE_STORAGE_KEY);
-    if (savedProfile) {
-      try {
-        const profileData = JSON.parse(savedProfile);
-        setFirstName(profileData.firstName || firstName);
-        setLastName(profileData.lastName || lastName);
-        setEmail(profileData.email || email);
-        setPhone(profileData.phone || phone);
-        if (profileData.profilePhoto) {
-          setProfilePhoto(profileData.profilePhoto);
+    if (appContextLoading) return;
+
+    if (authUser && supabase) {
+      setEmail(authUser.email || '');
+
+      const fetchProfileData = async () => {
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, phone, avatar_url')
+            .eq('id', authUser.id)
+            .single();
+
+          if (profileError && profileError.code !== 'PGRST116') {
+            console.error('Ошибка загрузки профиля:', profileError);
+            toast({
+              title: language === 'ru' ? 'Ошибка загрузки профиля' : 'Профильді жүктеу қатесі',
+              description: profileError.message,
+              variant: 'destructive'
+            });
+          } else if (profileData) {
+            setFirstName(profileData.first_name || '');
+            setLastName(profileData.last_name || '');
+            setPhone(profileData.phone || '');
+            setAvatarUrl(profileData.avatar_url || null);
+          }
+        } catch (e) {
+          console.error('Исключение при загрузке профиля:', e);
+          toast({
+            title: language === 'ru' ? 'Исключение при загрузке профиля' : 'Профильді жүктеу кезіндегі қате',
+            description: (e as Error).message,
+            variant: 'destructive'
+          });
         }
-      } catch (error) {
-        console.error('Error loading profile data:', error);
-      }
+      };
+
+      fetchProfileData();
+    } else if (!appContextLoading) {
+      toast({
+        title: language === 'ru' ? 'Сессия не найдена' : 'Сессия табылмады',
+        description: language === 'ru' ? 'Пожалуйста, войдите в систему.' : 'Жүйеге кіріңіз.',
+        variant: 'destructive'
+      });
     }
-    
-    // Load user listings
+
+    // Load other data from localStorage (temporary)
     const savedListings = localStorage.getItem(USER_LISTINGS_KEY);
     if (savedListings) {
       try {
@@ -89,7 +119,6 @@ const UserProfile = () => {
       }
     }
     
-    // Load messages
     const savedMessages = localStorage.getItem(USER_MESSAGES_KEY);
     if (savedMessages) {
       try {
@@ -98,7 +127,6 @@ const UserProfile = () => {
         console.error('Error loading messages:', error);
       }
     } else {
-      // Добавляем пример сообщения
       const exampleMessages = [
         {
           id: 1,
@@ -112,7 +140,6 @@ const UserProfile = () => {
       localStorage.setItem(USER_MESSAGES_KEY, JSON.stringify(exampleMessages));
     }
     
-    // Load reviews
     const savedReviews = localStorage.getItem(USER_REVIEWS_KEY);
     if (savedReviews) {
       try {
@@ -121,7 +148,6 @@ const UserProfile = () => {
         console.error('Error loading reviews:', error);
       }
     } else {
-      // Добавляем пример отзыва
       const exampleReviews = [
         {
           id: 1,
@@ -135,7 +161,6 @@ const UserProfile = () => {
       localStorage.setItem(USER_REVIEWS_KEY, JSON.stringify(exampleReviews));
     }
     
-    // Load notifications
     const savedNotifications = localStorage.getItem(USER_NOTIFICATIONS_KEY);
     if (savedNotifications) {
       try {
@@ -144,7 +169,6 @@ const UserProfile = () => {
         console.error('Error loading notifications:', error);
       }
     } else {
-      // Добавляем пример уведомлений
       const exampleNotifications = [
         {
           id: 1,
@@ -164,19 +188,19 @@ const UserProfile = () => {
       setNotifications(exampleNotifications);
       localStorage.setItem(USER_NOTIFICATIONS_KEY, JSON.stringify(exampleNotifications));
     }
-  }, [language]);
+  }, [authUser, supabase, appContextLoading, language, toast]);
   
-  const handleProfilePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Convert to WebP format
+      // Process image for upload
       const processedFile = await processImageForUpload(file);
       
       // Create a preview URL
       const previewUrl = URL.createObjectURL(processedFile);
-      setProfilePhoto(previewUrl);
-      setNewProfilePhoto(processedFile);
+      setAvatarUrl(previewUrl);
+      setNewAvatarFile(processedFile);
       
       toast({
         title: language === 'ru' ? 'Фото загружено' : 'Фото жүктелді',
@@ -185,25 +209,89 @@ const UserProfile = () => {
     }
   };
   
-  const handleSaveProfile = () => {
-    // Save profile data to local storage
-    const profileData = {
-      firstName,
-      lastName,
-      email,
-      phone,
-      profilePhoto
+  const handleProfileSave = async () => {
+    if (!authUser || !supabase) {
+      toast({
+        title: language === 'ru' ? 'Ошибка' : 'Қате',
+        description: language === 'ru' ? 'Сессия не найдена' : 'Сессия табылмады',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Basic validation
+    if (!firstName.trim() || !lastName.trim()) {
+      toast({
+        title: language === 'ru' ? 'Ошибка валидации' : 'Тексеру қатесі',
+        description: language === 'ru' ? 'Имя и фамилия обязательны' : 'Аты мен тегі міндетті',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    let processedAvatarUrl = avatarUrl;
+
+    // Handle avatar upload if new file is selected
+    if (newAvatarFile) {
+      try {
+        const filePath = `avatars/${authUser.id}/${Date.now()}_${newAvatarFile.name}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, newAvatarFile, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+
+        processedAvatarUrl = data.publicUrl;
+        setAvatarUrl(processedAvatarUrl);
+        setNewAvatarFile(null);
+
+      } catch (error) {
+        console.error('Ошибка загрузки аватара:', error);
+        toast({
+          title: language === 'ru' ? 'Ошибка загрузки аватара' : 'Аватар жүктеу қатесі',
+          description: (error as Error).message,
+          variant: 'destructive'
+        });
+        return;
+      }
+    }
+
+    // Save profile data to Supabase
+    const profileDataToSave = {
+      id: authUser.id,
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
+      phone: phone.trim(),
+      avatar_url: processedAvatarUrl,
+      updated_at: new Date().toISOString(),
     };
-    
-    localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(profileData));
-    setIsEditingProfile(false);
-    
-    toast({
-      title: language === 'ru' ? 'Профиль обновлен' : 'Профиль жаңартылды',
-      description: language === 'ru' 
-        ? 'Ваш профиль был успешно обновлен' 
-        : 'Сіздің профиліңіз сәтті жаңартылды',
-    });
+
+    try {
+      const { error: saveError } = await supabase
+        .from('profiles')
+        .upsert(profileDataToSave, { onConflict: 'id' });
+
+      if (saveError) throw saveError;
+
+      setIsEditingProfile(false);
+      
+      toast({
+        title: language === 'ru' ? 'Профиль сохранен' : 'Профиль сақталды',
+        description: language === 'ru' ? 'Ваши данные профиля успешно обновлены' : 'Сіздің профиль деректеріңіз сәтті жаңартылды',
+      });
+    } catch (error) {
+      console.error('Ошибка сохранения профиля:', error);
+      toast({
+        title: language === 'ru' ? 'Ошибка сохранения профиля' : 'Профильді сақтау қатесі',
+        description: (error as Error).message,
+        variant: 'destructive'
+      });
+    }
   };
   
   const handlePasswordChange = () => {
@@ -244,6 +332,7 @@ const UserProfile = () => {
     }
   };
   
+  // Helper functions
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : 'kk-KZ', {
@@ -292,9 +381,9 @@ const UserProfile = () => {
                   <div className="flex flex-col items-center text-center">
                     <div className="relative mb-4">
                       <div className="h-24 w-24 rounded-full bg-gray-200 overflow-hidden">
-                        {profilePhoto ? (
+                        {avatarUrl ? (
                           <img 
-                            src={profilePhoto} 
+                            src={avatarUrl} 
                             alt="Profile" 
                             className="h-full w-full object-cover" 
                           />
@@ -317,7 +406,7 @@ const UserProfile = () => {
                               type="file" 
                               className="hidden" 
                               accept="image/*"
-                              onChange={handleProfilePhotoChange}
+                              onChange={handleAvatarChange}
                             />
                           </label>
                         </div>
@@ -471,8 +560,16 @@ const UserProfile = () => {
                               id="email"
                               type="email"
                               value={email}
-                              onChange={(e) => setEmail(e.target.value)}
+                              readOnly
+                              disabled
+                              className="bg-gray-100 cursor-not-allowed"
                             />
+                            <p className="text-xs text-muted-foreground">
+                              {language === 'ru' 
+                                ? 'Email не может быть изменен через профиль' 
+                                : 'Email профиль арқылы өзгертілмейді'
+                              }
+                            </p>
                           </div>
                           
                           <div className="space-y-2">
@@ -486,7 +583,7 @@ const UserProfile = () => {
                             />
                           </div>
                           
-                          <Button onClick={handleSaveProfile}>
+                          <Button onClick={handleProfileSave}>
                             {language === 'ru' ? 'Сохранить изменения' : 'Өзгерістерді сақтау'}
                           </Button>
                         </div>
