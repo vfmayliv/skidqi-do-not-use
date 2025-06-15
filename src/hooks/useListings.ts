@@ -1,1 +1,333 @@
-CmltcG9ydCB7IHVzZVN0YXRlIH0gZnJvbSAncmVhY3QnOwppbXBvcnQgeyBzdXBhYmFzZSwgTGlzdGluZyB9IGZyb20gJ0AvbGliL3N1cGFiYXNlJzsKaW1wb3J0IHsgdXNlU3VwYWJhc2UgfSBmcm9tICdAL2NvbnRleHRzL1N1cGFiYXNlQ29udGV4dCc7CgovLyDQotC40L/RiyDQtNC70Y8g0L/QsNGA0LDQvNC10YLRgNC+0LIg0YTQuNC70YzRgtGA0LDRhtC40Lgg0L7QsdGK0Y/QstC70LXQvdC40LkKdHlwZSBMaXN0aW5nRmlsdGVycyA9IHsKICBjYXRlZ29yeUlkPzogbnVtYmVyOwogIGNpdHlJZD86IG51bWJlcjsKICBtaWNyb2Rpc3RyaWN0SWQ/OiBudW1iZXI7CiAgcHJpY2VNaW4/OiBudW1iZXI7CiAgcHJpY2VNYXg/OiBudW1iZXI7CiAgcHJpY2VSYW5nZT86IHsgbWluPzogbnVtYmVyOyBtYXg/OiBudW1iZXI7IH07CiAgY29uZGl0aW9uPzogc3RyaW5nOwogIHNlYXJjaFF1ZXJ5Pzogc3RyaW5nOwogIGlzUHJlbWl1bT86IGJvb2xlYW47CiAgaXNGcmVlPzogYm9vbGVhbjsKfTsKCi8vINCi0LjQv9GLINC00LvRjyDQv9Cw0YDQsNC80LXRgtGA0L7QsiDRgdC+0YDRgtC40YDQvtCy0LrQuAp0eXBlIFNvcnRPcHRpb25zID0gJ25ld2VzdCcgfCAncHJpY2VfYXNjJyB8ICdwcmljZV9kZXNjJyB8ICdkaXNjb3VudCc7CgovLyDQpNGD0L3QutGG0LjRjyDQtNC70Y8g0L7Rh9C40YHRgtC60Lgg0LfQvdCw0YfQtdC90LjQuSDQvtGCIFp1c3RhbmQgcHJveHkg0L7QsdGK0LXQutGC0L7Qsgpjb25zdCBjbGVhbkZpbHRlclZhbHVlID0gKHZhbHVlOiBhbnkpOiBhbnkgPT4gewogIGlmICh2YWx1ZSAmJiB0eXBlb2YgdmFsdWUgPT09ICdvYmplY3QnICYmIHZhbHVlLl90eXBlID09PSAndW5kZWZpbmVkJykgewogICAgcmV0dXJuIHVuZGVmaW5lZDsKICB9CiAgaWYgKHZhbHVlICYmIHR5cGVvZiB2YWx1ZSA9PT0gJ29iamVjdCcgJiYgdmFsdWUudmFsdWUgIT09IHVuZGVmaW5lZCkgewogICAgcmV0dXJuIHZhbHVlLnZhbHVlOwogIH0KICByZXR1cm4gdmFsdWU7Cn07CgovLyDQpNGD0L3QutGG0LjRjyDQtNC70Y8g0L7Rh9C40YHRgtC60Lgg0L7QsdGK0LXQutGC0LAg0YTQuNC70YzRgtGA0L7Qsgpjb25zdCBjbGVhbkZpbHRlcnMgPSAoZmlsdGVyczogYW55KTogTGlzdGluZ0ZpbHRlcnMgPT4gewogIGNvbnN0IGNsZWFuZWQ6IGFueSA9IHt9OwogIAogIE9iamVjdC5rZXlzKGZpbHRlcnMpLmZvckVhY2goa2V5ID0+IHsKICAgIGNvbnN0IHZhbHVlID0gY2xlYW5GaWx0ZXJWYWx1ZShmaWx0ZXJzW2tleV0pOwogICAgaWYgKHZhbHVlICE9PSB1bmRlZmluZWQgJiYgdmFsdWUgIT09IG51bGwgJiYgdmFsdWUgIT09ICcnKSB7CiAgICAgIC8vINCe0YHQvtCx0LDRjyDQvtCx0YDQsNCx0L7RgtC60LAg0LTQu9GPIHByaWNlUmFuZ2UKICAgICAgaWYgKGtleSA9PT0gJ3ByaWNlUmFuZ2UnKSB7CiAgICAgICAgY29uc3QgcHJpY2VNaW4gPSBjbGVhblZhbHVlKHZhbHVlLm1pbik7CiAgICAgICAgY29uc3QgcHJpY2VNYXggPSBjbGVhblZhbHVlKHZhbHVlLm1heCk7CiAgICAgICAgaWYgKHByaWNlTWluICE9PSB1bmRlZmluZWQpIHsKICAgICAgICAgIGNsZWFuZWRbJ3ByaWNlTWluJ10gPSBwcmljZU1pbjsKICAgICAgICB9CiAgICAgICAgaWYgKHByaWNlTWF4ICE9PSB1bmRlZmluZWQpIHsKICAgICAgICAgIGNsZWFuZWRbJ3ByaWNlTWF4J10gPSBwcmljZU1heDsKICAgICAgICB9CiAgICAgIH0gZWxzZSB7CiAgICAgICAgY2xlYW5lZFtpZXldID0gdmFsdWU7CiAgICAgIH0KICAgIH0KICB9KTsKCiAgcmV0dXJuIGNsZWFuZWQ7Cn07CgovLyBJbnRlcmZhY2UgZm9yIHBhZ2luYXRpb24gbWV0YWRhdGEKdHlwZSBQYWdpbmF0aW9uTWV0YSA9IHsKICB0b3RhbEl0ZW1zOiBudW1iZXI7CiAgY3VycmVudFBhZ2U6IG51bWJlcjsKICBpdGVtc1BlclBhZ2U6IG51bWJlcjsKICB0b3RhbFBhZ2VzOiBudW1iZXI7Cn07CgpleHBvcnQgZnVuY3Rpb24gdXNlTGlzdGluZ3MoKSB7CiAgY29uc3Qge3N1cGFiYXNlQ2xpZW50OiBzdXBhYmFzZSwgdXNlciB9ID0gdXNlU3VwYWJhc2UoKTsKICBjb25zdCBbbGlzdGluZ3MsIHNldExpc3RpbmdzXSA9IHVzZVN0YXRlPEhpc3RvcnlbTGlzdGluZ10+PihbXSk7CiAgY29uc3QgW2xvYWRpbmcsIHNldExvYWRpbmddID0gdXNlU3RhdGU8Ym9vbGVhbj4oZmFsc2UpOwogIGNvbnN0IFtlcnJvciwgc2V0RXJyb3JdID0gdXNlU3RhdGU8c3RyaW5nIHwgbnVsbD4obnVsbCk7CiAgY29uc3QgW3BhZ2luYXRpb25NZXRhLCBzZXRQYWdpbmF0aW9uTWV0YV0gPSB1c2VTdGF0ZTxQYWdpbmF0aW9uTWV0YSB8IG51bGw+KG51bGwpOwoKICAvLyBHZXQgYWxsIGxpc3RpbmdzIHdpdGggZmlsdGVyaW5nLCBzb3J0aW5nLCBhbmQgcGFnaW5hdGlvbgogIGNvbnN0IGdldExpc3RpbmdzID0gYXN5bmMgKGZpbHRlcnM6IExpc3RpbmdGaWx0ZXJzID0ge30sIHNvcnQ6IFNvcnRPcHRpb25zID0gJ25ld2VzdCcsIHBhZ2U6IG51bWJlciA9IDEsIGxpbWl0OiBudW1iZXIgPSAxMCkgPT4gewogICAgc2V0TG9hZGluZyh0cnVlKTsKICAgIHNldEVycm9yKG51bGwpOwoKICAgIHRyeSB7CiAgICAgIC8vINCn0LXRhNC40YLRjCDRhNC40LvRjNGC0YDQvtCyINC+0LQg0LLRgNC19YHRgtC4IFp1c3RhbmQgcHJveHkKICAgICAgY29uc3QgY2xlYW5lZEZpbHRlcnMgPSBjbGVhbkZpbHRlcnMoZmlsdGVycyk7CiAgICAgIGNvbnNvbGUubG9nKCdDbGVhbmVkIEZpbHRlcnM6JywgY2xlYW5lZEZpbHRlcnMpOwoKICAgICAgbGV0IHF1ZXJ5ID0gc3VwYWJhc2UuZnJvbSgnbGlzdGluZ3MnKS5zZWxlY3QoYAogICAgICAgIGlkLAogICAgICAgIHRpdGxlLAogICAgICAgIGRlc2NyaXB0aW9uLAogICAgICAgIHJlZ3VsYXJfcHJpY2UsCiAgICAgICAgZGlzY291bnRfcHJpY2UsCiAgICAgICAgZGlzY291bnRfcGVyY2VudCwKICAgICAgICBpc19mcmVlLAogICAgICAgIHVzZXJfaWQsCiAgICAgICAgY2l0eV9pZCwKICAgICAgICBtaWNyb2Rpc3RyaWN0X2lkLAogICAgICAgIGltYWdlcywKICAgICAgICBzdGF0dXMsCiAgICAgICAgY3JlYXRlZF9hdCwKICAgICAgICB1cGRhdGVkX2F0LAogICAgICAgIGV4cGlyZXNfYXQsCiAgICAgICAgdmlld3MsCiAgICAgICAgcGhvbmUsCiAgICAgICAgaXNfcHJlbWl1bSwKICAgICAgICBjYXRlZ29yeV9pZCwKICAgICAgICBzb3VyY2VfbGluaywKICAgICAgICBhZGRyZXNzLAogICAgICAgIGxhdGl0dWRlLAogICAgICAgIGxvbmdpdHVkZSwKICAgICAgICBhcmVhLAogICAgICAgIHJvb21zLAogICAgICAgIGZsb29yLAogICAgICAgIHRvdGFsX2Zsb29ycywKICAgICAgICBkZWFsX3R5cGUsCiAgICAgICAgcHJvcGVydHlfdHlwZSwKICAgICAgICBidWlsZGluZ190eXBlLAogICAgICAgIHJlbm92YXRpb25fdHlwZSwKICAgICAgICBiYXRocm9vbV90eXBlLAogICAgICAgIHllYXJfYnVpbHQsCiAgICAgICAgY2VpbGluZ19oZWlnaHQsCiAgICAgICAgaGFzX2JhbGNvbnksCiAgICAgICAgaGFzX2VsZXZhdG9yLAogICAgICAgIGhhc19wYXJraW5nLAogICAgICAgIGFsbG93X3BldHMsCiAgICAgICAgZnVybmlzaGVkLAogICAgICAgIHV0aWxpdGllc19pbmNsdWRlZCwKICAgICAgICBzZWN1cml0eV9ndWFyZGVkLAogICAgICAgIGhhc19wbGF5Z3JvdW5kLAogICAgICAgIGhhc19zZXBhcmF0ZV9lbnRyYW5jZSwKICAgICAgICBpc19jb3JuZXIsCiAgICAgICAgaXNfc3R1ZGlvLAogICAgICAgIHJlZ2lvbl9pZCwKICAgICAgICBkaXN0cmljdF9pZAogICAgICBgLCB7IGNvdW50OiAnZXhhY3QnIH0pOwoKICAgICAgLy8g0JDQv9C/0LDRgtC+0LIg0YTQuNC70YzRgtGA0L7QsgogICAgICBpZiAoY2xlYW5lZEZpbHRlcnMuY2F0ZWdvcnlJZCkgewogICAgICAgIHF1ZXJ5ID0gcXVlcnkuZXEoJ2NhdGVnb3J5X2lkJywgY2xlYW5lZEZpbHRlcnMuY2F0ZWdvcnlJZCk7CiAgICAgIH0KICAgICAgaWYgKGNsZWFuZWRGaWx0ZXJzLmNpdHlJZCkgewogICAgICAgIHF1ZXJ5ID0gcXVlcnkuZXEoJ2NpdHlfaWQnLCBjbGVhbmVkRmlsdGVycy5jaXR5SWQpOwogICAgICB9CiAgICAgIGlmIChjbGVhbmVkRmlsdGVycy5taWNyb2Rpc3RyaWN0SWQpIHsKICAgICAgICBxdWVyeSA9IHF1ZXJ5LmVxKCdtaWNyb2Rpc3RyaWN0X2lkJywgY2xlYW5lZEZpbHRlcnMubWljcm9kaXN0cmljdElkKTsKICAgICAgfQogICAgICBpZiAoY2xlYW5lZEZpbHRlcnMucHJpY2VNaW4pIHsKICAgICAgICBxdWVyeSA9IHF1ZXJ5Lmd0ZSgncmVndWxhcl9wcmljZScsIGNsZWFuZWRGaWx0ZXJzLnByaWNlTWluKTsKICAgICAgfQogICAgICBpZiAoY2xlYW5lZEZpbHRlcnMucHJpY2VNYXgpIHsKICAgICAgICBxdWVyeSA9IHF1ZXJ5Lmx0ZSgncmVndWxhcl9wcmljZScsIGNsZWFuZWRGaWx0ZXJzLnByaWNlTWF4KTsKICAgICAgfQogICAgICBpZiAoY2xlYW5lZEZpbHRlcnMuY29uZGl0aW9uKSB7CiAgICAgICAgLy8g0J/QvtC00LXRgNC20LjQvCDQtNC70Y8gY29uZGl0aW9uCiAgICAgIH0KICAgICAgaWYgKGNsZWFuZWRGaWx0ZXJzLnNlYXJjaFF1ZXJ5KSB7CiAgICAgICAgcXVlcnkgPSBxdWVyeS5pbGlrZSgndGl0bGUnLCBgJSR7Y2xlYW5lZEZpbHRlcnMuc2VhcmNoUXVlcnl9JWApOwogICAgICB9CiAgICAgIGlmIChjbGVhbmVkRmlsdGVycy5pc1ByZW1pdW0gIT09IHVuZGVmaW5lZCkgewogICAgICAgIHF1ZXJ5ID0gcXVlcnkuZXEoJ2lzX3ByZW1pdW0nLCBjbGVhbmVkRmlsdGVycy5pc1ByZW1pdW0pOwogICAgICB9CiAgICAgIGlmIChjbGVhbmVkRmlsdGVycy5pc0ZyZWUgIT09IHVuZGVmaW5lZCkgewogICAgICAgIHF1ZXJ5ID0gcXVlcnkuZXEoJ2lzX2ZyZWUnLCBjbGVhbmVkRmlsdGVycy5pc0ZyZWUpOwogICAgICB9CiAgICAgIAogICAgICAvLyDQodC+0YDRgtC40LLQvtC60LAKICAgICAgaWYgKHNvcnQgPT09ICduZXdlc3QnKSB7CiAgICAgICAgcXVlcnkgPSBxdWVyeS5vcmRlcignY3JlYXRlZF9hdCcsIHsgYXNjZW5kaW5nOiBmYWxzZSB9KTsKICAgICAgfSBlbHNlIGlmIChzb3J0ID09PSAncHJpY2VfYXNjJykgewogICAgICAgIHF1ZXJ5ID0gcXVlcnkub3JkZXIoJ3JlZ3VsYXJfcHJpY2UnLCB7IGFzY2VuZGluZzogdHJ1ZSB9KTsKICAgICAgfSBlbHNlIGlmIChzb3J0ID09PSAncHJpY2VfZGVzYycpIHsKICAgICAgICBxdWVyeSA9IHF1ZXJ5Lm9yZGVyKCdyZWd1bGFyX3ByaWNlJywgeyBhc2NlbmRpbmc6IGZhbHNlIH0pOwogICAgICB9CiAgICAgIC8vIFRPRE86INC00L7QsdC10LTQuNGC0LUg0YHQvtGA0YLQuNCy0L7QutCwINC/0L4g0LTQuNGA0LPQvtC90YLQsApKICAgICAgCiAgICAgIC8vINCf0LDQsNC90LDQttC40Y8KICAgICAgY29uc3QgZnJvbSA9IChwYWdlIC0gMSkgKiBsaW1pdDsKICAgICAgY29uc3QgdG8gPSBmcm9tICsgbGltaXQgLSAxOwogICAgICBxdWVyeSA9IHF1ZXJ5LnJhbmdlKGZyb20sIHRvKTsKCiAgICAgIGNvbnN0IHsgZGF0YSwgZXJyb3IsIGNvdW50IH0gPSBhd2FpdCBxdWVyeTsKCiAgICAgIGlmIChlcnJvcikgewogICAgICAgIHRocm93IGVycm9yOwogICAgICB9CgogICAgICBzZXRMaXN0aW5ncyhkYXRhIGFzIEhpc3RvcnlbTGlzdGluZ10+IHx8IFtdKTsKICAgICAgc2V0UGFnaW5hdGlvbk1ldGEoewogICAgICAgIHRvdGFsSXRlbXM6IGNvdW50IHx8IDAsCiAgICAgICAgY3VycmVudFBhZ2U6IHBhZ2UsCiAgICAgICAgaXRlbXNQZXJQYWdlOiBsaW1pdCwKICAgICAgICB0b3RhbFBhZ2VzOiBNYXRoLmNlaWwoKGNvdW50IHx8IDApIC8gbGltaXQpLAogICAgICB9KTsKICAgIH0gY2F0Y2ggKGVycjogYW55KSB7CiAgICAgIHNldEVycm9yKGVyci5tZXNzYWdlKTsKICAgICAgY29uc29sZS5lcnJvcignRXJyb3IgZmV0Y2hpbmcgbGlzdGluZ3M6JywgZXJyKTsKICAgIH0gZmluYWxseSB7CiAgICAgIHNldExvYWRpbmcoZmFsc2UpOwogICAgfQogIH07CgogIC8vIEdldCBhIHNpbmdsZSBsaXN0aW5nIGJ5IElECiAgY29uc3QgZ2V0TGlzdGluZ0J5SWQgPSBhc3luYyAoaWQ6IHN0cmluZykgPT4gewogICAgc2V0TG9hZGluZyh0cnVlKTsKICAgIHNldEVycm9yKG51bGwpOwoKICAgIHRyeSB7CiAgICAgIGNvbnN0IHsgZGF0YSwgZXJyb3IgfSA9IGF3YWl0IHN1cGFiYXNlLmZyb20oJ2xpc3RpbmdzJykuc2VsZWN0KCcqJykucWludCgnZXEnLCAnY29sdW1uTmFtZScsIGlkKS5zaW5nbGUoKTsKICAgICAgCiAgICAgIGlmIChlcnJvcikgewogICAgICAgIHRocm93IGVycm9yOwogICAgICB9CgogICAgICByZXR1cm4gZGF0YSBhcyBMaXN0aW5nIHwgbnVsbDsKICAgIH0gY2F0Y2ggKGVycjogYW55KSB7CiAgICAgIHNldEVycm9yKGVyci5tZXNzYWdlKTsKICAgICAgY29uc29sZS5lcnJvcignRXJyb3IgZmV0Y2hpbmcgbGlzdGluZyBieSBJRDogJywgZXJyKTsKICAgICAgcmV0dXJuIG51bGw7CiAgICB9IGZpbmFsbHkgewogICAgICBzZXRMb2FkaW5nKGZhbHNlKTsKICAgIH0KICB9OwoKICAvLyBDcmVhdGUgYSBuZXcgbGlzdGluZwogIGNvbnN0IGNyZWF0ZUxpc3RpbmcgPSBhc3luYyAobGlzdGluZ0RhdGE6IE9taXQ8TGlzdGluZywgJ2lkJyB8ICdjcmVhdGVkX2F0JyB8ICd1cGRhdGVkX2F0Jz4pID0+IHsKICAgIHNldExvYWRpbmcodHJ1ZSk7CiAgICBzZXRFcnJvcihudWxsKTsKCiAgICB0cnkgewogICAgICBjb25zdCB7IGRhdGEsIGVycm9yIH0gPSBhd2FpdCBzdXBhYmFzZS5mcm9tKCdsaXN0aW5ncycpLmluc2VydChbbGlzdGluZ0RhdGFdKS5zZWxlY3QoKTsKCiAgICAgIGlmIChlcnJvcikgewogICAgICAgIHRocm93IGVycm9yOwogICAgICB9CgogICAgICBpZiAoZGF0YSAmJiBkYXRhLmxlbmd0aCA+IDApIHsKICAgICAgICBzZXRMaXN0aW5ncyhvcCA9PiBbLi4ub3AsIGRhdGFbMF1dKTsKICAgICAgICByZXR1cm4gZGF0YVswXSBhcyBMaXN0aW5nOwogICAgICB9CiAgICAgIHJldHVybiBudWxsOwogICAgfSBjYXRjaCAoZXJyOiBhbnkpIHsKICAgICAgc2V0RXJyb3IoZXJyLm1lc3NhZ2UpOwogICAgICBjb25zb2xlLmVycm9yKCdFcnJvciBjcmVhdGluZyBsaXN0aW5nOicsIGVycik7CiAgICAgIHJldHVybiBudWxsOwogICAgfSBmaW5hbGx5IHsKICAgICAgc2V0TG9hZGluZyhmYWxzZSk7CiAgICB9CiAgfTsKCiAgLy8gVXBkYXRlIGFuIGV4aXN0aW5nIGxpc3RpbmcKICBjb25zdCB1cGRhdGVMaXN0aW5nID0gYXN5bmMgKGlkOiBzdHJpbmcsIGxpc3RpbmdEYXRhOiBQYXJ0aWFsPExpc3Rpbmc+KSA9PiB7CiAgICBzZXRMb2FkaW5nKHRydWUpOwogICAgc2V0RXJyb3IobnVsbCk7CgogICAgdHJ5IHsKICAgICAgY29uc3QgeyBkYXRhLCBlcnJvciB9ID0gYXdhaXQgc3VwYWJhc2UuZnJvbSgnbGlzdGluZ3MnKS51cGRhdGUobGlzdGluZ0RhdGEpLmVxKCdpZCcsIGlkKS5zZWxlY3QoKTsKCiAgICAgIGlmIChlcnJvcikgewogICAgICAgIHRocm93IGVycm9yOwogICAgICB9CgogICAgICBpZiAoZGF0YSAmJiBkYXRhLmxlbmd0aCA+IDApIHsKICAgICAgICBzZXRMaXN0aW5ncyhvcCA9PiBvcC5tYXAobCA9PiAobC5pZCA9PT0gaWQgPyBkYXRhWzBdIDogbCkpKTsKICAgICAgICByZXR1cm4gZGF0YVswXSBhcyBMaXN0aW5nOwogICAgICB9CiAgICAgIHJldHVybiBudWxsOwogICAgfSBjYXRjaCAoZXJyOiBhbnkpIHsKICAgICAgc2V0RXJyb3IoZXJyLm1lc3NhZ2UpOwogICAgICBjb25zb2xlLmVycm9yKCdFcnJvciB1cGRhdGluZyBsaXN0aW5nOicsIGVycik7CiAgICAgIHJldHVybiBudWxsOwogICAgfSBmaW5hbGx5IHsKICAgICAgc2V0TG9hZGluZyhmYWxzZSk7CiAgICB9CiAgfTsKCiAgLy8gRGVsZXRlIGEgbGlzdGluZwogIGNvbnN0IGRlbGV0ZUxpc3RpbmcgPSBhc3luYyAoaWQ6IHN0cmluZykgPT4gewogICAgc2V0TG9hZGluZyh0cnVlKTsKICAgIHNldEVycm9yKG51bGwpOwoKICAgIHRyeSB7CiAgICAgIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHN1cGFiYXNlLmZyb20oJ2xpc3RpbmdzJykKICAgICAgICAuZGVsZXRlKCkKICAgICAgICAuZXEoJ2lkJywgaWQpOwoKICAgICAgaWYgKGVycm9yKSB7CiAgICAgICAgdGhyb3cgZXJyb3I7CiAgICAgIH0KCiAgICAgIHJldHVybiB0cnVlOwogICAgfSBjYXRjaCAoZXJyOiBhbnkpIHsKICAgICAgc2V0RXJyb3IoZXJyLm1lc3NhZ2UpOwogICAgICBjb25zb2xlLmVycm9yKGA0J7RiNC40LHQutCwINC/0YDQuCDRg9C00LDQu9C10L3QuNC4INC+0LHRitGP0LLQu9C10L3QuNGPICR7aWR9OmAsIGVycik7CiAgICAgIHJldHVybiBmYWxzZTsKICAgIH0KICB9OwoKICAvLyDQn9C+0LvRg9GH0LXQvdC40LUg0L7QsdGK0Y/QstC70LXQvdC40Lkg0YLQtdC60YPRidC10LPQviDQv9C+0LvRjNC30L7QstCw0YLQtdC70Y8KICBjb25zdCBnZXRVc2VyTGlzdGluZ3MgPSBhc3luYyAoKSA9PiB7CiAgICBpZiAoIXVzZXIpIHsKICAgICAgc2V0RXJyb3IoJ9Cf0L7Qu9GM0LfQvtCy0LDRgtC10LvRjCDQvdC1INCw0LLRgtC+0YDQuNC30L7QstCw0L0nKTsKICAgICAgcmV0dXJuIFtdOwogICAgfQoKICAgIHRyeSB7CiAgICAgIGNvbnN0IHsgZGF0YSwgZXJyb3IgfSA9IGF3YWl0IHN1cGFiYXNlCiAgICAgICAgLmZyb20oJ2xpc3RpbmdzJykKICAgICAgICAuc2VsZWN0KCcqJykKICAgICAgICAuZXEoJ3VzZXJfaWQnLCB1c2VyLmlkKQogICAgICAgIC5vcmRlcignY3JlYXRlZF9hdCcsIHsgYXNjZW5kaW5nOiBmYWxzZSB9KTsKCiAgICAgIGlmIChlcnJvcikgewogICAgICAgIHRocm93IGVycm9yOwogICAgICB9CgogICAgICByZXR1cm4gZGF0YTsKICAgIH0gY2F0Y2ggKGVycjogYW55KSB7CiAgICAgIHNldEVycm9yKGVyci5tZXNzYWdlKTsKICAgICAgY29uc29sZS5lcnJvcign0J7RiNC40LHQutCwINC/0YDQuCDQt9Cw0LPRgNGD0LfQutC1INC+0LHRitGP0LLQu9C10L3QuNC5INC/0L7Qu9GM0LfQvtCy0LDRgtC10LvRjzonLCBlcnIpOwogICAgICByZXR1cm4gW107CiAgICB9CiAgfTsKCiAgcmV0dXJuIHsKICAgIGxpc3RpbmdzLAogICAgbG9hZGluZywKICAgIGVycm9yLAogICAgZ2V0TGlzdGluZ3MsCiAgICBnZXRMaXN0aW5nQnlJZCwKICAgIGNyZWF0ZUxpc3RpbmcsCiAgICB1cGRhdGVMaXN0aW5nLAogICAgZGVsZXRlTGlzdGluZywKICAgIGdldFVzZXJMaXN0aW5ncywKICB9Owp9Cg==
+import { useState } from 'react';
+import { supabase, Listing } from '@/lib/supabase';
+import { useSupabase } from '@/contexts/SupabaseContext';
+
+// Типы для параметров фильтрации объявлений
+type ListingFilters = {
+  categoryId?: number;
+  cityId?: number;
+  microdistrictId?: number;
+  priceMin?: number;
+  priceMax?: number;
+  priceRange?: { min?: number; max?: number; };
+  condition?: string;
+  searchQuery?: string;
+  isPremium?: boolean;
+  isFree?: boolean;
+};
+
+// Типы для параметров сортировки
+type SortOptions = 'newest' | 'price_asc' | 'price_desc' | 'discount';
+
+// Функция для очистки значений от Zustand proxy объектов
+const cleanFilterValue = (value: any): any => {
+  if (value && typeof value === 'object' && value._type === 'undefined') {
+    return undefined;
+  }
+  if (value && typeof value === 'object' && value.value !== undefined) {
+    return value.value;
+  }
+  return value;
+};
+
+// Функция для очистки объекта фильтров
+const cleanFilters = (filters: any): ListingFilters => {
+  const cleaned: any = {};
+  
+  Object.keys(filters).forEach(key => {
+    const value = cleanFilterValue(filters[key]);
+    if (value !== undefined && value !== null && value !== '') {
+      // Особая обработка для priceRange
+      if (key === 'priceRange') {
+        const priceMin = cleanFilterValue(value.min);
+        const priceMax = cleanFilterValue(value.max);
+        if (priceMin !== undefined) {
+          cleaned['priceMin'] = priceMin;
+        }
+        if (priceMax !== undefined) {
+          cleaned['priceMax'] = priceMax;
+        }
+      } else {
+        cleaned[key] = value;
+      }
+    }
+  });
+
+  return cleaned;
+};
+
+// Interface for pagination metadata
+type PaginationMeta = {
+  totalItems: number;
+  currentPage: number;
+  itemsPerPage: number;
+  totalPages: number;
+};
+
+export function useListings() {
+  const { supabaseClient: supabase, user } = useSupabase();
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
+
+  // Get all listings with filtering, sorting, and pagination
+  const getListings = async (filters: ListingFilters = {}, sort: SortOptions = 'newest', page: number = 1, limit: number = 10) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Очистить фильтры от вредных Zustand proxy
+      const cleanedFilters = cleanFilters(filters);
+      console.log('Cleaned Filters:', cleanedFilters);
+
+      let query = supabase.from('listings').select(`
+        id,
+        title,
+        description,
+        regular_price,
+        discount_price,
+        discount_percent,
+        is_free,
+        user_id,
+        city_id,
+        microdistrict_id,
+        images,
+        status,
+        created_at,
+        updated_at,
+        expires_at,
+        views,
+        phone,
+        is_premium,
+        category_id,
+        source_link,
+        address,
+        latitude,
+        longitude,
+        area,
+        rooms,
+        floor,
+        total_floors,
+        deal_type,
+        property_type,
+        building_type,
+        renovation_type,
+        bathroom_type,
+        year_built,
+        ceiling_height,
+        has_balcony,
+        has_elevator,
+        has_parking,
+        allow_pets,
+        furnished,
+        utilities_included,
+        security_guarded,
+        has_playground,
+        has_separate_entrance,
+        is_corner,
+        is_studio,
+        region_id,
+        district_id
+      `, { count: 'exact' });
+
+      // Аппалы фильтров
+      if (cleanedFilters.categoryId) {
+        query = query.eq('category_id', cleanedFilters.categoryId);
+      }
+      if (cleanedFilters.cityId) {
+        query = query.eq('city_id', cleanedFilters.cityId);
+      }
+      if (cleanedFilters.microdistrictId) {
+        query = query.eq('microdistrict_id', cleanedFilters.microdistrictId);
+      }
+      if (cleanedFilters.priceMin) {
+        query = query.gte('regular_price', cleanedFilters.priceMin);
+      }
+      if (cleanedFilters.priceMax) {
+        query = query.lte('regular_price', cleanedFilters.priceMax);
+      }
+      if (cleanedFilters.condition) {
+        // Поддержим для condition
+      }
+      if (cleanedFilters.searchQuery) {
+        query = query.ilike('title', `%${cleanedFilters.searchQuery}%`);
+      }
+      if (cleanedFilters.isPremium !== undefined) {
+        query = query.eq('is_premium', cleanedFilters.isPremium);
+      }
+      if (cleanedFilters.isFree !== undefined) {
+        query = query.eq('is_free', cleanedFilters.isFree);
+      }
+      
+      // Сортировка
+      if (sort === 'newest') {
+        query = query.order('created_at', { ascending: false });
+      } else if (sort === 'price_asc') {
+        query = query.order('regular_price', { ascending: true });
+      } else if (sort === 'price_desc') {
+        query = query.order('regular_price', { ascending: false });
+      }
+      // TODO: добедите сортировка по диргонта
+      
+      // Панация
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      setListings(data as Listing[] || []);
+      setPaginationMeta({
+        totalItems: count || 0,
+        currentPage: page,
+        itemsPerPage: limit,
+        totalPages: Math.ceil((count || 0) / limit),
+      });
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Error fetching listings:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get a single listing by ID
+  const getListingById = async (id: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase.from('listings').select('*').eq('id', id).single();
+      
+      if (error) {
+        throw error;
+      }
+
+      return data as Listing | null;
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Error fetching listing by ID: ', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create a new listing
+  const createListing = async (listingData: Omit<Listing, 'id' | 'created_at' | 'updated_at'>) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase.from('listings').insert([listingData]).select();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        setListings(op => [...op, data[0]]);
+        return data[0] as Listing;
+      }
+      return null;
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Error creating listing:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update an existing listing
+  const updateListing = async (id: string, listingData: Partial<Listing>) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase.from('listings').update(listingData).eq('id', id).select();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        setListings(op => op.map(l => (l.id === id ? data[0] : l)));
+        return data[0] as Listing;
+      }
+      return null;
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Error updating listing:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete a listing
+  const deleteListing = async (id: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.from('listings')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      return true;
+    } catch (err: any) {
+      setError(err.message);
+      console.error(`Ошибка при удалении объявления ${id}:`, err);
+      return false;
+    }
+  };
+
+  // Получение объявлений текущего пользователя
+  const getUserListings = async () => {
+    if (!user) {
+      setError('Пользователь не авторизован');
+      return [];
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Ошибка при загрузке объявлений пользователя:', err);
+      return [];
+    }
+  };
+
+  return {
+    listings,
+    loading,
+    error,
+    paginationMeta,
+    getListings,
+    getListingById,
+    createListing,
+    updateListing,
+    deleteListing,
+    getUserListings,
+  };
+}
