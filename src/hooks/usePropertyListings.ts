@@ -2,9 +2,7 @@
 import { useState } from 'react';
 import { useSupabase } from '@/contexts/SupabaseContext';
 import { PropertyListingFilters } from '@/utils/filterTypeConverters';
-
-// Sort options for property listings
-type PropertySortOptions = 'newest' | 'price_asc' | 'price_desc' | 'area_asc' | 'area_desc';
+import { SortOption } from '@/types/listingType';
 
 export function usePropertyListings() {
   const [listings, setListings] = useState<any[]>([]);
@@ -67,7 +65,7 @@ export function usePropertyListings() {
   // Main function to get property listings
   const getPropertyListings = async (
     filters: PropertyListingFilters = {}, 
-    sort: PropertySortOptions = 'newest',
+    sort: SortOption | 'newest' = 'newest',
     limit: number = 50,
     offset: number = 0
   ) => {
@@ -140,16 +138,21 @@ export function usePropertyListings() {
   };
 
   // Map sort options to SQL function parameters
-  const mapSortOption = (sort: PropertySortOptions): string => {
+  const mapSortOption = (sort: SortOption | 'newest'): string => {
     switch (sort) {
+      case SortOption.PRICE_ASC:
       case 'price_asc':
         return 'price_asc';
+      case SortOption.PRICE_DESC:
       case 'price_desc':
         return 'price_desc';
+      case SortOption.AREA_ASC:
       case 'area_asc':
         return 'area_asc';
+      case SortOption.AREA_DESC:
       case 'area_desc':
         return 'area_desc';
+      case SortOption.DATE_DESC:
       case 'newest':
       default:
         return 'created_at';
