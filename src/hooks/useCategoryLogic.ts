@@ -44,7 +44,8 @@ export function useCategoryLogic(categoryId: string | undefined) {
       console.log('📋 Параметры фильтрации при инициализации:', filterParams);
       console.log('🎯 Загружаем объявления для категории Electronics (ID: 3)');
       
-      getListings(filterParams, 'newest', 100).finally(() => {
+      // Исправляем: используем правильные параметры пагинации (page: 1, limit: 50)
+      getListings(filterParams, 'newest', 1, 50).finally(() => {
         setIsInitialized(true);
       });
     } else {
@@ -66,7 +67,8 @@ export function useCategoryLogic(categoryId: string | undefined) {
       };
       
       console.log('🔄 Параметры фильтрации при обновлении:', filterParams);
-      getListings(filterParams, 'newest', 100);
+      // Исправляем: используем правильные параметры пагинации (page: 1, limit: 50)
+      getListings(filterParams, 'newest', 1, 50);
     }
   }, [filters, isInitialized, categoryId, getListings]);
 
@@ -75,11 +77,12 @@ export function useCategoryLogic(categoryId: string | undefined) {
     if (categoryId) {
       const numericCategoryId = getCategoryIdNumber(categoryId);
       if (numericCategoryId) {
+        // Исправляем: используем правильные параметры пагинации (page: 1, limit: 50)
         getListings({
           categoryId: numericCategoryId,
           priceRange: filters.priceRange,
           condition: filters.condition !== 'any' ? filters.condition : undefined
-        }, 'newest', 100);
+        }, 'newest', 1, 50);
       }
     }
   };
