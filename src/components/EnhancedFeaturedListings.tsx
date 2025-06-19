@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,14 +13,15 @@ export function EnhancedFeaturedListings() {
   const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
-    // Загружаем объявления только один раз при инициализации
+    // Загружаем объявления только один раз при инициализации с правильными параметрами
     if (!isInitialized) {
       console.log('Загружаем объявления для главной страницы...');
-      getListings({}, 'newest', 16).finally(() => {
+      // Исправляем: используем offset 0 вместо случайного значения
+      getListings({}, 'newest', 16, 0).finally(() => {
         setIsInitialized(true);
       });
     }
-  }, [isInitialized]);
+  }, [isInitialized, getListings]);
 
   // Фильтруем премиум объявления для вкладки "Избранные"
   const featuredListings = listings.filter(listing => listing.is_premium);
@@ -76,7 +76,7 @@ export function EnhancedFeaturedListings() {
 
         {error && (
           <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            Ошибка загрузки: {error}
+            {language === 'ru' ? 'Ошибка загрузки:' : 'Жүктеу қатесі:'} {error}
           </div>
         )}
         
