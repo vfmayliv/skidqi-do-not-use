@@ -31,8 +31,8 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   
-  // Loading states
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  // Combined loading state
+  const [isInitializing, setIsInitializing] = useState(true);
   
   // User profile state (start with empty values, no mock data)
   const [firstName, setFirstName] = useState('');
@@ -59,29 +59,27 @@ const UserProfile = () => {
   
   // Authentication and profile data loading
   useEffect(() => {
-    // If still loading auth state, wait
-    if (authLoading) {
-      return;
-    }
+    const initializeProfile = async () => {
+      // Wait for auth loading to complete
+      if (authLoading) {
+        return;
+      }
 
-    // If user is not authenticated, redirect to login
-    if (!authUser) {
-      toast({
-        title: language === 'ru' ? 'Доступ запрещен' : 'Қол жеткізу тыйым салынған',
-        description: language === 'ru' 
-          ? 'Пожалуйста, войдите в систему.' 
-          : 'Жүйеге кіріңіз.',
-        variant: 'destructive'
-      });
-      navigate('/login');
-      return;
-    }
+      // If user is not authenticated, redirect to login
+      if (!authUser) {
+        toast({
+          title: language === 'ru' ? 'Доступ запрещен' : 'Қол жеткізу тыйым салынған',
+          description: language === 'ru' 
+            ? 'Пожалуйста, войдите в систему.' 
+            : 'Жүйеге кіріңіз.',
+          variant: 'destructive'
+        });
+        navigate('/login');
+        return;
+      }
 
-    // If user is authenticated, load profile data
-    setEmail(authUser.email || '');
-    
-    const fetchProfileData = async () => {
-      setIsLoadingProfile(true);
+      // If user is authenticated, load profile data
+      setEmail(authUser.email || '');
       
       try {
         const { data: profileData, error: profileError } = await supabase
@@ -113,15 +111,16 @@ const UserProfile = () => {
           description: (e as Error).message,
           variant: 'destructive'
         });
-      } finally {
-        setIsLoadingProfile(false);
       }
+
+      // Load temporary data from localStorage
+      loadTemporaryData();
+      
+      // Mark initialization as complete
+      setIsInitializing(false);
     };
 
-    fetchProfileData();
-
-    // Load temporary data from localStorage
-    loadTemporaryData();
+    initializeProfile();
 
   }, [authUser, authLoading, supabase, language, toast, navigate]);
 
@@ -362,8 +361,8 @@ const UserProfile = () => {
     return items.filter(item => !item.read).length;
   };
 
-  // Show loading spinner while checking authentication or loading profile
-  if (authLoading || isLoadingProfile) {
+  // Show loading spinner only during initial loading
+  if (isInitializing) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -371,18 +370,13 @@ const UserProfile = () => {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">
-              {language === 'ru' ? 'Загрузка...' : 'Жүктеу...'}
+              {language === 'ru' ? 'Загрузка профиля...' : 'Профильді жүктеу...'}
             </p>
           </div>
         </main>
         <Footer />
       </div>
     );
-  }
-
-  // If user is not authenticated, this should not render (redirect happens in useEffect)
-  if (!authUser) {
-    return null;
   }
   
   return (
