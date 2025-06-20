@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAppContext } from '@/contexts/AppContext';
+import { useSupabase } from '@/contexts/SupabaseContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/useToast';
 
 const Login = () => {
-  const { language, login, setUserRole } = useAppContext();
+  const { language } = useAppContext();
+  const { signIn, user, loading } = useSupabase();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -21,16 +23,25 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Перенаправляем уже авторизованных пользователей
   useEffect(() => {
-    // Reset form when switching between owner and user login
+    if (user && !loading) {
+      navigate('/profile');
+    }
+  }, [user, loading, navigate]);
+
+  // Сбрасываем форму при переключении между режимами входа
+  useEffect(() => {
     setEmail('');
     setPassword('');
   }, [isOwnerLogin]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple validation
+    console.log('🔄 Начинаем процесс входа:', email);
+    
+    // Валидация
     if (!email || !password) {
       const title = language === 'ru' ? 'Ошибка' : 'Қате';
       const description = language === 'ru' 
@@ -47,117 +58,90 @@ const Login = () => {
     
     setIsSubmitting(true);
     
-    // Check if this is an owner login
-    if (isOwnerLogin) {
-      // Verify owner credentials
-      if (email === 'ceo' && password === 'world2025/') {
-        // Set as authenticated admin
-        login();
-        setUserRole('admin');
+    try {
+      console.log('📤 Отправляем запрос входа в Supabase...');
+      
+      // Используем реальную аутентификацию через Supabase
+      const { error } = await signIn(email, password);
+      
+      console.log('📨 Ответ от Supabase:', { error });
+      
+      if (error) {
+        console.error('❌ Ошибка входа:', error);
         
-        const title = language === 'ru' ? 'Успешно' : 'Сәтті';
-        const description = language === 'ru' 
-          ? 'Вы успешно вошли как администратор' 
-          : 'Сіз әкімші ретінде сәтті кірдіңіз';
+        // Обработка различных типов ошибок
+        let errorMessage = language === 'ru' 
+          ? 'Произошла ошибка при входе' 
+          : 'Кіру кезінде қате орын алды';
           
-        toast({
-          title,
-          description
-        });
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = language === 'ru' 
+            ? 'Неверный email или пароль' 
+            : 'Қате email немесе құпия сөз';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = language === 'ru' 
+            ? 'Пожалуйста, подтвердите ваш email перед входом' 
+            : 'Кіру алдында электрондық поштаңызды растаңыз';
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = language === 'ru' 
+            ? 'Слишком много попыток входа. Попробуйте позже' 
+            : 'Тым көп кіру әрекеті. Кейінірек көріңіз';
+        }
         
-        // Redirect to owner panel
-        console.log('Redirecting to owner panel');
-        navigate('/owner');
-      } else {
-        const title = language === 'ru' ? 'Ошибка' : 'Қате';
-        const description = language === 'ru' 
-          ? 'Неверные учетные данные администратора' 
-          : 'Әкімшінің жарамсыз тіркелгі деректері';
-          
         toast({
-          title,
-          description,
+          title: language === 'ru' ? 'Ошибка входа' : 'Кіру қатесі',
+          description: errorMessage,
           variant: 'destructive'
         });
+        
         setIsSubmitting(false);
         return;
       }
-    } else {
-      // Regular user login - In a real app, this would verify against saved users
-      // For demo, we'll check if the user is registered
-      const registeredUserData = localStorage.getItem('registeredUser');
       
-      if (registeredUserData) {
-        try {
-          const userData = JSON.parse(registeredUserData);
-          
-          if (userData.email === email && userData.password === password) {
-            // Set as authenticated user
-            login();
-            setUserRole('user');
-            
-            const title = language === 'ru' ? 'Успешно' : 'Сәтті';
-            const description = language === 'ru' 
-              ? 'Вы успешно вошли в аккаунт' 
-              : 'Сіз аккаунтқа сәтті кірдіңіз';
-              
-            toast({
-              title,
-              description
-            });
-            
-            // Redirect to profile
-            navigate('/profile');
-          } else {
-            const title = language === 'ru' ? 'Ошибка' : 'Қате';
-            const description = language === 'ru' 
-              ? 'Неверный email или пароль' 
-              : 'Қате email немесе құпия сөз';
-              
-            toast({
-              title,
-              description,
-              variant: 'destructive'
-            });
-            setIsSubmitting(false);
-            return;
-          }
-        } catch (error) {
-          const title = language === 'ru' ? 'Ошибка' : 'Қате';
-          const description = language === 'ru' 
-            ? 'Произошла ошибка при входе' 
-            : 'Кіру кезінде қате орын алды';
-            
-          toast({
-            title,
-            description,
-            variant: 'destructive'
-          });
-          setIsSubmitting(false);
-          return;
-        }
-      } else {
-        // For demo purposes, allow login without registration
-        // In a real app, you would reject this login
-        login();
-        setUserRole('user');
-        
-        const title = language === 'ru' ? 'Демо режим' : 'Демо режимі';
-        const description = language === 'ru' 
-          ? 'Вход выполнен в демонстрационном режиме' 
-          : 'Кіру демонстрациялық режимде жасалды';
-          
-        toast({
-          title,
-          description
-        });
-        
-        navigate('/profile');
-      }
+      console.log('✅ Вход успешен');
+      
+      // Показываем сообщение об успешном входе
+      toast({
+        title: language === 'ru' ? 'Успешный вход' : 'Сәтті кіру',
+        description: language === 'ru' 
+          ? 'Вы успешно вошли в аккаунт' 
+          : 'Аккаунтқа сәтті кірдіңіз'
+      });
+      
+      // Перенаправление произойдет автоматически через useEffect
+      
+    } catch (error) {
+      console.error('💥 Неожиданная ошибка:', error);
+      
+      toast({
+        title: language === 'ru' ? 'Ошибка' : 'Қате',
+        description: language === 'ru' 
+          ? 'Произошла неожиданная ошибка. Попробуйте еще раз.' 
+          : 'Күтпеген қате орын алды. Қайтадан көріңіз.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
+
+  // Показываем загрузку во время проверки сессии
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">
+              {language === 'ru' ? 'Загрузка...' : 'Жүктелуде...'}
+            </p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -197,6 +181,7 @@ const Login = () => {
                   placeholder={isOwnerLogin ? "ceo" : "email@example.com"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
@@ -218,6 +203,7 @@ const Login = () => {
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
             </CardContent>
