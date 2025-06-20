@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAppContext } from '@/contexts/AppContext';
+import { useSupabase } from '@/contexts/SupabaseContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,7 @@ import { useToast } from '@/components/ui/use-toast';
 
 const Register = () => {
   const { language, t } = useAppContext();
+  const { signUp } = useSupabase();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -25,8 +27,10 @@ const Register = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('🔄 Начинаем регистрацию пользователя:', email);
     
     // Validation
     if (!firstName || !lastName || !email || !phone || !password || !confirmPassword) {
@@ -64,29 +68,79 @@ const Register = () => {
     
     setIsSubmitting(true);
     
-    // In a real app, this would make an API call to register the user
-    // For this demo, we're simulating the process
-    setTimeout(() => {
-      // Store user data (in a real app, this would be stored on the server)
-      const userData = { firstName, lastName, email, phone, password };
-      localStorage.setItem('pendingUser', JSON.stringify(userData));
+    try {
+      console.log('📤 Отправляем запрос регистрации в Supabase...');
       
-      // Simulate sending a confirmation email
+      // Используем реальную регистрацию через Supabase
+      const { data, error } = await signUp(email, password);
+      
+      console.log('📨 Ответ от Supabase:', { data, error });
+      
+      if (error) {
+        console.error('❌ Ошибка регистрации:', error);
+        
+        // Обработка различных типов ошибок
+        let errorMessage = language === 'ru' 
+          ? 'Произошла ошибка при регистрации' 
+          : 'Тіркелу кезінде қате орын алды';
+          
+        if (error.message.includes('User already registered')) {
+          errorMessage = language === 'ru' 
+            ? 'Пользователь с таким email уже зарегистрирован' 
+            : 'Осы email-мен пайдаланушы қазірдің өзінде тіркелген';
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = language === 'ru' 
+            ? 'Неверный формат email' 
+            : 'Email форматы дұрыс емес';
+        } else if (error.message.includes('Password')) {
+          errorMessage = language === 'ru' 
+            ? 'Пароль должен содержать минимум 6 символов' 
+            : 'Құпия сөз кемінде 6 таңбадан тұруы керек';
+        }
+        
+        toast({
+          title: language === 'ru' ? 'Ошибка регистрации' : 'Тіркелу қатесі',
+          description: errorMessage,
+          variant: 'destructive'
+        });
+        
+        setIsSubmitting(false);
+        return;
+      }
+      
+      console.log('✅ Регистрация успешна:', data);
+      
+      // Обновляем профиль пользователя с дополнительными данными
+      if (data.user) {
+        console.log('📝 Сохраняем дополнительные данные пользователя...');
+        
+        // Здесь можно добавить логику для сохранения firstName, lastName, phone
+        // в таблицу profiles, если она существует
+      }
+      
       toast({
         title: language === 'ru' ? 'Регистрация успешна' : 'Тіркелу сәтті',
         description: language === 'ru' 
-          ? 'На ваш email отправлено письмо с ссылкой для подтверждения' 
-          : 'Растау сілтемесі бар хат сіздің электрондық поштаңызға жіберілді'
+          ? 'Проверьте вашу почту для подтверждения аккаунта' 
+          : 'Аккаунтты растау үшін поштаңызды тексеріңіз'
       });
       
-      // For demo purposes, simulate confirmation directly
-      localStorage.setItem('confirmationSent', 'true');
-      
-      setIsSubmitting(false);
-      
-      // Redirect to confirmation page
+      // Перенаправляем на страницу подтверждения или входа
       navigate('/confirm-email');
-    }, 1500);
+      
+    } catch (error) {
+      console.error('💥 Неожиданная ошибка:', error);
+      
+      toast({
+        title: language === 'ru' ? 'Ошибка' : 'Қате',
+        description: language === 'ru' 
+          ? 'Произошла неожиданная ошибка. Попробуйте еще раз.' 
+          : 'Күтпеген қате орын алды. Қайтадан көріңіз.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -115,6 +169,7 @@ const Register = () => {
                     id="first-name" 
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div className="space-y-2">
@@ -125,6 +180,7 @@ const Register = () => {
                     id="last-name" 
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -137,6 +193,7 @@ const Register = () => {
                   placeholder="email@example.com" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
               
@@ -149,6 +206,7 @@ const Register = () => {
                   placeholder="+7 (___) ___-__-__" 
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
               
@@ -161,6 +219,7 @@ const Register = () => {
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
               
@@ -173,6 +232,7 @@ const Register = () => {
                   type="password" 
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
               
@@ -181,6 +241,7 @@ const Register = () => {
                   id="terms" 
                   checked={agreedToTerms}
                   onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                  disabled={isSubmitting}
                 />
                 <label
                   htmlFor="terms"
@@ -204,7 +265,7 @@ const Register = () => {
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 
-                  (language === 'ru' ? 'Обработка...' : 'Өңдеу...') : 
+                  (language === 'ru' ? 'Регистрация...' : 'Тіркелу...') : 
                   (language === 'ru' ? 'Зарегистрироваться' : 'Тіркелу')
                 }
               </Button>
