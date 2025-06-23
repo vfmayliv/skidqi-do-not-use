@@ -132,24 +132,24 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
         };
       }
       
-      // Преобразуем тип кузова
+      // Преобразуем тип кузова с правильным типом
       if (newFilters.bodyType) {
-        convertedFilters.bodyType = newFilters.bodyType;
+        convertedFilters.bodyType = newFilters.bodyType as BodyType;
       }
       
-      // Преобразуем трансмиссию
+      // Преобразуем трансмиссию с правильным типом
       if (newFilters.transmission) {
-        convertedFilters.transmission = newFilters.transmission;
+        convertedFilters.transmission = newFilters.transmission as TransmissionType;
       }
       
-      // Преобразуем тип двигателя
+      // Преобразуем тип двигателя с правильным типом
       if (newFilters.engine) {
-        convertedFilters.engineType = newFilters.engine;
+        convertedFilters.engineType = newFilters.engine as EngineType;
       }
       
-      // Преобразуем привод
+      // Преобразуем привод с правильным типом
       if (newFilters.drive) {
-        convertedFilters.driveType = newFilters.drive;
+        convertedFilters.driveType = newFilters.drive as DriveType;
       }
       
       // Преобразуем состояние

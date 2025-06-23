@@ -277,19 +277,10 @@ const CreateListing = () => {
     // Создаем новое объявление
     const newListing: Listing = {
       id: generateUniqueId(),
-      title: {
-        ru: language === 'ru' ? title : title,
-        kz: language === 'kz' ? title : title
-      },
-      description: {
-        ru: language === 'ru' ? description : description,
-        kz: language === 'kz' ? description : description
-      },
+      title: title,
+      description: description,
       categoryId: selectedCategoryPath.length > 0 ? selectedCategoryPath[selectedCategoryPath.length - 1].id : '',
-      city: {
-        ru: selectedCityId ? getCitiesByRegion(selectedRegionId!).find(c => c.id === selectedCityId)?.name_ru || '' : '',
-        kz: selectedCityId ? getCitiesByRegion(selectedRegionId!).find(c => c.id === selectedCityId)?.name_kz || '' : ''
-      },
+      city: selectedCityId ? getCitiesByRegion(selectedRegionId!).find(c => c.id === selectedCityId)?.name_ru || '' : '',
       imageUrl: uploadedImages.length > 0 ? uploadedImages[0] : '/placeholder.svg',
       images: uploadedImages,
       originalPrice: parseFloat(price) || 0,
@@ -305,7 +296,9 @@ const CreateListing = () => {
       isFeatured: false,
       regionId: selectedRegionId?.toString() || '',
       cityId: selectedCityId?.toString() || '',
-      microdistrictId: selectedMicrodistrictId?.toString() || ''
+      microdistrictId: selectedMicrodistrictId?.toString() || '',
+      userId: '',
+      price: parseFloat(discountPrice) || parseFloat(price) || 0
     };
 
     // Сохраняем объявление в localStorage

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Header } from '@/components/Header';
@@ -35,6 +34,7 @@ interface ExtendedSeller {
 // Extended listing interface
 interface ExtendedListing extends Omit<Listing, 'seller'> {
   seller: ExtendedSeller;
+  images?: string[];
 }
 
 export default function ListingDetail() {
@@ -224,7 +224,7 @@ export default function ListingDetail() {
                 rating: mockListing.seller?.rating || 4.8,
                 reviews: mockListing.seller?.reviews || 25,
                 memberSince: '2022',
-                response: language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береди',
+                response: language === 'ru' ? 'Отвечает обычно в течении часа' : 'Әдетте бір сағат ішінде жауап береді',
                 lastOnline: language === 'ru' ? 'Был онлайн сегодня' : 'Бүгін онлайн болды'
               }
             };

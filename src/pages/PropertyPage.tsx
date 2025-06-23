@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -52,20 +51,20 @@ export default function PropertyPage() {
           ) : (
             <>
               <PropertyFilters />
-
+              
               <div className="flex justify-end">
-                  <ToggleGroup type="single" value={viewMode} onValueChange={(value) => {if (value) setViewMode(value)}} className="bg-card p-1 rounded-md">
-                      <ToggleGroupItem value="list" aria-label="List view">
-                          <List className="h-4 w-4" />
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="map" aria-label="Map view">
-                          <Map className="h-4 w-4" />
-                      </ToggleGroupItem>
-                  </ToggleGroup>
+                <ToggleGroup type="single" value={viewMode} onValueChange={(value) => {if (value) setViewMode(value)}} className="bg-card p-1 rounded-md">
+                  <ToggleGroupItem value="list" aria-label="List view">
+                    <List className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="map" aria-label="Map view">
+                    <Map className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
               </div>
-
+              
               {loading && <div className="text-center">Загрузка объявлений...</div>}
-              {error && <div className="text-center text-red-500">Ошибка: {error}</div>}
+              {error && <div className="text-center text-red-500">Ошибка: {error.message}</div>}
               
               {!loading && viewMode === 'list' && processedListings.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-8">
@@ -74,7 +73,7 @@ export default function PropertyPage() {
                   ))}
                 </div>
               )}
-
+              
               {!loading && viewMode === 'map' && (
                 <MapView listings={processedListings} />
               )}
