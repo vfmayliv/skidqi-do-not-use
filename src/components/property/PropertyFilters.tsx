@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -22,7 +23,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import AdvancedPropertyFilters from './AdvancedPropertyFilters';
 import { LocationFilter } from './LocationFilter';
-import { X } from 'lucide-react'; // Добавить импорт X из lucide-react, если его нет
+import { X } from 'lucide-react';
 
 interface PropertyFiltersProps {
   filters: PropertyFiltersType;
@@ -35,7 +36,7 @@ interface PropertyFiltersProps {
 }
 
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({
-  filters,
+  filters = {} as PropertyFiltersType, // Provide default empty object
   onFilterChange,
   onReset,
   onSearch,
@@ -45,6 +46,15 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
 }) => {
   const { t } = useTranslation();
   const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
+
+  // Safely access filter properties with defaults
+  const safeFilters = {
+    propertyTypes: filters?.propertyTypes || null,
+    regionId: filters?.regionId || null,
+    cityId: filters?.cityId || null,
+    microdistrictId: filters?.microdistrictId || null,
+    ...filters
+  };
 
   const handlePriceRangeChange = (value: number[]) => {
     onFilterChange({ priceRange: { min: value[0], max: value[1] } });
@@ -59,26 +69,26 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
   };
 
   const handleBuildingTypeChange = (buildingType: BuildingType) => {
-    if (filters.buildingTypes?.includes(buildingType)) {
-      onFilterChange({ buildingTypes: filters.buildingTypes.filter(type => type !== buildingType) });
+    if (safeFilters.buildingTypes?.includes(buildingType)) {
+      onFilterChange({ buildingTypes: safeFilters.buildingTypes.filter(type => type !== buildingType) });
     } else {
-      onFilterChange({ buildingTypes: [...(filters.buildingTypes || []), buildingType] });
+      onFilterChange({ buildingTypes: [...(safeFilters.buildingTypes || []), buildingType] });
     }
   };
 
   const handlePropertyTypeChange = (propertyType: PropertyType) => {
-    if (filters.propertyTypes?.includes(propertyType)) {
-      onFilterChange({ propertyTypes: filters.propertyTypes.filter(type => type !== propertyType) });
+    if (safeFilters.propertyTypes?.includes(propertyType)) {
+      onFilterChange({ propertyTypes: safeFilters.propertyTypes.filter(type => type !== propertyType) });
     } else {
-      onFilterChange({ propertyTypes: [...(filters.propertyTypes || []), propertyType] });
+      onFilterChange({ propertyTypes: [...(safeFilters.propertyTypes || []), propertyType] });
     }
   };
 
   const handleDistrictChange = (districtId: string) => {
-    if (filters.districts?.includes(districtId)) {
-      onFilterChange({ districts: filters.districts.filter(id => id !== districtId) });
+    if (safeFilters.districts?.includes(districtId)) {
+      onFilterChange({ districts: safeFilters.districts.filter(id => id !== districtId) });
     } else {
-      onFilterChange({ districts: [...(filters.districts || []), districtId] });
+      onFilterChange({ districts: [...(safeFilters.districts || []), districtId] });
     }
   };
 
@@ -94,15 +104,13 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
     onFilterChange({ furnished: checked });
   };
 
-  const handleSortByChange = (sortBy: SortOption) => {
+  const handleSortByChange = (sortBy: string) => {
     onFilterChange({ sortBy });
   };
 
-  // Функция для обработки изменений местоположения
+  // Function to handle location changes
   const handleLocationChange = (locationParams: { regionId?: string | null; cityId?: string | null; microdistrictId?: string | null }) => {
-    onFilterChange({
-      ...locationParams
-    });
+    onFilterChange(locationParams);
   };
 
   return (
@@ -112,9 +120,9 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
           {t('location', 'Местоположение')}
         </p>
         <LocationFilter 
-          regionId={filters.regionId}
-          cityId={filters.cityId}
-          microdistrictId={filters.microdistrictId}
+          regionId={safeFilters.regionId}
+          cityId={safeFilters.cityId}
+          microdistrictId={safeFilters.microdistrictId}
           onLocationChange={handleLocationChange}
         />
       </div>
@@ -122,21 +130,21 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
         <p className="text-sm font-medium mb-2">{t('propertyType', 'Тип недвижимости')}</p>
         <div className="flex flex-wrap gap-2">
           <Button
-            variant={filters.propertyTypes?.includes(PropertyType.APARTMENT) ? 'default' : 'outline'}
+            variant={safeFilters.propertyTypes?.includes(PropertyType.APARTMENT) ? 'default' : 'outline'}
             size="sm"
             onClick={() => handlePropertyTypeChange(PropertyType.APARTMENT)}
           >
             {t('apartment', 'Квартира')}
           </Button>
           <Button
-            variant={filters.propertyTypes?.includes(PropertyType.HOUSE) ? 'default' : 'outline'}
+            variant={safeFilters.propertyTypes?.includes(PropertyType.HOUSE) ? 'default' : 'outline'}
             size="sm"
             onClick={() => handlePropertyTypeChange(PropertyType.HOUSE)}
           >
             {t('house', 'Дом')}
           </Button>
           <Button
-            variant={filters.propertyTypes?.includes(PropertyType.COMMERCIAL) ? 'default' : 'outline'}
+            variant={safeFilters.propertyTypes?.includes(PropertyType.COMMERCIAL) ? 'default' : 'outline'}
             size="sm"
             onClick={() => handlePropertyTypeChange(PropertyType.COMMERCIAL)}
           >

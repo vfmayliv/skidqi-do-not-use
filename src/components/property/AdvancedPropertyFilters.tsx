@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
@@ -49,7 +48,7 @@ import {
   BuildingType, 
   RenovationType, 
   BathroomType,
-  SortOption
+  SortOptions
 } from '@/types/listingType';
 
 interface AdvancedPropertyFiltersProps {
@@ -86,7 +85,7 @@ const AdvancedPropertyFilters: React.FC<AdvancedPropertyFiltersProps> = ({
     onlyTrustedSellers: false,
     mortgageAvailable: false,
     hasVirtualTour: false,
-    sortBy: SortOption.DATE_DESC
+    sortBy: SortOptions.DATE_DESC
   });
 
   // Вспомогательные функции для работы с фильтрами
@@ -132,7 +131,7 @@ const AdvancedPropertyFilters: React.FC<AdvancedPropertyFiltersProps> = ({
     { id: BuildingType.BRICK, name: { ru: 'Кирпичный', kz: 'Кірпіш' } },
     { id: BuildingType.MONOLITHIC, name: { ru: 'Монолитный', kz: 'Монолитті' } },
     { id: BuildingType.BLOCK, name: { ru: 'Блочный', kz: 'Блокты' } },
-    { id: BuildingType.WOODEN, name: { ru: 'Деревянный', kz: 'Ағаш' } },
+    { id: BuildingType.WOOD, name: { ru: 'Деревянный', kz: 'Ағаш' } },
   ];
   
   const renovationTypes = [
@@ -165,11 +164,11 @@ const AdvancedPropertyFilters: React.FC<AdvancedPropertyFiltersProps> = ({
   ];
   
   const sortOptions = [
-    { id: SortOption.DATE_DESC, name: { ru: 'По дате (новые)', kz: 'Күні бойынша (жаңа)' } },
-    { id: SortOption.PRICE_ASC, name: { ru: 'Дешевле', kz: 'Арзан' } },
-    { id: SortOption.PRICE_DESC, name: { ru: 'Дороже', kz: 'Қымбат' } },
-    { id: SortOption.AREA_ASC, name: { ru: 'По площади (меньше)', kz: 'Ауданы бойынша (кіші)' } },
-    { id: SortOption.AREA_DESC, name: { ru: 'По площади (больше)', kz: 'Ауданы бойынша (үлкен)' } },
+    { id: SortOptions.DATE_DESC, name: { ru: 'По дате (новые)', kz: 'Күні бойынша (жаңа)' } },
+    { id: SortOptions.PRICE_ASC, name: { ru: 'Дешевле', kz: 'Арзан' } },
+    { id: SortOptions.PRICE_DESC, name: { ru: 'Дороже', kz: 'Қымбат' } },
+    { id: SortOptions.AREA_ASC, name: { ru: 'По площади (меньше)', kz: 'Ауданы бойынша (кіші)' } },
+    { id: SortOptions.AREA_DESC, name: { ru: 'По площади (больше)', kz: 'Ауданы бойынша (үлкен)' } },
   ];
   
   // Обработчик применения фильтров
@@ -228,7 +227,7 @@ const AdvancedPropertyFilters: React.FC<AdvancedPropertyFiltersProps> = ({
       onlyTrustedSellers: false,
       mortgageAvailable: false,
       hasVirtualTour: false,
-      sortBy: SortOption.DATE_DESC
+      sortBy: SortOptions.DATE_DESC
     });
     
     setActiveFiltersCount(0);

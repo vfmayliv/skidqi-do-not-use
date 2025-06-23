@@ -78,7 +78,7 @@ export const propertyFilterConfig: PropertyFilterConfig = {
 export default function PropertyPage() {
   const { language } = useAppStore();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { filters, setFilters, setFilter } = usePropertyFiltersStore();
+  const { filters, setFilters, setFilter, resetFilters, activeFiltersCount } = usePropertyFiltersStore();
   const [guidedSearchCompleted, setGuidedSearchCompleted] = useState(false);
 
   useEffect(() => {
@@ -121,6 +121,22 @@ export default function PropertyPage() {
     setGuidedSearchCompleted(true);
   };
 
+  const handleFilterChange = (newFilters: Partial<PropertyFilters>) => {
+    setFilters(newFilters);
+  };
+
+  const handleSearch = () => {
+    // Search is handled automatically by the useEffect that updates URL params
+    console.log('Search triggered with filters:', filters);
+  };
+
+  // Mock districts data
+  const districts = [
+    { id: '1', name: { ru: 'Алмалинский', kz: 'Алмалы' } },
+    { id: '2', name: { ru: 'Медеуский', kz: 'Медеу' } },
+    { id: '3', name: { ru: 'Бостандыкский', kz: 'Бостандық' } },
+  ];
+
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
       <Header />
@@ -137,7 +153,15 @@ export default function PropertyPage() {
             <GuidedSearch onComplete={handleGuidedSearchComplete} />
           ) : (
             <>
-              <PropertyFilters config={propertyFilterConfig} />
+              <PropertyFilters 
+                config={propertyFilterConfig}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onReset={resetFilters}
+                onSearch={handleSearch}
+                districts={districts}
+                activeFiltersCount={activeFiltersCount}
+              />
               
               {loading && (
                 <div className="text-center py-8">

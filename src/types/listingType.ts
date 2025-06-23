@@ -1,8 +1,13 @@
+
 export enum PropertyType {
   APARTMENT = 'flat',
   HOUSE = 'house',
   COMMERCIAL = 'commercial',
   LAND = 'land',
+  TOWNHOUSE = 'townhouse',
+  DACHA = 'dacha',
+  GARAGE = 'garage',
+  BUILDING = 'building',
 }
 
 export enum BuildingType {
@@ -10,12 +15,70 @@ export enum BuildingType {
   BRICK = 'brick',
   MONOLITHIC = 'monolithic',
   WOOD = 'wood',
+  BLOCK = 'block',
+  WOODEN = 'wooden',
 }
 
 export enum ConditionType {
   GOOD = 'good',
   AVERAGE = 'average',
   NEEDS_REPAIR = 'needs_repair',
+}
+
+export enum RenovationType {
+  COSMETIC = 'cosmetic',
+  EURO = 'euro',
+  DESIGNER = 'designer',
+  WITHOUT_RENOVATION = 'without_renovation',
+}
+
+export enum BathroomType {
+  COMBINED = 'combined',
+  SEPARATE = 'separate',
+  TWO_OR_MORE = 'two_or_more',
+}
+
+export enum EngineType {
+  GASOLINE = 'gasoline',
+  DIESEL = 'diesel',
+  HYBRID = 'hybrid',
+  ELECTRIC = 'electric',
+  GAS = 'gas'
+}
+
+export enum BodyType {
+  SEDAN = 'sedan',
+  HATCHBACK = 'hatchback',
+  SUV = 'suv',
+  WAGON = 'wagon',
+  COUPE = 'coupe',
+  CONVERTIBLE = 'convertible',
+}
+
+export enum TransmissionType {
+  MANUAL = 'manual',
+  AUTOMATIC = 'automatic',
+  CVT = 'cvt',
+}
+
+export enum DriveType {
+  FWD = 'fwd',
+  RWD = 'rwd',
+  AWD = 'awd',
+}
+
+export enum VehicleType {
+  CAR = 'car',
+  TRUCK = 'truck',
+  MOTORCYCLE = 'motorcycle',
+}
+
+export enum SortOptions {
+  DATE_DESC = 'date_desc',
+  PRICE_ASC = 'price_asc',
+  PRICE_DESC = 'price_desc',
+  AREA_ASC = 'area_asc',
+  AREA_DESC = 'area_desc',
 }
 
 export interface SortOption {
@@ -116,7 +179,6 @@ export interface PropertyFilters {
   microdistrictId: string | null;
 }
 
-// Transport filters and types that were missing
 export interface TransportFilters {
   brandId: string | null;
   modelId: string | null;
@@ -142,14 +204,6 @@ export interface TransportFilters {
   hasPhoto: boolean | null;
   dealerOnly: boolean | null;
   sortBy: string | null;
-}
-
-export enum EngineType {
-  GASOLINE = 'gasoline',
-  DIESEL = 'diesel',
-  HYBRID = 'hybrid',
-  ELECTRIC = 'electric',
-  GAS = 'gas'
 }
 
 export interface Listing {

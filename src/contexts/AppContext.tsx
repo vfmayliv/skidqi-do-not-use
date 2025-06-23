@@ -1,9 +1,22 @@
+
 import React, { createContext, useContext, useState } from 'react';
 
+export type Language = 'ru' | 'kz';
+
+export interface CityType {
+  id: string;
+  name: string;
+  name_ru: string;
+  name_kz: string;
+}
+
 interface AppContextType {
-  language: 'ru' | 'kz';
-  setLanguage: (lang: 'ru' | 'kz') => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  city?: CityType;
+  setCity?: (city: CityType) => void;
+  login?: (credentials: any) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -20,14 +33,20 @@ const translations = {
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<'ru' | 'kz'>('ru');
+  const [language, setLanguage] = useState<Language>('ru');
+  const [city, setCity] = useState<CityType | undefined>();
 
   const t = (key: string) => {
     return translations[language][key as keyof typeof translations.ru] || key;
   };
 
+  const login = (credentials: any) => {
+    // Login implementation
+    console.log('Login called with:', credentials);
+  };
+
   return (
-    <AppContext.Provider value={{ language, setLanguage, t }}>
+    <AppContext.Provider value={{ language, setLanguage, t, city, setCity, login }}>
       {children}
     </AppContext.Provider>
   );
