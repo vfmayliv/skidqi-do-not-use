@@ -8,6 +8,18 @@ export interface CategoryNode {
   subcategories?: CategoryNode[];
 }
 
+type CategoryTableName = 
+  | 'children_categories'
+  | 'pharmacy_categories' 
+  | 'fashion_style_categories'
+  | 'food_categories'
+  | 'tech_electronics_categories'
+  | 'home_categories'
+  | 'services_categories'
+  | 'pet_categories'
+  | 'hobbies_categories'
+  | 'beauty_categories';
+
 export function useCategoryHierarchy() {
   const [categories, setCategories] = useState<CategoryNode[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,8 +62,8 @@ export function useCategoryHierarchy() {
         setLoading(true);
         setError(null);
 
-        // Fetch all categories from different tables
-        const categoryTables = [
+        // List of category tables to fetch from
+        const categoryTables: CategoryTableName[] = [
           'children_categories',
           'pharmacy_categories', 
           'fashion_style_categories',
@@ -66,15 +78,15 @@ export function useCategoryHierarchy() {
 
         const allCategories: any[] = [];
 
-        for (const table of categoryTables) {
+        for (const tableName of categoryTables) {
           try {
             const { data, error } = await supabase
-              .from(table)
+              .from(tableName)
               .select('id, name_ru, name_kz, parent_id, level')
               .order('level', { ascending: true });
 
             if (error) {
-              console.warn(`Error fetching from ${table}:`, error);
+              console.warn(`Error fetching from ${tableName}:`, error);
               continue;
             }
 
@@ -82,7 +94,7 @@ export function useCategoryHierarchy() {
               allCategories.push(...data);
             }
           } catch (err) {
-            console.warn(`Failed to fetch from ${table}:`, err);
+            console.warn(`Failed to fetch from ${tableName}:`, err);
           }
         }
 
