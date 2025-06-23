@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Listing, PropertyFilters } from '@/types/listingType';
@@ -20,9 +19,11 @@ export function usePropertyListings(filters: PropertyFilters) {
         if (filters.dealType) {
           query = query.eq('deal_type', filters.dealType);
         }
-        if (filters.segment) {
-          query = query.eq('segment', filters.segment);
-        }
+        // The 'segment' column does not exist in the 'listings' table.
+        // This filter was causing the query to return no results.
+        // if (filters.segment) {
+        //   query = query.eq('segment', filters.segment);
+        // }
 
         // Property type filter
         if (filters.propertyTypes && filters.propertyTypes.length > 0) {
@@ -48,34 +49,23 @@ export function usePropertyListings(filters: PropertyFilters) {
             query = query.lte('area', filters.areaRange.max);
           }
         }
-        
+
+        // Rooms filter
+        if (filters.rooms && filters.rooms.length > 0) {
+          query = query.in('rooms', filters.rooms);
+        }
+
         // Floor filter
         if (filters.floorRange) {
-          if (filters.floorRange.min) {
-            query = query.gte('floor', filters.floorRange.min);
-          }
-          if (filters.floorRange.max) {
-            query = query.lte('floor', filters.floorRange.max);
-          }
+            if (filters.floorRange.min) {
+                query = query.gte('floor', filters.floorRange.min);
+            }
+            if (filters.floorRange.max) {
+                query = query.lte('floor', filters.floorRange.max);
+            }
         }
-        
-        // Building type filter
-        if (filters.buildingType && filters.buildingType.length > 0) {
-          query = query.in('building_type', filters.buildingType);
-        }
-        
-        // Condition filter
-        if (filters.conditionType && filters.conditionType.length > 0) {
-          query = query.in('condition', filters.conditionType);
-        }
-        
+
         // Boolean filters
-        if (typeof filters.hasPhoto === 'boolean') {
-          query = query.eq('has_photos', filters.hasPhoto);
-        }
-        if (typeof filters.hasParking === 'boolean') {
-          query = query.eq('has_parking', filters.hasParking);
-        }
         if (typeof filters.hasBalcony === 'boolean') {
           query = query.eq('has_balcony', filters.hasBalcony);
         }
@@ -110,7 +100,7 @@ export function usePropertyListings(filters: PropertyFilters) {
       }
     };
     
-    if (filters.dealType && filters.segment) {
+    if (filters.dealType) { // Only load if a deal type is selected
         loadListings();
     }
 
