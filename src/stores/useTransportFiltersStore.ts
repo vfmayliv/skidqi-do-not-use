@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { 
   TransportFilters,
@@ -25,29 +26,29 @@ type TransportFiltersState = {
 // Initial filters state
 const initialFilters: TransportFilters = {
   vehicleType: null,
-  brands: [],
-  models: null,
+  brandId: null,
+  modelId: null,
   yearRange: { min: null, max: null },
   priceRange: { min: null, max: null },
   mileageRange: { min: null, max: null },
   engineVolumeRange: { min: null, max: null },
-  engineTypes: null,
-  transmissionTypes: null, // Fixed property name from transmissions to transmissionTypes
-  driveTypes: null,
-  bodyTypes: null,
-  conditionTypes: null, // Fixed property name from condition to conditionTypes
-  steeringWheelTypes: null, // Fixed property name
-  colors: null,
+  engineType: null,
+  transmission: null,
+  driveType: null,
+  bodyType: null,
+  condition: null,
+  color: null,
+  fuelType: null,
+  hasPhoto: null,
+  dealerOnly: null,
+  customsCleared: null,
+  inStock: null,
+  exchangePossible: null,
+  withoutAccidents: null,
+  withServiceHistory: null,
+  steeringWheel: null,
   features: null,
   cities: null,
-  hasPhoto: null,
-  commercialType: null, // Added missing property
-  steeringWheel: null, // Added missing property
-  customsCleared: null, // Added missing property
-  inStock: null, // Added missing property
-  exchangePossible: null,
-  withoutAccidents: null, // Added missing property
-  withServiceHistory: null, // Added missing property
   sortBy: null
 };
 

@@ -476,9 +476,9 @@ export default function TransportPage() {
     let filtered = [...mockTransportListings];
     
     // Apply brand filter
-    if (filters.brands && filters.brands.length > 0) {
+    if (filters.brandId) {
       filtered = filtered.filter(listing => 
-        listing.brand && filters.brands!.includes(listing.brand)
+        listing.brand && listing.brand === filters.brandId
       );
     }
     

@@ -18,13 +18,15 @@ export const generateFixedListings = (): Listing[] => {
       discountPrice: 380000,
       discount: 16,
       imageUrl: 'https://via.placeholder.com/300x200?text=Samsung',
-      category: 'electronics',
-      categoryId: 'electronics', // для совместимости
-      subcategoryId: 'phones', // для совместимости
-      city: cities[0],
+      categoryId: 'electronics',
+      subcategoryId: 'phones',
+      city: { ru: cities[0].ru, kz: cities[0].kz },
       createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
       views: 542,
       isFeatured: true,
+      regionId: '1',
+      cityId: '1',
+      microdistrictId: '1',
       seller: {
         name: 'Александр',
         phone: '+7 (777) 123-45-67',
@@ -45,13 +47,15 @@ export const generateFixedListings = (): Listing[] => {
       discountPrice: 800000,
       discount: 16,
       imageUrl: 'https://via.placeholder.com/300x200?text=MacBook',
-      category: 'electronics',
-      categoryId: 'electronics', // для совместимости
-      subcategoryId: 'computers', // для совместимости
-      city: cities[1],
+      categoryId: 'electronics',
+      subcategoryId: 'computers',
+      city: { ru: cities[1].ru, kz: cities[1].kz },
       createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
       views: 328,
       isFeatured: true,
+      regionId: '2',
+      cityId: '2',
+      microdistrictId: '2',
       seller: {
         name: 'Марат',
         phone: '+7 (777) 234-56-78',
@@ -72,13 +76,15 @@ export const generateFixedListings = (): Listing[] => {
       discountPrice: 22000000,
       discount: 12,
       imageUrl: 'https://via.placeholder.com/300x200?text=Apartment',
-      category: 'property',
-      categoryId: 'property', // для совместимости
-      subcategoryId: 'apartments', // для совместимости
-      city: cities[2],
+      categoryId: 'property',
+      subcategoryId: 'apartments',
+      city: { ru: cities[2].ru, kz: cities[2].kz },
       createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
       views: 712,
       isFeatured: false,
+      regionId: '3',
+      cityId: '3',
+      microdistrictId: '3',
       seller: {
         name: 'Айгуль',
         phone: '+7 (777) 345-67-89',
@@ -99,13 +105,15 @@ export const generateFixedListings = (): Listing[] => {
       discountPrice: 13500000,
       discount: 10,
       imageUrl: 'https://via.placeholder.com/300x200?text=Toyota',
-      category: 'transport',
-      categoryId: 'transport', // для совместимости
-      subcategoryId: 'cars', // для совместимости
-      city: cities[0],
+      categoryId: 'transport',
+      subcategoryId: 'cars',
+      city: { ru: cities[0].ru, kz: cities[0].kz },
       createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
       views: 492,
       isFeatured: true,
+      regionId: '1',
+      cityId: '1',
+      microdistrictId: '1',
       seller: {
         name: 'Дмитрий',
         phone: '+7 (777) 456-78-90',
@@ -126,13 +134,15 @@ export const generateFixedListings = (): Listing[] => {
       discountPrice: 130000,
       discount: 28,
       imageUrl: 'https://via.placeholder.com/300x200?text=Sofa',
-      category: 'home',
-      categoryId: 'home', // для совместимости 
-      subcategoryId: undefined, // для совместимости
-      city: cities[3],
+      categoryId: 'home',
+      subcategoryId: undefined,
+      city: { ru: cities[3].ru, kz: cities[3].kz },
       createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
       views: 215,
       isFeatured: false,
+      regionId: '4',
+      cityId: '4',
+      microdistrictId: '4',
       seller: {
         name: 'Анна',
         phone: '+7 (777) 567-89-01',
@@ -153,13 +163,15 @@ export const generateFixedListings = (): Listing[] => {
       discountPrice: 9000,
       discount: 25,
       imageUrl: 'https://via.placeholder.com/300x200?text=DogFood',
-      category: 'pets',
-      categoryId: 'pets', // для совместимости
-      subcategoryId: undefined, // для совместимости
-      city: cities[1],
+      categoryId: 'pets',
+      subcategoryId: undefined,
+      city: { ru: cities[1].ru, kz: cities[1].kz },
       createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       views: 87,
       isFeatured: false,
+      regionId: '2',
+      cityId: '2',
+      microdistrictId: '2',
       seller: {
         name: 'Елена',
         phone: '+7 (777) 678-90-12',
@@ -180,13 +192,15 @@ export const generateFixedListings = (): Listing[] => {
       discountPrice: 220000,
       discount: 21,
       imageUrl: 'https://via.placeholder.com/300x200?text=Bicycle',
-      category: 'hobby',
-      categoryId: 'hobby', // для совместимости
-      subcategoryId: undefined, // для совместимости
-      city: cities[4],
+      categoryId: 'hobby',
+      subcategoryId: undefined,
+      city: { ru: cities[4].ru, kz: cities[4].kz },
       createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
       views: 342,
       isFeatured: true,
+      regionId: '5',
+      cityId: '5',
+      microdistrictId: '5',
       seller: {
         name: 'Тимур',
         phone: '+7 (777) 789-01-23',
@@ -207,13 +221,15 @@ export const generateFixedListings = (): Listing[] => {
       discountPrice: 25000,
       discount: 44,
       imageUrl: 'https://via.placeholder.com/300x200?text=Jacket',
-      category: 'fashion',
-      categoryId: 'fashion', // для совместимости
-      subcategoryId: undefined, // для совместимости
-      city: cities[1],
+      categoryId: 'fashion',
+      subcategoryId: undefined,
+      city: { ru: cities[1].ru, kz: cities[1].kz },
       createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
       views: 178,
       isFeatured: false,
+      regionId: '2',
+      cityId: '2',
+      microdistrictId: '2',
       seller: {
         name: 'Олег',
         phone: '+7 (777) 890-12-34',

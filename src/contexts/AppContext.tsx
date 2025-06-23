@@ -1,13 +1,14 @@
-
 import React, { createContext, useContext, useState } from 'react';
 
 export type Language = 'ru' | 'kz';
 
 export interface CityType {
-  id: string;
-  name: string;
-  name_ru: string;
-  name_kz: string;
+  id?: string;
+  name?: string;
+  name_ru?: string;
+  name_kz?: string;
+  ru: string;
+  kz: string;
 }
 
 interface AppContextType {

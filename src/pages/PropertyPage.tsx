@@ -121,7 +121,7 @@ export default function PropertyPage() {
     setGuidedSearchCompleted(true);
   };
 
-  const handleFilterChange = (newFilters: Partial<PropertyFilters>) => {
+  const handleFilterChange = (newFilters: Partial<typeof filters>) => {
     setFilters(newFilters);
   };
 

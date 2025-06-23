@@ -1,4 +1,3 @@
-
 export enum PropertyType {
   APARTMENT = 'flat',
   HOUSE = 'house',
@@ -87,6 +86,30 @@ export interface SortOption {
     ru: string;
     kz: string;
   };
+}
+
+export enum SteeringWheelType {
+  LEFT = 'left',
+  RIGHT = 'right'
+}
+
+export enum VehicleFeature {
+  ABS = 'abs',
+  ESP = 'esp',
+  AIRBAG = 'airbag',
+  AIR_CONDITIONING = 'air_conditioning',
+  POWER_STEERING = 'power_steering',
+  ELECTRIC_WINDOWS = 'electric_windows',
+  CENTRAL_LOCKING = 'central_locking',
+  ALARM = 'alarm',
+  IMMOBILIZER = 'immobilizer',
+  GPS = 'gps',
+  BLUETOOTH = 'bluetooth',
+  USB = 'usb',
+  HEATED_SEATS = 'heated_seats',
+  LEATHER_SEATS = 'leather_seats',
+  SUNROOF = 'sunroof',
+  ALLOY_WHEELS = 'alloy_wheels'
 }
 
 export interface PropertyFilterConfig {
@@ -180,6 +203,7 @@ export interface PropertyFilters {
 }
 
 export interface TransportFilters {
+  vehicleType: VehicleType | null;
   brandId: string | null;
   modelId: string | null;
   yearRange: {
@@ -194,6 +218,10 @@ export interface TransportFilters {
     min: number | null;
     max: number | null;
   };
+  engineVolumeRange: {
+    min: number | null;
+    max: number | null;
+  };
   engineType: string | null;
   transmission: string | null;
   driveType: string | null;
@@ -203,6 +231,14 @@ export interface TransportFilters {
   fuelType: string | null;
   hasPhoto: boolean | null;
   dealerOnly: boolean | null;
+  customsCleared: boolean | null;
+  inStock: boolean | null;
+  exchangePossible: boolean | null;
+  withoutAccidents: boolean | null;
+  withServiceHistory: boolean | null;
+  steeringWheel: SteeringWheelType | null;
+  features: VehicleFeature[] | null;
+  cities: string[] | null;
   sortBy: string | null;
 }
 
@@ -211,6 +247,7 @@ export interface Listing {
   title: string | { ru: string; kz: string };
   description: string | { ru: string; kz: string };
   imageUrl: string;
+  images?: string[];
   originalPrice: number;
   discountPrice: number;
   discount: number;

@@ -100,12 +100,12 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
         priceRange: { min: null, max: null },
         yearRange: { min: null, max: null },
         mileageRange: { min: null, max: null },
-        brands: []
+        brandId: null
       };
       
-      // Преобразуем выбор бренда в массив брендов
+      // Преобразуем выбор бренда
       if (newFilters.brand) {
-        convertedFilters.brands = [newFilters.brand];
+        convertedFilters.brandId = newFilters.brand;
       }
       
       // Преобразуем ценовой диапазон
@@ -134,27 +134,27 @@ const TransportFilters: React.FC<TransportFiltersProps> = ({
       
       // Преобразуем тип кузова
       if (newFilters.bodyType) {
-        convertedFilters.bodyTypes = [newFilters.bodyType as BodyType];
+        convertedFilters.bodyType = newFilters.bodyType;
       }
       
       // Преобразуем трансмиссию
       if (newFilters.transmission) {
-        convertedFilters.transmissionTypes = [newFilters.transmission as TransmissionType];
+        convertedFilters.transmission = newFilters.transmission;
       }
       
       // Преобразуем тип двигателя
       if (newFilters.engine) {
-        convertedFilters.engineTypes = [newFilters.engine as EngineType];
+        convertedFilters.engineType = newFilters.engine;
       }
       
       // Преобразуем привод
       if (newFilters.drive) {
-        convertedFilters.driveTypes = [newFilters.drive as DriveType];
+        convertedFilters.driveType = newFilters.drive;
       }
       
       // Преобразуем состояние
       if (newFilters.condition !== 'all') {
-        convertedFilters.conditionTypes = [newFilters.condition as ConditionType];
+        convertedFilters.condition = newFilters.condition;
       }
       
       // Преобразуем наличие фото
