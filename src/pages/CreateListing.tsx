@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -15,12 +16,12 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Upload, Camera, X, ChevronRight, ChevronLeft, Save } from 'lucide-react';
-import { categories, Category } from '@/data/categories';
-import { cities } from '@/data/cities';
+import { Upload, Camera, X, ChevronRight, ChevronLeft, Save, MapPin } from 'lucide-react';
 import { processImageForUpload, createImagePreviewUrl, revokeImagePreviewUrl } from '@/utils/imageUtils';
 import { useNavigate } from 'react-router-dom';
 import { Listing } from '@/types/listingType';
+import { useCategoryHierarchy, CategoryNode } from '@/hooks/useCategoryHierarchy';
+import { useLocationData } from '@/hooks/useLocationData';
 
 // Ключ для хранения объявлений пользователя в localStorage
 const USER_LISTINGS_KEY = 'userListings';
@@ -28,6 +29,14 @@ const USER_LISTINGS_KEY = 'userListings';
 const CreateListing = () => {
   const { language, city: selectedCity, t } = useAppContext();
   const { toast } = useToast();
+  const { categories: categoryTree, loading: categoriesLoading } = useCategoryHierarchy();
+  const { 
+    regions, 
+    getCitiesByRegion, 
+    getMicrodistrictsByCity, 
+    loading: locationLoading 
+  } = useLocationData();
+  
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -36,31 +45,29 @@ const CreateListing = () => {
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
-  const [city, setCity] = useState<string>(selectedCity ? selectedCity[language] : '');
   
   // Цена и скидка
   const [price, setPrice] = useState<string>('');
   const [discountPrice, setDiscountPrice] = useState<string>('');
   const [discount, setDiscount] = useState<string>('');
 
-  // Структура категорий в стиле Авито (многоуровневая)
-  const [categoryPath, setCategoryPath] = useState<Category[][]>([categories]); 
-  const [selectedCategoryIndices, setSelectedCategoryIndices] = useState<number[]>([]);
+  // Location states
+  const [selectedRegionId, setSelectedRegionId] = useState<number | null>(null);
+  const [selectedCityId, setSelectedCityId] = useState<number | null>(null);
+  const [selectedMicrodistrictId, setSelectedMicrodistrictId] = useState<number | null>(null);
+
+  // Category states - новая система с реальными данными
+  const [categoryPath, setCategoryPath] = useState<CategoryNode[][]>([]);
+  const [selectedCategoryPath, setSelectedCategoryPath] = useState<CategoryNode[]>([]);
   const [activeCategoryLevel, setActiveCategoryLevel] = useState<number>(0);
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  
-  // Функция обновления выбранных категорий при изменении индексов
+
+  // Initialize category path when categories are loaded
   useEffect(() => {
-    const selected: Category[] = [];
-    
-    selectedCategoryIndices.forEach((index, level) => {
-      if (categoryPath[level] && categoryPath[level][index]) {
-        selected[level] = categoryPath[level][index];
-      }
-    });
-    
-    setSelectedCategories(selected.filter(Boolean));
-  }, [selectedCategoryIndices, categoryPath]);
+    if (categoryTree.length > 0 && categoryPath.length === 0) {
+      setCategoryPath([categoryTree]);
+      setActiveCategoryLevel(0);
+    }
+  }, [categoryTree, categoryPath.length]);
 
   // Form validation state
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
@@ -69,38 +76,32 @@ const CreateListing = () => {
   useEffect(() => {
     const valid = 
       title.trim().length > 0 && 
-      selectedCategories.length > 0 &&
+      selectedCategoryPath.length > 0 &&
       description.trim().length > 0 &&
       price.trim().length > 0 &&
-      city.trim().length > 0 &&
+      selectedRegionId !== null &&
+      selectedCityId !== null &&
       phone.trim().length > 0;
     
     setIsFormValid(valid);
-  }, [title, selectedCategories, description, price, city, phone]);
+  }, [title, selectedCategoryPath, description, price, selectedRegionId, selectedCityId, phone]);
 
   // Выбор категории на определенном уровне
-  const selectCategory = (level: number, index: number) => {
-    const selectedCategory = categoryPath[level][index];
+  const selectCategory = (level: number, category: CategoryNode) => {
+    // Обновляем путь выбранных категорий
+    const newPath = [...selectedCategoryPath.slice(0, level), category];
+    setSelectedCategoryPath(newPath);
     
-    // Обновляем выбранный индекс для текущего уровня
-    const newIndices = [...selectedCategoryIndices];
-    newIndices[level] = index;
+    // Обновляем путь для отображения категорий
+    const newCategoryPath = [...categoryPath.slice(0, level + 1)];
     
-    // Удаляем все выбранные категории ниже по уровню
-    const newPath = [...categoryPath];
-    newPath.splice(level + 1);
-    
-    // Добавляем подкатегории, если они есть
-    if (selectedCategory.subcategories && selectedCategory.subcategories.length > 0) {
-      newPath[level + 1] = selectedCategory.subcategories;
+    // Если у категории есть подкатегории, добавляем их в путь
+    if (category.subcategories && category.subcategories.length > 0) {
+      newCategoryPath[level + 1] = category.subcategories;
       setActiveCategoryLevel(level + 1);
     }
     
-    // Очищаем выбранные индексы ниже текущего уровня
-    newIndices.splice(level + 1);
-    
-    setCategoryPath(newPath);
-    setSelectedCategoryIndices(newIndices);
+    setCategoryPath(newCategoryPath);
   };
   
   const handlePriceChange = (value: string) => {
@@ -186,23 +187,51 @@ const CreateListing = () => {
   // Возврат на предыдущий уровень категорий
   const goBackToPreviousLevel = () => {
     if (activeCategoryLevel > 0) {
-      setActiveCategoryLevel(activeCategoryLevel - 1);
+      const newLevel = activeCategoryLevel - 1;
+      setActiveCategoryLevel(newLevel);
+      
+      // Убираем последний уровень из пути категорий
+      setCategoryPath(prev => prev.slice(0, newLevel + 1));
+      
+      // Обновляем выбранный путь
+      setSelectedCategoryPath(prev => prev.slice(0, newLevel));
     }
   };
   
   // Формирование пути категорий для отображения
   const renderCategoryPath = () => {
-    return selectedCategories.map((category, index) => (
+    return selectedCategoryPath.map((category, index) => (
       <div key={index} className="flex items-center">
         {index > 0 && <ChevronRight className="w-4 h-4 mx-1 text-muted-foreground" />}
         <span 
-          className="cursor-pointer hover:text-primary"
+          className="cursor-pointer hover:text-primary text-sm"
           onClick={() => setActiveCategoryLevel(index)}
         >
           {category.name[language]}
         </span>
       </div>
     ));
+  };
+
+  // Handle region selection
+  const handleRegionChange = (regionId: string) => {
+    const id = parseInt(regionId);
+    setSelectedRegionId(id);
+    setSelectedCityId(null);
+    setSelectedMicrodistrictId(null);
+  };
+
+  // Handle city selection
+  const handleCityChange = (cityId: string) => {
+    const id = parseInt(cityId);
+    setSelectedCityId(id);
+    setSelectedMicrodistrictId(null);
+  };
+
+  // Handle microdistrict selection
+  const handleMicrodistrictChange = (microdistrictId: string) => {
+    const id = parseInt(microdistrictId);
+    setSelectedMicrodistrictId(id);
   };
 
   // Сохранение черновика и загрузка из localStorage
@@ -216,7 +245,6 @@ const CreateListing = () => {
         setPrice(draftData.price || '');
         setDiscountPrice(draftData.discountPrice || '');
         setDiscount(draftData.discount || '');
-        setCity(draftData.city || (selectedCity ? selectedCity[language] : ''));
         setPhone(draftData.phone || '');
         
         // Восстановление изображений
@@ -258,11 +286,11 @@ const CreateListing = () => {
         ru: language === 'ru' ? description : description,
         kz: language === 'kz' ? description : description
       },
-      categoryId: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].id : '',
-      category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].id : '',
+      categoryId: selectedCategoryPath.length > 0 ? selectedCategoryPath[selectedCategoryPath.length - 1].id : '',
+      category: selectedCategoryPath.length > 0 ? selectedCategoryPath[selectedCategoryPath.length - 1].id : '',
       city: {
-        ru: language === 'ru' ? city : city,
-        kz: language === 'kz' ? city : city
+        ru: selectedCityId ? getCitiesByRegion(selectedRegionId!).find(c => c.id === selectedCityId)?.name_ru || '' : '',
+        kz: selectedCityId ? getCitiesByRegion(selectedRegionId!).find(c => c.id === selectedCityId)?.name_kz || '' : ''
       },
       imageUrl: uploadedImages.length > 0 ? uploadedImages[0] : '/placeholder.svg',
       images: uploadedImages,
@@ -308,10 +336,12 @@ const CreateListing = () => {
       price,
       discountPrice,
       discount,
-      city,
+      selectedRegionId,
+      selectedCityId,
+      selectedMicrodistrictId,
       phone,
       images: uploadedImages,
-      categoryIndices: selectedCategoryIndices,
+      selectedCategoryPath,
       createdAt: new Date().toISOString()
     };
     
@@ -326,12 +356,29 @@ const CreateListing = () => {
     });
   };
 
+  if (categoriesLoading || locationLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">
+              {language === 'ru' ? 'Загрузка данных...' : 'Деректерді жүктеу...'}
+            </p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">
-          {language === 'ru' ? 'Создать объявление' : 'Хабарландыру жасау'}
+          {language ===  ? 'Создать объявление' : 'Хабарландыру жасау'}
         </h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -354,14 +401,14 @@ const CreateListing = () => {
                   />
                 </div>
                 
-                {/* Категории в стиле Авито */}
+                {/* Категории с реальными данными из Supabase */}
                 <div className="space-y-4">
                   <div>
                     <Label>
                       {language === 'ru' ? 'Категория' : 'Санат'}
                     </Label>
                     
-                    {selectedCategories.length > 0 && (
+                    {selectedCategoryPath.length > 0 && (
                       <div className="flex items-center text-sm mt-1 mb-3 flex-wrap">
                         {renderCategoryPath()}
                       </div>
@@ -382,15 +429,15 @@ const CreateListing = () => {
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-[300px] overflow-y-auto">
                         {categoryPath[activeCategoryLevel]?.map((category, index) => (
                           <div 
-                            key={index}
+                            key={category.id}
                             className={`
                               p-2 rounded border cursor-pointer flex justify-between items-center
-                              ${selectedCategoryIndices[activeCategoryLevel] === index ? 'bg-primary/10 border-primary' : 'hover:bg-muted/50'}
+                              ${selectedCategoryPath[activeCategoryLevel]?.id === category.id ? 'bg-primary/10 border-primary' : 'hover:bg-muted/50'}
                             `}
-                            onClick={() => selectCategory(activeCategoryLevel, index)}
+                            onClick={() => selectCategory(activeCategoryLevel, category)}
                           >
                             <div className="flex items-center">
-                              <span>{category.name[language]}</span>
+                              <span className="text-sm">{category.name[language]}</span>
                             </div>
                             {category.subcategories && category.subcategories.length > 0 && (
                               <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -519,34 +566,85 @@ const CreateListing = () => {
           </div>
           
           <div className="space-y-6">
+            {/* Location Selection Card */}
             <Card>
               <CardContent className="p-6 space-y-4">
-                <h2 className="text-lg font-medium mb-2">
-                  {language === 'ru' ? 'Контактная информация' : 'Байланыс ақпараты'}
+                <h2 className="text-lg font-medium mb-2 flex items-center">
+                  <MapPin className="h-5 w-5 mr-2" />
+                  {language === 'ru' ? 'Местоположение' : 'Орналасқан жері'}
                 </h2>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="city">
-                    {language === 'ru' ? 'Город' : 'Қала'}
+                  <Label htmlFor="region">
+                    {language === 'ru' ? 'Регион' : 'Аймақ'}
                   </Label>
-                  <Select 
-                    defaultValue={selectedCity ? selectedCity[language] : undefined}
-                    onValueChange={(value) => setCity(value)}
-                  >
-                    <SelectTrigger id="city">
+                  <Select onValueChange={handleRegionChange}>
+                    <SelectTrigger id="region">
                       <SelectValue 
-                        placeholder={language === 'ru' ? 'Выберите город' : 'Қаланы таңдаңыз'} 
+                        placeholder={language === 'ru' ? 'Выберите регион' : 'Аймақты таңдаңыз'} 
                       />
                     </SelectTrigger>
                     <SelectContent>
-                      {cities.map((cityOption, index) => (
-                        <SelectItem key={index} value={cityOption[language]}>
-                          {cityOption[language]}
+                      {regions.map((region) => (
+                        <SelectItem key={region.id} value={region.id.toString()}>
+                          {language === 'ru' ? region.name_ru : region.name_kz}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
+                
+                {selectedRegionId && (
+                  <div className="space-y-2">
+                    <Label htmlFor="city">
+                      {language === 'ru' ? 'Город' : 'Қала'}
+                    </Label>
+                    <Select onValueChange={handleCityChange}>
+                      <SelectTrigger id="city">
+                        <SelectValue 
+                          placeholder={language === 'ru' ? 'Выберите город' : 'Қаланы таңдаңыз'} 
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getCitiesByRegion(selectedRegionId).map((city) => (
+                          <SelectItem key={city.id} value={city.id.toString()}>
+                            {language === 'ru' ? city.name_ru : city.name_kz}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
+                {selectedCityId && (
+                  <div className="space-y-2">
+                    <Label htmlFor="microdistrict">
+                      {language === 'ru' ? 'Микрорайон' : 'Шағынаудан'}
+                    </Label>
+                    <Select onValueChange={handleMicrodistrictChange}>
+                      <SelectTrigger id="microdistrict">
+                        <SelectValue 
+                          placeholder={language === 'ru' ? 'Выберите микрорайон (необязательно)' : 'Шағынауданды таңдаңыз (міндетті емес)'} 
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getMicrodistrictsByCity(selectedCityId).map((microdistrict) => (
+                          <SelectItem key={microdistrict.id} value={microdistrict.id.toString()}>
+                            {language === 'ru' ? microdistrict.name_ru : microdistrict.name_kz}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <h2 className="text-lg font-medium mb-2">
+                  {language === 'ru' ? 'Контактная информация' : 'Байланыс ақпараты'}
+                </h2>
                 
                 <div className="space-y-2">
                   <Label htmlFor="phone">

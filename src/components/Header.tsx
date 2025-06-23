@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Search, User, Heart, MessageCircle, Plus } from 'lucide-react';
@@ -18,10 +19,12 @@ import { useServicesCategories } from '@/hooks/useServicesCategories';
 import { usePetCategories } from '@/hooks/usePetCategories';
 import { useHobbiesCategories } from '@/hooks/useHobbiesCategories';
 import { useBeautyCategories } from '@/hooks/useBeautyCategories';
+import { useSupabase } from '@/contexts/SupabaseContext';
 import * as LucideIcons from 'lucide-react';
 
 export function Header() {
   const { language, setLanguage, selectedCity, t } = useAppWithTranslations();
+  const { user } = useSupabase();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
@@ -43,6 +46,14 @@ export function Header() {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleCreateListingClick = () => {
+    if (!user) {
+      navigate('/login');
+    } else {
+      navigate('/create-listing');
     }
   };
 
@@ -298,11 +309,9 @@ export function Header() {
                   </Link>
                 </Button>
                 
-                <Button asChild className="ml-2">
-                  <Link to="/create-listing">
-                    <Plus className="h-4 w-4 mr-2" />
-                    {language === 'ru' ? 'Подать объявление' : 'Хабарландыру беру'}
-                  </Link>
+                <Button onClick={handleCreateListingClick} className="ml-2">
+                  <Plus className="h-4 w-4 mr-2" />
+                  {language === 'ru' ? 'Подать объявление' : 'Хабарландыру беру'}
                 </Button>
               </div>
 
