@@ -1071,6 +1071,7 @@ export type Database = {
           renovation_type: string | null
           rooms: number | null
           security_guarded: boolean | null
+          segment: string | null
           source_link: string | null
           status: string | null
           title: string
@@ -1120,6 +1121,7 @@ export type Database = {
           renovation_type?: string | null
           rooms?: number | null
           security_guarded?: boolean | null
+          segment?: string | null
           source_link?: string | null
           status?: string | null
           title: string
@@ -1169,6 +1171,7 @@ export type Database = {
           renovation_type?: string | null
           rooms?: number | null
           security_guarded?: boolean | null
+          segment?: string | null
           source_link?: string | null
           status?: string | null
           title?: string

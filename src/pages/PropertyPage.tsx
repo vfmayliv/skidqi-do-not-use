@@ -1,15 +1,16 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
-import PropertyFilters from '@/components/property/PropertyFilters'; // Updated component
-import { usePropertyFiltersStore } from '@/store/usePropertyFiltersStore';
+import PropertyFilters from '@/components/property/PropertyFilters';
+import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { usePropertyListings } from '@/hooks/usePropertyListings';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { GuidedSearch } from '@/components/property/GuidedSearch';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'; // For view switching
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { List, Map } from 'lucide-react';
-import MapView from '@/components/property/MapView'; // Placeholder for the map
+import MapView from '@/components/property/MapView';
 
 export default function PropertyPage() {
   const { dealType, segment, filters, setFilters, setDealType, setSegment } = usePropertyFiltersStore();
@@ -17,7 +18,7 @@ export default function PropertyPage() {
   const { listings, loading, error } = usePropertyListings(filters);
   
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'map'
+  const [viewMode, setViewMode] = useState('list');
 
   useEffect(() => {
     // Sync URL params with store on initial load
