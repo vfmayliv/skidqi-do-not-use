@@ -63,56 +63,81 @@ export enum DealType {
   RENT_DAILY = 'rent_daily', // Added missing RENT_DAILY type
 }
 
-export enum ViewType {
-  WINDOW = 'window',
-  YARD = 'yard',
-  CITY = 'city',
-  LANDMARK = 'landmark',
-  MOUNTAINS = 'mountains',
-  SEA = 'sea',
-  PARK = 'park', // Added missing PARK type
-  LAKE = 'lake', // Added missing LAKE type
-  COURTYARD = 'courtyard', // Added missing COURTYARD type
-  STREET = 'street', // Added missing STREET type
+export interface PropertyFilters {
+  propertyTypes?: PropertyType[] | null;
+  priceRange?: { min: number | null; max: number | null };
+  areaRange?: { min: number | null; max: number | null };
+  floorRange?: { min: number | null; max: number | null };
+  buildingTypes?: BuildingType[] | null;
+  rooms?: number[] | null;
+  districts?: string[] | null;
+  hasPhoto?: boolean | null;
+  onlyNewBuilding?: boolean | null;
+  furnished?: boolean | null;
+  allowPets?: boolean | null;
+  hasParking?: boolean | null;
+  dealType?: string | null;
+  segment?: string | null;
+  yearBuiltRange?: { min: number | null; max: number | null };
+  ceilingHeightRange?: { min: number | null; max: number | null };
+  bathroomTypes?: BathroomType[] | null;
+  renovationTypes?: RenovationType[] | null;
+  hasBalcony?: boolean | null;
+  hasElevator?: boolean | null;
+  rentPeriodMin?: number | null;
+  isCorner?: boolean | null;
+  isStudio?: boolean | null;
+  hasSeparateEntrance?: boolean | null;
+  securityGuarded?: boolean | null;
+  hasPlayground?: boolean | null;
+  utilityBillsIncluded?: boolean | null;
+  sortBy?: SortOption | null;
+  viewTypes?: string[] | null;
+  nearbyInfrastructure?: string[] | null;
 }
 
-export enum InfrastructureType {
-  SCHOOL = 'school',
-  KINDERGARTEN = 'kindergarten',
-  HOSPITAL = 'hospital',
-  PHARMACY = 'pharmacy',
-  SUPERMARKET = 'supermarket',
-  PARK = 'park',
-  GYM = 'gym',
-  CAFE = 'cafe',
-  PUBLIC_TRANSPORT = 'public_transport',
-  SHOPPING_CENTER = 'shopping_center', // Added missing SHOPPING_CENTER type
-  SPORT_COMPLEX = 'sport_complex', // Added missing SPORT_COMPLEX type
-  BANK = 'bank', // Added missing BANK type
+export interface PropertyFilterConfig {
+  areaRangeMin: number;
+  areaRangeMax: number;
+  floorRangeMin: number;
+  floorRangeMax: number;
+  dealTypes: { id: string; label: { ru: string; kz: string } }[];
+  segments: { id: string; label: { ru: string; kz: string }; types: string[] }[];
+  propertyTypes: { [key: string]: { ru: string; kz: string } };
+  buildingTypes: { [key: string]: { ru: string; kz: string } };
+  conditionTypes: { [key: string]: { ru: string; kz: string } };
+  sortOptions: { value: string; label: { ru: string; kz: string } }[];
 }
 
-// Transport related enums
-export enum TransmissionType {
-  MANUAL = 'manual',
-  AUTOMATIC = 'automatic',
-  ROBOT = 'robot',
-  VARIATOR = 'variator',
+export enum ConditionType {
+  NEW = 'new',
+  USED = 'used',
+  DAMAGED = 'damaged',
+  GOOD = 'good',
+  AVERAGE = 'average',
+  NEEDS_REPAIR = 'needs_repair',
 }
 
-export enum EngineType {
-  PETROL = 'petrol',
+export enum FuelType {
+  GASOLINE = 'gasoline',
   DIESEL = 'diesel',
   GAS = 'gas',
   HYBRID = 'hybrid',
   ELECTRIC = 'electric',
-  PETROL_GAS = 'petrol_gas',
+}
+
+export enum TransmissionType {
+  MANUAL = 'manual',
+  AUTOMATIC = 'automatic',
+  TIPTRONIC = 'tiptronic',
+  VARIATOR = 'variator',
+  ROBOT = 'robot',
 }
 
 export enum DriveType {
-  FRONT = 'front',
-  REAR = 'rear',
-  ALL_WHEEL = 'all_wheel',
-  FULL = 'full',
+  FWD = 'fwd',
+  RWD = 'rwd',
+  AWD = 'awd',
 }
 
 export enum BodyType {
@@ -120,21 +145,11 @@ export enum BodyType {
   HATCHBACK = 'hatchback',
   SUV = 'suv',
   MINIVAN = 'minivan',
-  WAGON = 'wagon',
   COUPE = 'coupe',
+  WAGON = 'wagon',
   PICKUP = 'pickup',
   CABRIOLET = 'cabriolet',
-  VAN = 'van', // Added missing VAN type
-  LIMOUSINE = 'limousine', // Added missing LIMOUSINE type
-}
-
-export enum ConditionType {
-  NEW = 'new',
-  EXCELLENT = 'excellent',
-  GOOD = 'good',
-  SATISFACTORY = 'satisfactory',
-  POOR = 'poor',
-  FOR_PARTS = 'for_parts',
+  LIMOUSINE = 'limousine',
 }
 
 export enum SteeringWheelType {
@@ -142,162 +157,29 @@ export enum SteeringWheelType {
   RIGHT = 'right',
 }
 
-export enum VehicleFeature {
-  ABS = 'abs',
-  ESP = 'esp',
-  ALLOY_WHEELS = 'alloy_wheels',
-  CLIMATE_CONTROL = 'climate_control',
-  CRUISE_CONTROL = 'cruise_control',
-  HEATED_SEATS = 'heated_seats',
-  LEATHER_INTERIOR = 'leather_interior',
-  NAVIGATION = 'navigation',
-  PARKING_SENSORS = 'parking_sensors',
-  REAR_VIEW_CAMERA = 'rear_view_camera',
-  SUNROOF = 'sunroof',
-  AIRBAGS = 'airbags', // Added missing AIRBAGS feature
-}
-
-// Interface for filters
-export interface PropertyFilters {
-  propertyTypes?: PropertyType[] | null;
-  dealType?: DealType | null;
-  priceRange: { min: number | null; max: number | null };
-  rooms: (number | string)[];
-  areaRange: { min: number | null; max: number | null };
-  floor?: { min: number | null; max: number | null }; // Using "floor" for backward compatibility
-  floorRange?: { min: number | null; max: number | null }; // Adding floorRange for newer components
-  totalFloors?: { min: number | null; max: number | null };
-  yearBuilt?: { min: number | null; max: number | null };
-  yearBuiltRange?: { min: number | null; max: number | null }; // Adding for newer components
-  buildingTypes?: BuildingType[] | null;
-  renovationTypes?: RenovationType[] | null;
-  bathroomTypes?: BathroomType[] | null;
-  districts?: string[] | null;
-  viewTypes?: ViewType[] | null; // Added missing viewTypes
-  nearbyInfrastructure?: InfrastructureType[] | null; // Added missing nearbyInfrastructure
-  hasPhoto?: boolean;
-  isNewBuilding?: boolean;
-  onlyNewBuilding?: boolean; // Added for compatibility
-  hasParking?: boolean;
-  hasFurniture?: boolean;
-  furnished?: boolean; // Added for compatibility
-  hasBalcony?: boolean;
-  hasElevator?: boolean;
-  isCorner?: boolean;
-  onlyTrustedSellers?: boolean;
-  mortgageAvailable?: boolean;
-  hasVirtualTour?: boolean;
-  isStudio?: boolean; // Added missing property
-  rentPeriodMin?: number; // Added missing rentPeriodMin
-  allowPets?: boolean; // Added missing allowPets
-  hasSeparateEntrance?: boolean; // Added missing hasSeparateEntrance
-  securityGuarded?: boolean; // Added missing securityGuarded
-  hasPlayground?: boolean; // Added missing hasPlayground
-  ceilingHeightRange?: { min: number | null; max: number | null }; // Added missing ceilingHeightRange
-  utilityBillsIncluded?: boolean; // Added missing utilityBillsIncluded
-  sortBy: SortOption;
-  regionId: string | null;
-  cityId: string | null;
-  microdistrictId: string | null;
-}
-
-export interface TransportFilters {
-  vehicleType?: VehicleType | null;
-  priceRange: { min: number | null; max: number | null };
-  brands: string[];
-  models?: string[] | null;
-  yearRange: { min: number | null; max: number | null };
-  mileageRange: { min: number | null; max: number | null };
-  engineTypes?: EngineType[] | null;
-  engineVolumeRange: { min: number | null; max: number | null };
-  transmissionTypes?: TransmissionType[] | null;
-  driveTypes?: DriveType[] | null;
-  bodyTypes?: BodyType[] | null;
-  steeringWheelTypes?: SteeringWheelType[] | null;
-  conditionTypes?: ConditionType[] | null;
-  colors?: string[] | null;
-  features?: VehicleFeature[] | null;
-  cities?: string[] | null;
-  hasPhoto?: boolean;
-  isCleared?: boolean;
-  notBroken?: boolean;
-  hasVideo?: boolean;
-  onlyTrustedSellers?: boolean;
-  exchangePossible?: boolean;
-  sortBy?: SortOption | null;
-  commercialType?: string | null; // Added missing commercialType
-  steeringWheel?: SteeringWheelType | null; // Added missing steeringWheel
-  customsCleared?: boolean | null; // Added missing customsCleared
-  inStock?: boolean | null; // Added missing inStock
-  withoutAccidents?: boolean | null; // Added missing withoutAccidents
-  withServiceHistory?: boolean | null; // Added missing withServiceHistory
-}
-
-export interface PropertyFilterConfig {
-  areaRangeMin?: number;
-  areaRangeMax?: number;
-  floorRangeMin?: number;
-  floorRangeMax?: number;
-  yearBuiltMin?: number;
-  yearBuiltMax?: number;
-  priceRangeMin?: number;
-  priceRangeMax?: number;
-  dealTypes?: { id: string; label: { ru: string; kz: string } }[];
-  segments?: { 
-    id: string; 
-    label: { ru: string; kz: string };
-    types: any[];
-  }[];
-  residentialFilters?: any[];
-  commercialFilters?: any[];
-  generalFilters?: any[];
-}
+export type VehicleFeature = 'abs' | 'air_conditioning' | 'heated_seats' | 'cruise_control' | 'rear_view_camera';
 
 export interface Listing {
   id: string;
-  title: {
-    ru: string;
-    kz: string;
-  };
-  description: {
-    ru: string;
-    kz: string;
-  };
-  originalPrice: number;
-  discountPrice: number;
-  discount: number;
-  city: {
-    ru: string;
-    kz: string;
-  };
-  categoryId: string;
-  category?: string;
-  subcategoryId?: string;
-  subSubcategoryId?: string;
+  title: string;
+  description: string;
+  price: number;
+  currency: 'KZT' | 'USD' | 'EUR';
+  images: string[];
   createdAt: string;
-  imageUrl: string;
-  images?: string[];
-  isFeatured?: boolean;
+  updatedAt: string;
   views: number;
-  seller: {
-    name: string;
-    phone: string;
-    rating: number;
-    reviews?: number;
-  };
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-
-  // Transport specific fields
+  isPromoted?: boolean;
+  userId: string;
+  categoryId: string;
+  
+  // Vehicle specific fields
   brand?: string;
   model?: string;
   year?: number;
   mileage?: number;
-  vehicleType?: VehicleType;
   engineVolume?: number;
-  engineType?: EngineType;
+  fuelType?: FuelType;
   transmission?: TransmissionType;
   driveType?: DriveType;
   bodyType?: BodyType;
@@ -331,7 +213,7 @@ export interface Region {
   id: string;
   name_ru: string;
   name_kz: string;
-  is_city_level?: boolean; // Для определения особых регионов-городов (Алматы, Астана, Шымкент)
+  is_city_level?: boolean; // Поле для определения уровня города (Астана, Алматы, Шымкент)
 }
 
 export interface City {
