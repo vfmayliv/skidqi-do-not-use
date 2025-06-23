@@ -27,14 +27,14 @@ export const MyListings: React.FC<MyListingsProps> = ({ listings }) => {
               <div className="flex">
                 <div className="w-24 h-24">
                   <img 
-                    src={listing.imageUrl} 
-                    alt={listing.title[language]} 
+                    src={listing.imageUrl || '/placeholder.svg'} 
+                    alt={typeof listing.title === 'string' ? listing.title : listing.title[language]} 
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <CardContent className="flex-1 p-3">
                   <h3 className="font-medium text-sm line-clamp-2">
-                    {listing.title[language]}
+                    {typeof listing.title === 'string' ? listing.title : listing.title[language]}
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {formatPrice(listing.discountPrice)}

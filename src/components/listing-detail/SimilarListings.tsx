@@ -23,15 +23,16 @@ export const SimilarListings = ({ listings, language, formatPrice }: SimilarList
           if (typeof item.title === 'string') {
             titleText = item.title;
           } else if (item.title && typeof item.title === 'object') {
-            // Try to access by language key
-            titleText = (item.title[language] || Object.values(item.title)[0] || '').toString();
+            // Handle object-type title properly
+            const titleObj = item.title as any;
+            titleText = (titleObj[language] || Object.values(titleObj)[0] || '').toString();
           }
               
           return (
             <Link key={item.id} to={`/listing/${item.id}`} className="group">
               <div className="aspect-square rounded-md overflow-hidden mb-2">
                 <img 
-                  src={item.imageUrl} 
+                  src={item.imageUrl || '/placeholder.svg'} 
                   alt={titleText} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                 />

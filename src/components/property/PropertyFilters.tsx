@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { usePropertyFiltersStore } from '@/store/usePropertyFiltersStore';
+import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { filtersConfig, PropertyTypeOption, FilterVisibility } from '@/config/filtersConfig';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';

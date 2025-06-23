@@ -1,3 +1,4 @@
+
 export enum PropertyType {
   // Residential
   APARTMENT = 'apartment',
@@ -23,6 +24,7 @@ export enum PropertyType {
   READY_BUSINESS = 'ready_business',
   COMMERCIAL_LAND = 'commercial_land',
   COWORKING = 'coworking',
+  COMMERCIAL = 'commercial',
 }
 
 export enum BuildingType {
@@ -88,12 +90,46 @@ export enum VehicleType {
   MOTORCYCLE = 'motorcycle',
 }
 
+export enum SteeringWheelType {
+  LEFT = 'left',
+  RIGHT = 'right',
+}
+
+export enum VehicleFeature {
+  ABS = 'abs',
+  ESP = 'esp',
+  AIRBAGS = 'airbags',
+  LEATHER_SEATS = 'leather_seats',
+  SUNROOF = 'sunroof',
+  NAVIGATION = 'navigation',
+}
+
 export enum SortOptions {
   DATE_DESC = 'date_desc',
   PRICE_ASC = 'price_asc',
   PRICE_DESC = 'price_desc',
   AREA_ASC = 'area_asc',
   AREA_DESC = 'area_desc',
+}
+
+export interface Region {
+  id: string;
+  name_ru: string;
+  name_kz: string;
+}
+
+export interface City {
+  id: string;
+  name_ru: string;
+  name_kz: string;
+  region_id: string;
+}
+
+export interface Microdistrict {
+  id: string;
+  name_ru: string;
+  name_kz: string;
+  city_id: string;
 }
 
 export interface PropertyFilters {
@@ -105,12 +141,11 @@ export interface PropertyFilters {
   areaMin?: number;
   areaMax?: number;
   rooms?: number[];
-  floor?: string; // e.g., 'not_first', 'not_last', 'last', or specific floor number
+  floor?: string;
   sortBy: SortOptions;
   query?: string;
   districts?: string[];
   microdistricts?: string[];
-  // Advanced filters
   hasBalcony?: boolean;
   hasElevator?: boolean;
   hasParking?: boolean;
@@ -120,6 +155,39 @@ export interface PropertyFilters {
   yearBuiltMax?: number;
   buildingType?: BuildingType[];
   conditionType?: ConditionType[];
+}
+
+export interface TransportFilters {
+  brandId?: string;
+  modelId?: string;
+  yearFrom?: number;
+  yearTo?: number;
+  priceFrom?: number;
+  priceTo?: number;
+  mileageFrom?: number;
+  mileageTo?: number;
+  engineType?: EngineType;
+  transmission?: TransmissionType;
+  driveType?: DriveType;
+  bodyType?: BodyType;
+  condition?: string;
+  color?: string;
+  fuelType?: string;
+  hasPhoto?: boolean;
+  dealerOnly?: boolean;
+  sortBy?: string;
+  vehicleType?: VehicleType;
+  brands?: string[];
+  models?: string[];
+  bodyTypes?: BodyType[];
+  transmissionTypes?: TransmissionType[];
+  engineTypes?: EngineType[];
+  driveTypes?: DriveType[];
+  conditionTypes?: string[];
+  engineVolumeRange?: {
+    min?: number;
+    max?: number;
+  };
 }
 
 export interface PropertyFilterConfig {
@@ -140,6 +208,8 @@ export interface Listing {
   price: number;
   discountPrice: number;
   discount: number;
+  originalPrice: number;
+  imageUrl: string;
   city: string | { ru: string; kk: string };
   categoryId: string;
   subcategoryİd?: string;
