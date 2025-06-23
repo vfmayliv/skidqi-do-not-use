@@ -34,8 +34,10 @@ const ConfirmEmail = () => {
           localStorage.removeItem('pendingUser');
           localStorage.removeItem('confirmationSent');
           
-          // Set as authenticated
-          login();
+          // Set as authenticated - pass dummy credentials
+          if (login) {
+            login({ email: 'user@example.com', password: 'password' });
+          }
           
           setStatus('success');
           

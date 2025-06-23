@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -287,7 +286,6 @@ const CreateListing = () => {
         kz: language === 'kz' ? description : description
       },
       categoryId: selectedCategoryPath.length > 0 ? selectedCategoryPath[selectedCategoryPath.length - 1].id : '',
-      category: selectedCategoryPath.length > 0 ? selectedCategoryPath[selectedCategoryPath.length - 1].id : '',
       city: {
         ru: selectedCityId ? getCitiesByRegion(selectedRegionId!).find(c => c.id === selectedCityId)?.name_ru || '' : '',
         kz: selectedCityId ? getCitiesByRegion(selectedRegionId!).find(c => c.id === selectedCityId)?.name_kz || '' : ''
@@ -304,7 +302,10 @@ const CreateListing = () => {
       },
       createdAt: new Date().toISOString(),
       views: 0,
-      isFeatured: false
+      isFeatured: false,
+      regionId: selectedRegionId?.toString() || '',
+      cityId: selectedCityId?.toString() || '',
+      microdistrictId: selectedMicrodistrictId?.toString() || ''
     };
 
     // Сохраняем объявление в localStorage
