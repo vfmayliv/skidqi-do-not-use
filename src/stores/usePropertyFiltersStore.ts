@@ -65,6 +65,9 @@ const initialFilters: PropertyFilters = {
   sortBy: null,
   viewTypes: null,
   nearbyInfrastructure: null,
+  regionId: null,
+  cityId: null,  
+  microdistrictId: null
 };
 
 export const usePropertyFiltersStore = create<PropertyFiltersState>((set, get) => ({
@@ -109,8 +112,8 @@ function calculateActiveFiltersCount(filters: PropertyFilters): number {
     
     if (filterKey === 'priceRange' || filterKey === 'areaRange' || filterKey === 'floorRange' || 
         filterKey === 'yearBuiltRange' || filterKey === 'ceilingHeightRange') {
-      const range = filterValue as { min: number | null, max: number | null };
-      if ((range.min !== null && range.min > 0) || (range.max !== null && range.max < 1000000000)) {
+      const range = filterValue as { min: number | null, max: number | null } | null;
+      if (range && ((range.min !== null && range.min > 0) || (range.max !== null && range.max < 1000000000))) {
         return count + 1;
       }
       return count;

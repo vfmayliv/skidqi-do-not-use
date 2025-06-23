@@ -12,6 +12,7 @@ export interface Listing {
   originalPrice: number;
   discountPrice: number;
   discount: number;
+  imageUrl: string;
   city: {
     ru: string;
     kz: string;
@@ -19,8 +20,7 @@ export interface Listing {
   categoryId: string;
   subcategoryId?: string;
   createdAt: string;
-  imageUrl: string;
-  isFeatured?: boolean; // Made optional to match listingType.ts
+  isFeatured?: boolean;
   views: number;
   
   // Add seller property to match listingType.ts Listing interface
@@ -47,5 +47,12 @@ export interface Listing {
   regionId: string;
   cityId: string;
   microdistrictId: string;
-  districtId?: string; // Keeping for backward compatibility
+  districtId?: string;
+  
+  // Property-specific fields
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  address?: string;
 }
