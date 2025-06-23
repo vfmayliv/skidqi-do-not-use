@@ -1,12 +1,28 @@
 export enum PropertyType {
-  APARTMENT = 'flat',
+  // Residential
+  APARTMENT = 'apartment',
+  NEW_BUILDING = 'new_building',
+  SECONDARY = 'secondary',
+  ROOM = 'room',
   HOUSE = 'house',
-  COMMERCIAL = 'commercial',
-  LAND = 'land',
   TOWNHOUSE = 'townhouse',
-  DACHA = 'dacha',
+  LAND = 'land',
   GARAGE = 'garage',
+  BED_SPACE = 'bed_space',
+  DACHA = 'dacha',
+
+  // Commercial
+  OFFICE = 'office',
+  RETAIL = 'retail',
+  WAREHOUSE = 'warehouse',
+  FREE_PURPOSE = 'free_purpose',
+  PUBLIC_CATERING = 'public_catering',
+  PRODUCTION = 'production',
+  AUTO_SERVICE = 'auto_service',
   BUILDING = 'building',
+  READY_BUSINESS = 'ready_business',
+  COMMERCIAL_LAND = 'commercial_land',
+  COWORKING = 'coworking',
 }
 
 export enum BuildingType {
@@ -80,180 +96,53 @@ export enum SortOptions {
   AREA_DESC = 'area_desc',
 }
 
-export interface SortOption {
-  value: string;
-  label: {
-    ru: string;
-    kz: string;
-  };
-}
-
-export enum SteeringWheelType {
-  LEFT = 'left',
-  RIGHT = 'right'
-}
-
-export enum VehicleFeature {
-  ABS = 'abs',
-  ESP = 'esp',
-  AIRBAG = 'airbag',
-  AIR_CONDITIONING = 'air_conditioning',
-  POWER_STEERING = 'power_steering',
-  ELECTRIC_WINDOWS = 'electric_windows',
-  CENTRAL_LOCKING = 'central_locking',
-  ALARM = 'alarm',
-  IMMOBILIZER = 'immobilizer',
-  GPS = 'gps',
-  BLUETOOTH = 'bluetooth',
-  USB = 'usb',
-  HEATED_SEATS = 'heated_seats',
-  LEATHER_SEATS = 'leather_seats',
-  SUNROOF = 'sunroof',
-  ALLOY_WHEELS = 'alloy_wheels'
+export interface PropertyFilters {
+  dealType: 'buy' | 'rent' | 'rent_daily';
+  segment: 'residential' | 'commercial' | 'overseas';
+  propertyTypes: PropertyType[];
+  priceMin?: number;
+  priceMax?: number;
+  areaMin?: number;
+  areaMax?: number;
+  rooms?: number[];
+  floor?: string; // e.g., 'not_first', 'not_last', 'last', or specific floor number
+  sortBy: SortOptions;
+  query?: string;
+  districts?: string[];
+  microdistricts?: string[];
+  // Advanced filters
+  hasBalcony?: boolean;
+  hasElevator?: boolean;
+  hasParking?: boolean;
+  furnished?: boolean;
+  allowPets?: boolean;
+  yearBuiltMin?: number;
+  yearBuiltMax?: number;
+  buildingType?: BuildingType[];
+  conditionType?: ConditionType[];
 }
 
 export interface PropertyFilterConfig {
-  areaRangeMin: number;
-  areaRangeMax: number;
-  floorRangeMin: number;
-  floorRangeMax: number;
-  dealTypes: { id: string; label: { ru: string; kz: string } }[];
-  segments: { 
-    id: string; 
-    label: { ru: string; kz: string };
-    types: []
-  }[];
-  propertyTypes: { [key: string]: { ru: string; kz: string } };
-  buildingTypes: { [key: string]: { ru: string; kz: string } };
-  conditionTypes: { [key: string]: { ru: string; kz: string } };
-  sortOptions: SortOption[];
-}
-
-export interface Region {
-  id: string;
-  name_ru: string;
-  name_kz: string;
-}
-
-export interface City {
-  id: string;
-  name_ru: string;
-  name_kz: string;
-  region_id: string;
-}
-
-export interface Microdistrict {
-  id: string;
-  name_ru: string;
-  name_kz: string;
-  city_id: string;
-}
-
-export interface PropertyFilters {
-  propertyTypes: string[] | null;
-  priceRange: {
-    min: number | null;
-    max: number | null;
-  };
-  areaRange: {
-    min: number | null;
-    max: number | null;
-  };
-  floorRange: {
-    min: number | null;
-    max: number | null;
-  };
-  buildingTypes: string[] | null;
-  rooms: number[] | null;
-  districts: string[] | null;
-  hasPhoto: boolean | null;
-  onlyNewBuilding: boolean | null;
-  furnished: boolean | null;
-  allowPets: boolean | null;
-  hasParking: boolean | null;
-  dealType: string | null;
-  segment: string | null;
-  yearBuiltRange: {
-    min: number | null;
-    max: number | null;
-  };
-  ceilingHeightRange: {
-    min: number | null;
-    max: number | null;
-  };
-  bathroomTypes: string[] | null;
-  renovationTypes: string[] | null;
-  hasBalcony: boolean | null;
-  hasElevator: boolean | null;
-  rentPeriodMin: number | null;
-  isCorner: boolean | null;
-  isStudio: boolean | null;
-  hasSeparateEntrance: boolean | null;
-  securityGuarded: boolean | null;
-  hasPlayground: boolean | null;
-  utilityBillsIncluded: boolean | null;
-  sortBy: string | null;
-  viewTypes: string[] | null;
-  nearbyInfrastructure: string[] | null;
-  
-  // Location filters
-  regionId: string | null;
-  cityId: string | null;
-  microdistrictId: string | null;
-}
-
-export interface TransportFilters {
-  vehicleType: VehicleType | null;
-  brandId: string | null;
-  modelId: string | null;
-  yearRange: {
-    min: number | null;
-    max: number | null;
-  };
-  priceRange: {
-    min: number | null;
-    max: number | null;
-  };
-  mileageRange: {
-    min: number | null;
-    max: number | null;
-  };
-  engineVolumeRange: {
-    min: number | null;
-    max: number | null;
-  };
-  engineType: string | null;
-  transmission: string | null;
-  driveType: string | null;
-  bodyType: string | null;
-  condition: string | null;
-  color: string | null;
-  fuelType: string | null;
-  hasPhoto: boolean | null;
-  dealerOnly: boolean | null;
-  customsCleared: boolean | null;
-  inStock: boolean | null;
-  exchangePossible: boolean | null;
-  withoutAccidents: boolean | null;
-  withServiceHistory: boolean | null;
-  steeringWheel: SteeringWheelType | null;
-  features: VehicleFeature[] | null;
-  cities: string[] | null;
-  sortBy: string | null;
+  showPrice: boolean;
+  showArea: boolean;
+  showRooms: boolean;
+  showFloor: boolean;
+  showBuildingType: boolean;
+  showCondition: boolean;
+  showAdvanced: boolean;
 }
 
 export interface Listing {
   id: string;
-  title: string | { ru: string; kz: string };
-  description: string | { ru: string; kz: string };
-  imageUrl: string;
-  images?: string[];
-  originalPrice: number;
+  userId: string;
+  title: string;
+  description: string;
+  price: number;
   discountPrice: number;
   discount: number;
-  city: string | { ru: string; kz: string };
+  city: string | { ru: string; kk: string };
   categoryId: string;
-  subcategoryId?: string;
+  subcategoryİd?: string;
   createdAt: string;
   views: number;
   isFeatured?: boolean;
