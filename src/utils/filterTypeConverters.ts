@@ -1,5 +1,4 @@
-
-import { PropertyFilters, PropertyType, SortOptions } from '@/types/listingType';
+import { PropertyFilters, PropertyType, SortOptions, BuildingType } from '@/types/listingType';
 
 export function convertToPropertyListingFilters(params: Record<string, string | string[]>): Partial<PropertyFilters> {
   const filters: Partial<PropertyFilters> = {};
@@ -34,10 +33,10 @@ export function convertToPropertyListingFilters(params: Record<string, string | 
     };
   }
 
-  // Handle building types with proper property name
+  // Handle building types with proper property name and type casting
   if (params.buildingTypes) {
     const types = Array.isArray(params.buildingTypes) ? params.buildingTypes : [params.buildingTypes];
-    filters.buildingType = types.filter(Boolean);
+    filters.buildingType = types.filter(Boolean) as BuildingType[];
   }
 
   // Handle rooms
