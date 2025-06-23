@@ -42,6 +42,7 @@ const initialFilters: PropertyFilters = {
   allowPets: null,
   hasParking: null,
   dealType: null,
+  segment: null,
   yearBuiltRange: {
     min: null,
     max: null
@@ -64,51 +65,37 @@ const initialFilters: PropertyFilters = {
   sortBy: null,
   viewTypes: null,
   nearbyInfrastructure: null,
-  // Новые поля для административных единиц
-  regionId: null,
-  cityId: null,
-  microdistrictId: null
 };
 
-export const usePropertyFiltersStore = create<PropertyFiltersState>()((set, get) => ({
+export const usePropertyFiltersStore = create<PropertyFiltersState>((set, get) => ({
   filters: initialFilters,
   activeFiltersCount: 0,
-  
+
   setFilter: (key, value) => {
-    set((state) => {
-      const newFilters = {
+    set(state => ({
+      filters: {
         ...state.filters,
         [key]: value
-      };
-      
-      return {
-        filters: newFilters,
-        activeFiltersCount: calculateActiveFiltersCount(newFilters)
-      };
-    });
+      }
+    }));
+    set({ activeFiltersCount: get().calculateActiveFiltersCount() });
   },
-  
+
   setFilters: (newFilters) => {
-    set((state) => {
-      const updatedFilters = {
+    set(state => ({
+      filters: {
         ...state.filters,
         ...newFilters
-      };
-      
-      return {
-        filters: updatedFilters,
-        activeFiltersCount: calculateActiveFiltersCount(updatedFilters)
-      };
-    });
+      }
+    }));
+    set({ activeFiltersCount: get().calculateActiveFiltersCount() });
   },
-  
+
   resetFilters: () => {
-    set({
-      filters: initialFilters,
-      activeFiltersCount: 0
-    });
+    set({ filters: initialFilters });
+    set({ activeFiltersCount: 0 });
   },
-  
+
   calculateActiveFiltersCount: () => {
     return calculateActiveFiltersCount(get().filters);
   }
