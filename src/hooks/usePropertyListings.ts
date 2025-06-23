@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import { Listing, PropertyFilters } from '@/types/listingType';
-import { mockListings } from '@/data/mockListings';
 
 export function usePropertyListings(filters: PropertyFilters) {
   const [listings, setListings] = useState<Listing[]>([]);
@@ -14,70 +13,106 @@ export function usePropertyListings(filters: PropertyFilters) {
       setError(null);
       
       try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Filter mock listings based on filters
-        let filteredListings = mockListings.filter(listing => {
-          // Property type filter
-          if (filters.propertyTypes && filters.propertyTypes.length > 0) {
-            if (!listing.propertyType || !filters.propertyTypes.includes(listing.propertyType)) {
-              return false;
-            }
-          }
-          
-          // Price range filter
-          if (filters.priceRange) {
-            const price = listing.discountPrice || listing.originalPrice;
-            if (filters.priceRange.min && price < filters.priceRange.min) return false;
-            if (filters.priceRange.max && price > filters.priceRange.max) return false;
-          }
-          
-          // Area filter
-          if (filters.areaRange && listing.area) {
-            if (filters.areaRange.min && listing.area < filters.areaRange.min) return false;
-            if (filters.areaRange.max && listing.area > filters.areaRange.max) return false;
-          }
-          
-          // Rooms filter
-          if (filters.rooms && filters.rooms.length > 0 && listing.rooms) {
-            if (!filters.rooms.includes(listing.rooms)) return false;
-          }
-          
-          // Boolean filters
-          if (filters.furnished !== null && listing.furnished !== filters.furnished) return false;
-          if (filters.allowPets !== null && listing.allowPets !== filters.allowPets) return false;
-          if (filters.hasParking !== null && listing.hasParking !== filters.hasParking) return false;
-          if (filters.hasBalcony !== null && listing.hasBalcony !== filters.hasBalcony) return false;
-          if (filters.hasElevator !== null && listing.hasElevator !== filters.hasElevator) return false;
-          
-          return true;
-        });
-        
-        // Sort listings
-        if (filters.sortBy) {
-          filteredListings.sort((a, b) => {
-            switch (filters.sortBy) {
-              case 'price_asc':
-                return (a.discountPrice || a.originalPrice) - (b.discountPrice || b.originalPrice);
-              case 'price_desc':
-                return (b.discountPrice || b.originalPrice) - (a.discountPrice || a.originalPrice);
-              case 'date_desc':
-              default:
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            }
-          });
+        let query = supabase.from('listings').select('*');
+
+        // Guided search filters
+        if (filters.dealType) {
+          query = query.eq('deal_type', filters.dealType);
+        }
+        if (filters.segment) {
+          query = query.eq('segment', filters.segment);
+        }
+
+        // Property type filter
+        if (filters.propertyTypes && filters.propertyTypes.length > 0) {
+          query = query.in('property_type', filters.propertyTypes);
         }
         
-        setListings(filteredListings);
+        // Price range filter
+        if (filters.priceRange) {
+          if (filters.priceRange.min) {
+            query = query.gte('price', filters.priceRange.min);
+          }
+          if (filters.priceRange.max) {
+            query = query.lte('price', filters.priceRange.max);
+          }
+        }
+        
+        // Area filter
+        if (filters.areaRange) {
+          if (filters.areaRange.min) {
+            query = query.gte('area', filters.areaRange.min);
+          }
+          if (filters.areaRange.max) {
+            query = query.lte('area', filters.areaRange.max);
+          }
+        }
+        
+        // Floor filter
+        if (filters.floorRange) {
+          if (filters.floorRange.min) {
+            query = query.gte('floor', filters.floorRange.min);
+          }
+          if (filters.floorRange.max) {
+            query = query.lte('floor', filters.floorRange.max);
+          }
+        }
+        
+        // Building type filter
+        if (filters.buildingType) {
+          query = query.eq('building_type', filters.buildingType);
+        }
+        
+        // Condition filter
+        if (filters.condition) {
+          query = query.eq('condition', filters.condition);
+        }
+        
+        // Boolean filters
+        if (typeof filters.hasPhotos === 'boolean') {
+          query = query.eq('has_photos', filters.hasPhotos);
+        }
+        if (typeof filters.hasParking === 'boolean') {
+          query = query.eq('has_parking', filters.hasParking);
+        }
+        if (typeof filters.hasBalcony === 'boolean') {
+          query = query.eq('has_balcony', filters.hasBalcony);
+        }
+        if (typeof filters.hasElevator === 'boolean') {
+          query = query.eq('has_elevator', filters.hasElevator);
+        }
+
+        // Sorting
+        if (filters.sortBy) {
+          const [sortField, sortOrder] = filters.sortBy.split('_');
+          const isAscending = sortOrder === 'asc';
+          const sortColumn = sortField === 'date' ? 'created_at' : 'price';
+          query = query.order(sortColumn, { ascending: isAscending });
+        } else {
+          // Default sort by creation date
+          query = query.order('created_at', { ascending: false });
+        }
+
+        const { data, error: queryError } = await query;
+
+        if (queryError) {
+          throw queryError;
+        }
+
+        setListings(data as any[] as Listing[]);
+
       } catch (err) {
         setError(err as Error);
+        console.error('Error fetching listings:', err);
       } finally {
         setLoading(false);
       }
     };
     
-    loadListings();
+    if (filters.dealType && filters.segment) {
+        loadListings();
+    }
+
   }, [filters]);
 
   return { listings, loading, error };
