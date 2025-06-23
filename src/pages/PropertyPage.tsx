@@ -5,7 +5,7 @@ import PropertyFilters from '@/components/property/PropertyFilters';
 import { useAppStore } from '@/stores/useAppStore';
 import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { usePropertyListings } from '@/hooks/usePropertyListings';
-import { convertToPropertyListingsFilters } from '@/utils/filterTypeConverters';
+import { convertToPropertyListingFilters } from '@/utils/filterTypeConverters';
 import {
   PropertyType,
   BuildingType,
@@ -83,7 +83,7 @@ export default function PropertyPage() {
 
   useEffect(() => {
     const params = Object.fromEntries(searchParams.entries());
-    const newFilters = convertToPropertyListingsFilters(params);
+    const newFilters = convertToPropertyListingFilters(params);
     const dealType = searchParams.get('dealType');
     const segment = searchParams.get('segment');
 
