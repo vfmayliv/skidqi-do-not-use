@@ -1,4 +1,3 @@
-
 export enum PropertyType {
   // Residential
   APARTMENT = 'apartment',
@@ -133,16 +132,33 @@ export interface Microdistrict {
 }
 
 export interface PropertyFilters {
-  dealType: 'buy' | 'rent' | 'rent_daily';
-  segment: 'residential' | 'commercial' | 'overseas';
-  propertyTypes: PropertyType[];
-  priceMin?: number;
-  priceMax?: number;
-  areaMin?: number;
-  areaMax?: number;
+  dealType?: 'buy' | 'rent' | 'rent_daily';
+  segment?: 'residential' | 'commercial' | 'overseas';
+  propertyTypes?: PropertyType[];
+  priceRange?: {
+    min?: number;
+    max?: number;
+  };
+  areaRange?: {
+    min?: number;
+    max?: number;
+  };
+  floorRange?: {
+    min?: number;
+    max?: number;
+  };
+  yearBuiltRange?: {
+    min?: number;
+    max?: number;
+  };
+  ceilingHeightRange?: {
+    min?: number;
+    max?: number;
+  };
   rooms?: number[];
-  floor?: string;
-  sortBy: SortOptions;
+  buildingType?: BuildingType[];
+  conditionType?: ConditionType[];
+  sortBy?: SortOptions;
   query?: string;
   districts?: string[];
   microdistricts?: string[];
@@ -151,43 +167,50 @@ export interface PropertyFilters {
   hasParking?: boolean;
   furnished?: boolean;
   allowPets?: boolean;
-  yearBuiltMin?: number;
-  yearBuiltMax?: number;
-  buildingType?: BuildingType[];
-  conditionType?: ConditionType[];
+  bathroomTypes?: BathroomType[];
+  renovationTypes?: RenovationType[];
+  hasPhoto?: boolean;
+  onlyNewBuilding?: boolean;
+  rentPeriodMin?: number;
+  isCorner?: boolean;
+  isStudio?: boolean;
+  hasSeparateEntrance?: boolean;
+  securityGuarded?: boolean;
+  hasPlayground?: boolean;
+  utilityBillsIncluded?: boolean;
+  viewTypes?: string[];
+  nearbyInfrastructure?: string[];
+  regionId?: string;
+  cityId?: string;
+  microdistrictId?: string;
 }
 
 export interface TransportFilters {
-  brandId?: string;
-  modelId?: string;
-  yearFrom?: number;
-  yearTo?: number;
-  priceFrom?: number;
-  priceTo?: number;
-  mileageFrom?: number;
-  mileageTo?: number;
-  engineType?: EngineType;
-  transmission?: TransmissionType;
-  driveType?: DriveType;
-  bodyType?: BodyType;
-  condition?: string;
-  color?: string;
-  fuelType?: string;
-  hasPhoto?: boolean;
-  dealerOnly?: boolean;
-  sortBy?: string;
-  vehicleType?: VehicleType;
-  brands?: string[];
-  models?: string[];
-  bodyTypes?: BodyType[];
-  transmissionTypes?: TransmissionType[];
-  engineTypes?: EngineType[];
-  driveTypes?: DriveType[];
-  conditionTypes?: string[];
-  engineVolumeRange?: {
-    min?: number;
-    max?: number;
-  };
+  vehicleType?: VehicleType | null;
+  brandId?: string | null;
+  modelId?: string | null;
+  yearRange?: { min: number | null, max: number | null };
+  priceRange?: { min: number | null, max: number | null };
+  mileageRange?: { min: number | null, max: number | null };
+  engineVolumeRange?: { min: number | null, max: number | null };
+  engineType?: EngineType | null;
+  transmission?: TransmissionType | null;
+  driveType?: DriveType | null;
+  bodyType?: BodyType | null;
+  condition?: string | null;
+  color?: string | null;
+  fuelType?: string | null;
+  hasPhoto?: boolean | null;
+  dealerOnly?: boolean | null;
+  customsCleared?: boolean | null;
+  inStock?: boolean | null;
+  exchangePossible?: boolean | null;
+  withoutAccidents?: boolean | null;
+  withServiceHistory?: boolean | null;
+  steeringWheel?: SteeringWheelType | null;
+  features?: VehicleFeature[] | null;
+  cities?: string[] | null;
+  sortBy?: string | null;
 }
 
 export interface PropertyFilterConfig {

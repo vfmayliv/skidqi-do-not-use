@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { filtersConfig, PropertyTypeOption, FilterVisibility } from '@/config/filtersConfig';
@@ -15,17 +16,17 @@ const PropertyFilters: React.FC = () => {
   const { dealType, segment, filters, setFilters, resetFilters } = usePropertyFiltersStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const config = filtersConfig[dealType]?.[segment];
+  const config = filtersConfig[dealType as keyof typeof filtersConfig]?.[segment as keyof typeof filtersConfig.buy];
 
   const activeFiltersVisibility = useMemo((): FilterVisibility => {
-    if (!config || !filters.propertyType || filters.propertyType.length === 0) {
+    if (!config || !filters.propertyTypes || filters.propertyTypes.length === 0) {
       // If no property type is selected, show a default set of filters (e.g., for all residential)
-      const allResidentialTypes = filtersConfig.buy.residential.propertyTypes;
+      const allResidentialTypes = filtersConfig.buy?.residential?.propertyTypes || [];
       const combined = allResidentialTypes.reduce((acc, p) => ({ ...acc, ...p.filters }), {});
       return combined;
     }
 
-    const selectedTypesConfig = config.propertyTypes.filter(p => filters.propertyType.includes(p.value));
+    const selectedTypesConfig = config.propertyTypes.filter(p => filters.propertyTypes?.includes(p.value));
     if (selectedTypesConfig.length === 0) return {};
 
     // Combine visibilities: a filter is shown if it's true for AT LEAST ONE selected type
@@ -39,14 +40,14 @@ const PropertyFilters: React.FC = () => {
     }, {} as FilterVisibility);
 
     return combinedVisibility;
-  }, [config, filters.propertyType]);
+  }, [config, filters.propertyTypes]);
 
   const handleCheckboxChange = (propertyType: string) => {
-    const currentTypes = filters.propertyType || [];
-    const newTypes = currentTypes.includes(propertyType)
+    const currentTypes = filters.propertyTypes || [];
+    const newTypes = currentTypes.includes(propertyType as any)
       ? currentTypes.filter(pt => pt !== propertyType)
-      : [...currentTypes, propertyType];
-    setFilters({ propertyType: newTypes });
+      : [...currentTypes, propertyType as any];
+    setFilters({ propertyTypes: newTypes });
   };
   
   const handleRoomsChange = (roomCount: number) => {
@@ -65,8 +66,16 @@ const PropertyFilters: React.FC = () => {
           <AccordionTrigger>Цена</AccordionTrigger>
           <AccordionContent className="space-y-4">
             <div className="flex gap-4">
-              <Input placeholder="От" value={filters.price_min || ''} onChange={e => setFilters({ price_min: Number(e.target.value) })} />
-              <Input placeholder="До" value={filters.price_max || ''} onChange={e => setFilters({ price_max: Number(e.target.value) })} />
+              <Input 
+                placeholder="От" 
+                value={filters.priceRange?.min || ''} 
+                onChange={e => setFilters({ priceRange: { ...filters.priceRange, min: Number(e.target.value) } })} 
+              />
+              <Input 
+                placeholder="До" 
+                value={filters.priceRange?.max || ''} 
+                onChange={e => setFilters({ priceRange: { ...filters.priceRange, max: Number(e.target.value) } })} 
+              />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -77,8 +86,16 @@ const PropertyFilters: React.FC = () => {
           <AccordionTrigger>Площадь, м²</AccordionTrigger>
           <AccordionContent className="space-y-4">
             <div className="flex gap-4">
-              <Input placeholder="От" value={filters.area_total_min || ''} onChange={e => setFilters({ area_total_min: Number(e.target.value) })} />
-              <Input placeholder="До" value={filters.area_total_max || ''} onChange={e => setFilters({ area_total_max: Number(e.target.value) })} />
+              <Input 
+                placeholder="От" 
+                value={filters.areaRange?.min || ''} 
+                onChange={e => setFilters({ areaRange: { ...filters.areaRange, min: Number(e.target.value) } })} 
+              />
+              <Input 
+                placeholder="До" 
+                value={filters.areaRange?.max || ''} 
+                onChange={e => setFilters({ areaRange: { ...filters.areaRange, max: Number(e.target.value) } })} 
+              />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -102,17 +119,29 @@ const PropertyFilters: React.FC = () => {
         <AccordionContent className="space-y-6">
           {activeFiltersVisibility.showFloor && (
              <div className="flex gap-4">
-               <Input placeholder="Этаж от" value={filters.floor_min || ''} onChange={e => setFilters({ floor_min: Number(e.target.value) })} />
-               <Input placeholder="Этаж до" value={filters.floor_max || ''} onChange={e => setFilters({ floor_max: Number(e.target.value) })} />
+               <Input 
+                 placeholder="Этаж от" 
+                 value={filters.floorRange?.min || ''} 
+                 onChange={e => setFilters({ floorRange: { ...filters.floorRange, min: Number(e.target.value) } })} 
+               />
+               <Input 
+                 placeholder="Этаж до" 
+                 value={filters.floorRange?.max || ''} 
+                 onChange={e => setFilters({ floorRange: { ...filters.floorRange, max: Number(e.target.value) } })} 
+               />
              </div>
           )}
           {activeFiltersVisibility.showYearBuilt && (
              <div className="flex gap-4">
-               <Input placeholder="Год постройки от" value={filters.year_built_min || ''} onChange={e => setFilters({ year_built_min: Number(e.target.value) })} />
+               <Input 
+                 placeholder="Год постройки от" 
+                 value={filters.yearBuiltRange?.min || ''} 
+                 onChange={e => setFilters({ yearBuiltRange: { ...filters.yearBuiltRange, min: Number(e.target.value) } })} 
+               />
              </div>
           )}
           {activeFiltersVisibility.showBuildingType && (
-            <Select onValueChange={value => setFilters({ building_type: value as BuildingType })}>
+            <Select onValueChange={value => setFilters({ buildingType: [value as BuildingType] })}>
                 <SelectTrigger><SelectValue placeholder="Тип дома" /></SelectTrigger>
                 <SelectContent>
                     {Object.values(BuildingType).map(bt => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}
@@ -120,7 +149,7 @@ const PropertyFilters: React.FC = () => {
             </Select>
           )}
           {activeFiltersVisibility.showRenovation && (
-             <Select onValueChange={value => setFilters({ renovation: value as RenovationType })}>
+             <Select onValueChange={value => setFilters({ renovationTypes: [value as RenovationType] })}>
                 <SelectTrigger><SelectValue placeholder="Ремонт" /></SelectTrigger>
                 <SelectContent>
                     {Object.values(RenovationType).map(rt => <SelectItem key={rt} value={rt}>{rt}</SelectItem>)}
@@ -128,7 +157,7 @@ const PropertyFilters: React.FC = () => {
             </Select>
           )}
           {activeFiltersVisibility.showBathroomType && (
-            <Select onValueChange={value => setFilters({ bathroom_type: value as BathroomType })}>
+            <Select onValueChange={value => setFilters({ bathroomTypes: [value as BathroomType] })}>
                 <SelectTrigger><SelectValue placeholder="Санузел" /></SelectTrigger>
                 <SelectContent>
                     {Object.values(BathroomType).map(bmt => <SelectItem key={bmt} value={bmt}>{bmt}</SelectItem>)}
@@ -136,13 +165,17 @@ const PropertyFilters: React.FC = () => {
             </Select>
           )}
           {activeFiltersVisibility.showCeilingHeight && (
-             <Input placeholder="Высота потолков, м" value={filters.ceiling_height_min || ''} onChange={e => setFilters({ ceiling_height_min: Number(e.target.value) })} />
+             <Input 
+               placeholder="Высота потолков, м" 
+               value={filters.ceilingHeightRange?.min || ''} 
+               onChange={e => setFilters({ ceilingHeightRange: { ...filters.ceilingHeightRange, min: Number(e.target.value) } })} 
+             />
           )}
           <div className="grid grid-cols-2 gap-4">
-            {activeFiltersVisibility.showFurnished && <div className="flex items-center space-x-2"><Checkbox id="furnished" checked={filters.is_furnished} onCheckedChange={c => setFilters({ is_furnished: !!c })} /><label htmlFor="furnished">Меблирована</label></div>}
-            {activeFiltersVisibility.showHasBalcony && <div className="flex items-center space-x-2"><Checkbox id="balcony" checked={filters.has_balcony} onCheckedChange={c => setFilters({ has_balcony: !!c })} /><label htmlFor="balcony">Есть балкон</label></div>}
-            {activeFiltersVisibility.showHasParking && <div className="flex items-center space-x-2"><Checkbox id="parking" checked={filters.has_parking} onCheckedChange={c => setFilters({ has_parking: !!c })} /><label htmlFor="parking">Есть паркинг</label></div>}
-            {activeFiltersVisibility.showAllowPets && <div className="flex items-center space-x-2"><Checkbox id="pets" checked={filters.allow_pets} onCheckedChange={c => setFilters({ allow_pets: !!c })} /><label htmlFor="pets">Можно с животными</label></div>}
+            {activeFiltersVisibility.showFurnished && <div className="flex items-center space-x-2"><Checkbox id="furnished" checked={filters.furnished} onCheckedChange={c => setFilters({ furnished: !!c })} /><label htmlFor="furnished">Меблирована</label></div>}
+            {activeFiltersVisibility.showHasBalcony && <div className="flex items-center space-x-2"><Checkbox id="balcony" checked={filters.hasBalcony} onCheckedChange={c => setFilters({ hasBalcony: !!c })} /><label htmlFor="balcony">Есть балкон</label></div>}
+            {activeFiltersVisibility.showHasParking && <div className="flex items-center space-x-2"><Checkbox id="parking" checked={filters.hasParking} onCheckedChange={c => setFilters({ hasParking: !!c })} /><label htmlFor="parking">Есть паркинг</label></div>}
+            {activeFiltersVisibility.showAllowPets && <div className="flex items-center space-x-2"><Checkbox id="pets" checked={filters.allowPets} onCheckedChange={c => setFilters({ allowPets: !!c })} /><label htmlFor="pets">Можно с животными</label></div>}
           </div>
         </AccordionContent>
       </AccordionItem>
@@ -158,7 +191,7 @@ const PropertyFilters: React.FC = () => {
         <div className="flex flex-wrap gap-2 flex-grow">
           {config.propertyTypes.slice(0, 5).map(pt => (
             <div key={pt.value} className="flex items-center space-x-2">
-              <Checkbox id={pt.value} checked={filters.propertyType?.includes(pt.value)} onCheckedChange={() => handleCheckboxChange(pt.value)} />
+              <Checkbox id={pt.value} checked={filters.propertyTypes?.includes(pt.value as any)} onCheckedChange={() => handleCheckboxChange(pt.value)} />
               <label htmlFor={pt.value} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{pt.label}</label>
             </div>
           ))}

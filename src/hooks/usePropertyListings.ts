@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Listing, PropertyFilters } from '@/types/listingType';
@@ -31,10 +32,10 @@ export function usePropertyListings(filters: PropertyFilters) {
         // Price range filter
         if (filters.priceRange) {
           if (filters.priceRange.min) {
-            query = query.gte('price', filters.priceRange.min);
+            query = query.gte('regular_price', filters.priceRange.min);
           }
           if (filters.priceRange.max) {
-            query = query.lte('price', filters.priceRange.max);
+            query = query.lte('regular_price', filters.priceRange.max);
           }
         }
         
@@ -59,18 +60,18 @@ export function usePropertyListings(filters: PropertyFilters) {
         }
         
         // Building type filter
-        if (filters.buildingType) {
-          query = query.eq('building_type', filters.buildingType);
+        if (filters.buildingType && filters.buildingType.length > 0) {
+          query = query.in('building_type', filters.buildingType);
         }
         
         // Condition filter
-        if (filters.condition) {
-          query = query.eq('condition', filters.condition);
+        if (filters.conditionType && filters.conditionType.length > 0) {
+          query = query.in('condition', filters.conditionType);
         }
         
         // Boolean filters
-        if (typeof filters.hasPhotos === 'boolean') {
-          query = query.eq('has_photos', filters.hasPhotos);
+        if (typeof filters.hasPhoto === 'boolean') {
+          query = query.eq('has_photos', filters.hasPhoto);
         }
         if (typeof filters.hasParking === 'boolean') {
           query = query.eq('has_parking', filters.hasParking);
@@ -86,7 +87,7 @@ export function usePropertyListings(filters: PropertyFilters) {
         if (filters.sortBy) {
           const [sortField, sortOrder] = filters.sortBy.split('_');
           const isAscending = sortOrder === 'asc';
-          const sortColumn = sortField === 'date' ? 'created_at' : 'price';
+          const sortColumn = sortField === 'date' ? 'created_at' : 'regular_price';
           query = query.order(sortColumn, { ascending: isAscending });
         } else {
           // Default sort by creation date
