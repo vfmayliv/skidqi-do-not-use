@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -6,8 +5,8 @@ import PropertyFilters from '@/components/property/PropertyFilters';
 import { useAppStore } from '@/stores/useAppStore';
 import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { usePropertyListings } from '@/hooks/usePropertyListings';
-import { convertToPropertyListingFilters } from '@/utils/filterTypeConverters';
-import { 
+import { convertToPropertyListingsFilters } from '@/utils/filterTypeConverters';
+import {
   PropertyType,
   BuildingType,
   ConditionType,
@@ -16,6 +15,7 @@ import {
 } from '@/types/listingType';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { GuidedSearch } from '@/components/property/GuidedSearch';
 
 interface DistrictData {
   id: string;
@@ -31,8 +31,8 @@ export const propertyFilterConfig: PropertyFilterConfig = {
   floorRangeMin: 1,
   floorRangeMax: 30,
   dealTypes: [
-    { id: 'sale', label: { ru: 'Продажа', kz: 'Сату' } },
-    { id: 'rent', label: { ru: 'Аренда', kz: 'Жалға алу' } }
+    { id: 'sale', label: { ru: 'Купить', kz: 'Сатып алу' } },
+    { id: 'rent', label: { ru: 'Снять', kz: 'Жалға алу' } }
   ],
   segments: [
     { 
@@ -42,166 +42,134 @@ export const propertyFilterConfig: PropertyFilterConfig = {
     },
     { 
       id: 'commercial', 
-      label: { ru: 'Коммерческая недвижимость', kz: 'Коммерциялық жылжымайтын мүлік' },
+      label: { ru: 'Коммерческая недвижимость', kz: 'Коммерциялық' },
       types: []
     }
   ],
-  residentialFilters: [],
-  commercialFilters: [],
-  generalFilters: []
+  propertyTypes: {
+    flat: { ru: 'Квартира', kz: 'Пәтер' },
+    house: { ru: 'Дом', kz: 'Үй' },
+    dacha: { ru: 'Дача', kz: 'Саяжай' },
+    garage: { ru: 'Гараж', kz: 'Гараж' },
+    land: { ru: 'Участок', kz: 'Жер учаскесі' },
+    office: { ru: 'Офис', kz: 'Кеңсе' },
+    building: { ru: 'Здание', kz: 'Ғимарат' },
+    warehouse: { ru: 'Склад', kz: 'Қойма' },
+    shop: { ru: 'Магазин', kz: 'Дүкен' },
+  },
+  buildingTypes: {
+    panel: { ru: 'Панельный', kz: 'Панельді' },
+    brick: { ru: 'Кирпичный', kz: 'Кірпіш' },
+    monolithic: { ru: 'Монолитный', kz: 'Монолитті' },
+    wood: { ru: 'Деревянный', kz: 'Ағаш' },
+  },
+  conditionTypes: {
+    good: { ru: 'Хорошее', kz: 'Жақсы' },
+    average: { ru: 'Среднее', kz: 'Орташа' },
+    needs_repair: { ru: 'Требует ремонта', kz: 'Жөндеуді қажет етеді' },
+  },
+  sortOptions: [
+    { value: 'date_desc', label: { ru: 'Сначала новые', kz: 'Алдымен жаңа' } },
+    { value: 'price_asc', label: { ru: 'Сначала дешевые', kz: 'Алдымен арзан' } },
+    { value: 'price_desc', label: { ru: 'Сначала дорогие', kz: 'Алдымен қымбат' } },
+  ],
 };
 
 export default function PropertyPage() {
   const { language } = useAppStore();
-  const { filters, setFilters, resetFilters, activeFiltersCount } = usePropertyFiltersStore();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [districts, setDistricts] = useState<DistrictData[]>([]);
-  
-  // Use the optimized hook for property listings
-  const { 
-    listings, 
-    loading, 
-    error, 
-    totalCount, 
-    getPropertyListings 
-  } = usePropertyListings();
+  const { filters, setFilters, setFilter } = usePropertyFiltersStore();
+  const [guidedSearchCompleted, setGuidedSearchCompleted] = useState(false);
 
-  // Load districts (mock data for now)
   useEffect(() => {
-    const mockDistricts: DistrictData[] = [
-      { id: 'almaty-district', name: { ru: 'Алмалинский район', kz: 'Алмалы ауданы' } },
-      { id: 'bostandyk-district', name: { ru: 'Бостандыкский район', kz: 'Бостандық ауданы' } },
-      { id: 'alatau-district', name: { ru: 'Алатауский район', kz: 'Алатау ауданы' } },
-    ];
-    setDistricts(mockDistricts);
-  }, []);
+    const params = Object.fromEntries(searchParams.entries());
+    const newFilters = convertToPropertyListingsFilters(params);
+    const dealType = searchParams.get('dealType');
+    const segment = searchParams.get('segment');
 
-  // Load property listings when filters change
-  useEffect(() => {
-    console.log('🔄 Loading property listings with filters:', filters);
-    const convertedFilters = convertToPropertyListingFilters(filters);
-    getPropertyListings(convertedFilters, filters.sortBy || 'newest', 50, 0);
-  }, [filters, getPropertyListings]);
-
-  // Initialize filters from URL
-  useEffect(() => {
-    const initialPropertyType = searchParams.get('type') as PropertyType || null;
-    if (initialPropertyType) {
-      setFilters({ 
-        propertyTypes: initialPropertyType ? [initialPropertyType] : null 
-      });
+    if (dealType && segment) {
+      setFilters({ ...newFilters, dealType, segment });
+      setGuidedSearchCompleted(true);
+    } else {
+      setFilters(newFilters);
+      setGuidedSearchCompleted(false);
     }
   }, [searchParams, setFilters]);
 
-  const updateUrlParams = (newFilters) => {
-    const params = new URLSearchParams();
-    
-    if (newFilters.propertyTypes && newFilters.propertyTypes.length > 0) {
-      params.set('type', newFilters.propertyTypes[0]);
-    } else {
-      params.delete('type');
-    }
-    
-    setSearchParams(params);
-  };
+  const { listings, loading, error } = usePropertyListings(filters);
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    updateUrlParams({...filters, ...newFilters});
-  };
+  useEffect(() => {
+    const newSearchParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '' && (!Array.isArray(value) || value.length > 0)) {
+        if (Array.isArray(value)) {
+          value.forEach(item => newSearchParams.append(key, item.toString()));
+        } else {
+          newSearchParams.set(key, value.toString());
+        }
+      }
+    });
+    setSearchParams(newSearchParams, { replace: true });
+  }, [filters, setSearchParams]);
 
-  const handleReset = () => {
-    resetFilters();
-    setSearchParams({});
-  };
-
-  const handleSearch = () => {
-    console.log('🔍 Search triggered with filters:', filters);
-    const convertedFilters = convertToPropertyListingFilters(filters);
-    getPropertyListings(convertedFilters, filters.sortBy || 'newest', 50, 0);
-  };
-
-  // Process listings to ensure compatibility with PropertyCard
   const processedListings = useMemo(() => {
-    return listings.map(listing => ({
-      ...listing,
-      // Ensure proper data mapping for PropertyCard component
-      imageUrl: listing.images && listing.images.length > 0 ? listing.images[0] : '/placeholder.svg',
-      originalPrice: listing.regular_price || listing.discount_price || 0,
-      discountPrice: listing.discount_price || listing.regular_price || 0,
-      discount: listing.discount_percent || 0,
-      city: {
-        ru: 'Алматы', // Can be enhanced to load from cities table
-        kz: 'Алматы'
-      },
-      categoryId: 'property',
-      createdAt: listing.created_at,
-      isFeatured: listing.is_premium || false,
-      views: listing.views || 0,
-    }));
+    return listings || [];
   }, [listings]);
 
+  const handleGuidedSearchComplete = (dealType: string, segment: string) => {
+    setFilters({ ...filters, dealType, segment });
+    setGuidedSearchCompleted(true);
+  };
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="bg-gray-50 min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1">
-        <div className="container mx-auto px-4 py-8">
-          <PropertyFilters
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onReset={handleReset}
-            onSearch={handleSearch}
-            districts={districts}
-            activeFiltersCount={activeFiltersCount}
-            config={propertyFilterConfig}
-          />
-          
-          {/* Show error messages */}
-          {error && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-              {language === 'ru' ? 'Ошибка загрузки:' : 'Жүктеу қатесі:'} {error}
-            </div>
-          )}
-          
-          {/* Show results count */}
-          <div className="mb-6">
-            <p className="text-gray-600">
-              {loading ? 
-                (language === 'ru' ? 'Загружаем...' : 'Жүктеу...') :
-                `${language === 'ru' ? 'Найдено' : 'Табылды'} ${totalCount || processedListings.length} ${language === 'ru' ? 'объявлений' : 'хабарландыру'}`
-              }
-            </p>
-          </div>
-          
-          {/* Show loading or listings */}
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-gray-600">
-                {language === 'ru' ? 'Загружаем объявления недвижимости...' : 'Жылжымайтын мүлік хабарландыруларын жүктеп жатырмыз...'}
-              </p>
-            </div>
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <div className="max-w-screen-xl mx-auto">
+          <h1 className="text-3xl font-bold mb-4">
+            {language === 'ru' ? 'Недвижимость' : 'Жылжымайтын мүлік'}
+          </h1>
+          <p className="text-gray-600 mb-8">
+            {language === 'ru' ? 'Найдите лучшие предложения по недвижимости в вашем городе.' : 'Қалаңыздағы жылжымайтын мүлік бойынша ең жақсы ұсыныстарды табыңыз.'}
+          </p>
+
+          {!guidedSearchCompleted ? (
+            <GuidedSearch onComplete={handleGuidedSearchComplete} />
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mt-8">
-              {processedListings.map(listing => (
-                <PropertyCard key={listing.id} listing={listing} />
-              ))}
-            </div>
-          )}
-          
-          {/* Show message when no listings found */}
-          {!loading && processedListings.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-gray-500">
-                {language === 'ru' ? 'Объявлений недвижимости не найдено' : 'Жылжымайтын мүлік хабарландырулары табылмады'}
-              </p>
-              <p className="text-sm text-gray-400 mt-2">
-                {language === 'ru' ? 
-                  'Попробуйте изменить фильтры или выбрать другие параметры поиска' : 
-                  'Сүзгілерді өзгертіп көріңіз немесе басқа іздеу параметрлерін таңдаңыз'
-                }
-              </p>
-            </div>
+            <>
+              <PropertyFilters config={propertyFilterConfig} />
+              
+              {loading && (
+                <div className="text-center py-8">
+                  <p>Загрузка объявлений...</p>
+                </div>
+              )}
+
+              {error && (
+                <div className="text-center py-8">
+                  <p className="text-red-500">Ошибка при загрузке: {error.message}</p>
+                </div>
+              )}
+
+              {!loading && processedListings.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-8">
+                  {processedListings.map(listing => (
+                    <PropertyCard key={listing.id} listing={listing} />
+                  ))}
+                </div>
+              )}
+              
+              {!loading && processedListings.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">
+                    {language === 'ru' ? 'Подходящих объявлений не найдено' : 'Сәйкес хабарландырулар табылмады'}
+                  </p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    {language === 'ru' ? 'Попробуйте изменить параметры фильтра или расширить область поиска' : 'Сүзгі параметрлерін өзгертіп көріңіз немесе іздеу аймағын кеңейтіңіз'}
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
