@@ -1,137 +1,192 @@
 import React, { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { PropertyType, BuildingType, ConditionType, SortOptions, PropertyFilters as PropertyFiltersType, PropertyFilterConfig } from '@/types/listingType';
+import { usePropertyFiltersStore } from '@/store/usePropertyFiltersStore';
+import { filtersConfig, PropertyTypeOption, FilterVisibility } from '@/config/filtersConfig';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import AdvancedPropertyFilters from './AdvancedPropertyFilters';
-import { LocationFilter } from './LocationFilter';
-import { X } from 'lucide-react';
-import { filtersConfig } from '@/config/filtersConfig';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { BuildingType, RenovationType, BathroomType } from '@/types/listingType';
+import { Filter, Search, X } from 'lucide-react';
 
-interface PropertyFiltersProps {
-  filters: PropertyFiltersType;
-  onFilterChange: (filters: Partial<PropertyFiltersType>) => void;
-  onReset: () => void;
-  onSearch: () => void;
-  districts: any[];
-  activeFiltersCount?: number;
-  config: PropertyFilterConfig;
-}
+const PropertyFilters: React.FC = () => {
+  const { dealType, segment, filters, setFilters, resetFilters } = usePropertyFiltersStore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-const PropertyFilters: React.FC<PropertyFiltersProps> = ({
-  filters = {} as PropertyFiltersType, // Provide default empty object
-  onFilterChange,
-  onReset,
-  onSearch,
-  districts,
-  activeFiltersCount = 0,
-  config
-}) => {
-  const { t } = useTranslation();
-  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
+  const config = filtersConfig[dealType]?.[segment];
 
-  // Safely access nested properties with optional chaining and default values
-  const safeFilters = {
-    ...filters,
-    propertyTypes: filters.propertyTypes || [],
+  const activeFiltersVisibility = useMemo((): FilterVisibility => {
+    if (!config || !filters.propertyType || filters.propertyType.length === 0) {
+      // If no property type is selected, show a default set of filters (e.g., for all residential)
+      const allResidentialTypes = filtersConfig.buy.residential.propertyTypes;
+      const combined = allResidentialTypes.reduce((acc, p) => ({ ...acc, ...p.filters }), {});
+      return combined;
+    }
+
+    const selectedTypesConfig = config.propertyTypes.filter(p => filters.propertyType.includes(p.value));
+    if (selectedTypesConfig.length === 0) return {};
+
+    // Combine visibilities: a filter is shown if it's true for AT LEAST ONE selected type
+    const combinedVisibility = selectedTypesConfig.reduce((acc, current) => {
+      for (const key in current.filters) {
+        if (current.filters[key as keyof FilterVisibility]) {
+          acc[key as keyof FilterVisibility] = true;
+        }
+      }
+      return acc;
+    }, {} as FilterVisibility);
+
+    return combinedVisibility;
+  }, [config, filters.propertyType]);
+
+  const handleCheckboxChange = (propertyType: string) => {
+    const currentTypes = filters.propertyType || [];
+    const newTypes = currentTypes.includes(propertyType)
+      ? currentTypes.filter(pt => pt !== propertyType)
+      : [...currentTypes, propertyType];
+    setFilters({ propertyType: newTypes });
+  };
+  
+  const handleRoomsChange = (roomCount: number) => {
+    const currentRooms = filters.rooms || [];
+    const newRooms = currentRooms.includes(roomCount)
+      ? currentRooms.filter(r => r !== roomCount)
+      : [...currentRooms, roomCount];
+    setFilters({ rooms: newRooms });
   };
 
-  const handlePropertyTypeChange = (propertyType: PropertyType) => {
-    const currentTypes = safeFilters.propertyTypes.slice();
-    const index = currentTypes.indexOf(propertyType);
+  const renderAdvancedFilters = () => (
+    <Accordion type="multiple" defaultValue={['price', 'area', 'details']} className="w-full">
+      {/* Price */}
+      {activeFiltersVisibility.showPrice && (
+        <AccordionItem value="price">
+          <AccordionTrigger>Цена</AccordionTrigger>
+          <AccordionContent className="space-y-4">
+            <div className="flex gap-4">
+              <Input placeholder="От" value={filters.price_min || ''} onChange={e => setFilters({ price_min: Number(e.target.value) })} />
+              <Input placeholder="До" value={filters.price_max || ''} onChange={e => setFilters({ price_max: Number(e.target.value) })} />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      )}
+      {/* Area */}
+      {activeFiltersVisibility.showArea && (
+        <AccordionItem value="area">
+          <AccordionTrigger>Площадь, м²</AccordionTrigger>
+          <AccordionContent className="space-y-4">
+            <div className="flex gap-4">
+              <Input placeholder="От" value={filters.area_total_min || ''} onChange={e => setFilters({ area_total_min: Number(e.target.value) })} />
+              <Input placeholder="До" value={filters.area_total_max || ''} onChange={e => setFilters({ area_total_max: Number(e.target.value) })} />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      )}
+       {/* Rooms - only for modal, main is outside */}
+      {activeFiltersVisibility.showRooms && (
+        <AccordionItem value="rooms">
+            <AccordionTrigger>Количество комнат</AccordionTrigger>
+            <AccordionContent className="flex flex-wrap gap-4">
+                {[1, 2, 3, 4, 5].map(r => (
+                    <Button key={r} variant={filters.rooms?.includes(r) ? 'default' : 'outline'} onClick={() => handleRoomsChange(r)}>{r}</Button>
+                ))}
+                 <Button variant={filters.rooms?.includes(6) ? 'default' : 'outline'} onClick={() => handleRoomsChange(6)}>6+</Button>
+                 <Button variant={filters.rooms?.includes(0) ? 'default' : 'outline'} onClick={() => handleRoomsChange(0)}>Студия</Button>
+            </AccordionContent>
+        </AccordionItem>
+      )}
+      {/* Other details */}
+      <AccordionItem value="details">
+        <AccordionTrigger>Дополнительные параметры</AccordionTrigger>
+        <AccordionContent className="space-y-6">
+          {activeFiltersVisibility.showFloor && (
+             <div className="flex gap-4">
+               <Input placeholder="Этаж от" value={filters.floor_min || ''} onChange={e => setFilters({ floor_min: Number(e.target.value) })} />
+               <Input placeholder="Этаж до" value={filters.floor_max || ''} onChange={e => setFilters({ floor_max: Number(e.target.value) })} />
+             </div>
+          )}
+          {activeFiltersVisibility.showYearBuilt && (
+             <div className="flex gap-4">
+               <Input placeholder="Год постройки от" value={filters.year_built_min || ''} onChange={e => setFilters({ year_built_min: Number(e.target.value) })} />
+             </div>
+          )}
+          {activeFiltersVisibility.showBuildingType && (
+            <Select onValueChange={value => setFilters({ building_type: value as BuildingType })}>
+                <SelectTrigger><SelectValue placeholder="Тип дома" /></SelectTrigger>
+                <SelectContent>
+                    {Object.values(BuildingType).map(bt => <SelectItem key={bt} value={bt}>{bt}</SelectItem>)}
+                </SelectContent>
+            </Select>
+          )}
+          {activeFiltersVisibility.showRenovation && (
+             <Select onValueChange={value => setFilters({ renovation: value as RenovationType })}>
+                <SelectTrigger><SelectValue placeholder="Ремонт" /></SelectTrigger>
+                <SelectContent>
+                    {Object.values(RenovationType).map(rt => <SelectItem key={rt} value={rt}>{rt}</SelectItem>)}
+                </SelectContent>
+            </Select>
+          )}
+          {activeFiltersVisibility.showBathroomType && (
+            <Select onValueChange={value => setFilters({ bathroom_type: value as BathroomType })}>
+                <SelectTrigger><SelectValue placeholder="Санузел" /></SelectTrigger>
+                <SelectContent>
+                    {Object.values(BathroomType).map(bmt => <SelectItem key={bmt} value={bmt}>{bmt}</SelectItem>)}
+                </SelectContent>
+            </Select>
+          )}
+          {activeFiltersVisibility.showCeilingHeight && (
+             <Input placeholder="Высота потолков, м" value={filters.ceiling_height_min || ''} onChange={e => setFilters({ ceiling_height_min: Number(e.target.value) })} />
+          )}
+          <div className="grid grid-cols-2 gap-4">
+            {activeFiltersVisibility.showFurnished && <div className="flex items-center space-x-2"><Checkbox id="furnished" checked={filters.is_furnished} onCheckedChange={c => setFilters({ is_furnished: !!c })} /><label htmlFor="furnished">Меблирована</label></div>}
+            {activeFiltersVisibility.showHasBalcony && <div className="flex items-center space-x-2"><Checkbox id="balcony" checked={filters.has_balcony} onCheckedChange={c => setFilters({ has_balcony: !!c })} /><label htmlFor="balcony">Есть балкон</label></div>}
+            {activeFiltersVisibility.showHasParking && <div className="flex items-center space-x-2"><Checkbox id="parking" checked={filters.has_parking} onCheckedChange={c => setFilters({ has_parking: !!c })} /><label htmlFor="parking">Есть паркинг</label></div>}
+            {activeFiltersVisibility.showAllowPets && <div className="flex items-center space-x-2"><Checkbox id="pets" checked={filters.allow_pets} onCheckedChange={c => setFilters({ allow_pets: !!c })} /><label htmlFor="pets">Можно с животными</label></div>}
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
 
-    if (index > -1) {
-      currentTypes.splice(index, 1);
-    } else {
-      currentTypes.push(propertyType);
-    }
-    onFilterChange({ propertyTypes: currentTypes });
-  };
-
-  const currentFilterConfig = useMemo(() => {
-    const { dealType, segment } = filters;
-    if (dealType && segment && filtersConfig[dealType] && filtersConfig[dealType][segment]) {
-        return filtersConfig[dealType][segment];
-    }
-    return { propertyTypes: [] }; // Return a default empty config
-  }, [filters.dealType, filters.segment]);
+  if (!config) return <div>Loading configuration...</div>;
 
   return (
-    <div className="bg-card p-4 rounded-lg shadow-sm space-y-4">
-      {/* Dynamic Property Types */}
-      <div>
-        <p className="text-sm font-medium mb-2">{t('propertyType', 'Тип недвижимости')}</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-          {currentFilterConfig.propertyTypes.map((typeOption) => (
-            <div key={typeOption.value} className="flex items-center space-x-2">
-              <Checkbox
-                id={typeOption.value}
-                checked={safeFilters.propertyTypes.includes(typeOption.value)}
-                onCheckedChange={() => handlePropertyTypeChange(typeOption.value)}
-              />
-              <label
-                htmlFor={typeOption.value}
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {t(typeOption.label, typeOption.label.replace('property_type_', ''))}
-              </label>
+    <div className="p-4 space-y-4 bg-card rounded-lg shadow">
+      {/* Main Horizontal Filters */}
+      <div className="flex flex-col md:flex-row gap-4 items-center">
+        <div className="flex flex-wrap gap-2 flex-grow">
+          {config.propertyTypes.slice(0, 5).map(pt => (
+            <div key={pt.value} className="flex items-center space-x-2">
+              <Checkbox id={pt.value} checked={filters.propertyType?.includes(pt.value)} onCheckedChange={() => handleCheckboxChange(pt.value)} />
+              <label htmlFor={pt.value} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{pt.label}</label>
             </div>
           ))}
         </div>
-      </div>
 
-      {/* Price Range */}
-      {config.showPrice && (
-        <div>
-          <Label htmlFor="price-range">{t('priceRange', 'Цена')}</Label>
-          <div className="flex items-center gap-2 mt-1">
-            <Input
-              type="number"
-              placeholder={t('from', 'От')}
-              value={filters.priceMin || ''}
-              onChange={(e) => onFilterChange({ priceMin: Number(e.target.value) })}
-              className="w-full"
-            />
-            <Input
-              type="number"
-              placeholder={t('to', 'До')}
-              value={filters.priceMax || ''}
-              onChange={(e) => onFilterChange({ priceMax: Number(e.target.value) })}
-              className="w-full"
-            />
-          </div>
+        <div className="flex gap-2">
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline"><Filter className="mr-2 h-4 w-4" /> Все фильтры</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader><DialogTitle>Расширенные фильтры</DialogTitle></DialogHeader>
+              <div className="py-4 max-h-[70vh] overflow-y-auto">
+                {renderAdvancedFilters()}
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setIsModalOpen(false)}>Применить</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Button onClick={() => { /* Logic to apply filters and fetch data */ }}>
+            <Search className="mr-2 h-4 w-4" /> Поиск
+          </Button>
+
+          <Button variant="ghost" onClick={resetFilters}><X className="mr-2 h-4 w-4"/>Сбросить</Button>
         </div>
-      )}
-
-      {/* Other filters remain unchanged... */}
-      {/* Area, Rooms, Location etc. */}
-
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-2 pt-4">
-        <Button onClick={onSearch} className="w-full sm:w-auto flex-grow">
-          {t('search', 'Поиск')}
-          {activeFiltersCount > 0 && <span className="ml-2 bg-primary-foreground text-primary rounded-full px-2 py-0.5 text-xs">{activeFiltersCount}</span>}
-        </Button>
-        <Button variant="outline" onClick={() => setIsAdvancedFiltersOpen(!isAdvancedFiltersOpen)} className="w-full sm:w-auto">
-          {t('advancedFilters', 'Расширенные фильтры')}
-        </Button>
-        <Button variant="ghost" onClick={onReset} className="w-full sm:w-auto text-sm">
-          <X className="w-4 h-4 mr-1" />
-          {t('reset', 'Сбросить')}
-        </Button>
       </div>
-
-      {isAdvancedFiltersOpen && (
-        <AdvancedPropertyFilters 
-          filters={filters} 
-          onFilterChange={onFilterChange} 
-          config={config} 
-        />
-      )}
     </div>
   );
 };
