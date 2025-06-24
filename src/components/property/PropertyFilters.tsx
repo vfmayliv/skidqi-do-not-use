@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { filtersConfig } from '@/config/filtersConfig';
@@ -17,7 +16,7 @@ const PropertyFilters: React.FC = () => {
   const handleDealTypeChange = (value: string) => {
     if (value) {
       setDealType(value);
-      setSegment(''); // Reset segment when deal type changes
+      setSegment(''); // Reset segment
       setFilters({ propertyTypes: [] }); // Reset property type
     }
   };
@@ -25,7 +24,7 @@ const PropertyFilters: React.FC = () => {
   const handleSegmentChange = (value: string) => {
     if (value) {
       setSegment(value);
-      setFilters({ propertyTypes: [] }); // Reset property type when segment changes
+      setFilters({ propertyTypes: [] }); // Reset property type
     }
   };
 
@@ -33,19 +32,26 @@ const PropertyFilters: React.FC = () => {
     setFilters({ [key]: value });
   };
 
-  const configForCurrentSelection = useMemo(() => {
-    if (!dealType || !segment) return null;
-    return filtersConfig[dealType];
-  }, [dealType, segment]);
+  // Correctly derive the configuration based on the new structure
+  const configForCurrentDeal = useMemo(() => {
+    if (!dealType) return null;
+    return filtersConfig.dealDetails[dealType];
+  }, [dealType]);
 
-  const availablePropertyTypes = configForCurrentSelection?.propertyTypes || [];
+  const configForCurrentSegment = useMemo(() => {
+    if (!configForCurrentDeal || !segment) return null;
+    return configForCurrentDeal.segmentDetails[segment];
+  }, [configForCurrentDeal, segment]);
+
+  const availableSegments = configForCurrentDeal?.segments || [];
+  const availablePropertyTypes = configForCurrentSegment?.propertyTypes || [];
   const selectedPropertyType = filters.propertyTypes?.[0];
 
   const renderFilterInputs = () => {
-    if (!selectedPropertyType || !configForCurrentSelection) return null;
+    if (!selectedPropertyType || !configForCurrentSegment) return null;
 
-    const visibleFilterIds = configForCurrentSelection.visibility[selectedPropertyType] || [];
-    const allFilters = configForCurrentSelection.filters;
+    const visibleFilterIds = configForCurrentSegment.visibility[selectedPropertyType] || [];
+    const allFilters = configForCurrentSegment.filters;
 
     return visibleFilterIds.map(filterId => {
       const filter = allFilters.find(f => f.id === filterId);
@@ -98,6 +104,7 @@ const PropertyFilters: React.FC = () => {
   return (
     <div className="p-4 bg-card border border-border rounded-lg mb-8">
       <div className="flex flex-wrap gap-x-4 gap-y-3 items-center">
+        {/* Deal Type Selector */}
         <ToggleGroup type="single" value={dealType} onValueChange={handleDealTypeChange} className="bg-muted p-1 rounded-md">
           {filtersConfig.dealTypes.map(dt => (
             <ToggleGroupItem key={dt.id} value={dt.id} className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3">
@@ -106,9 +113,10 @@ const PropertyFilters: React.FC = () => {
           ))}
         </ToggleGroup>
 
-        {dealType && configForCurrentSelection && (
+        {/* Segment Selector */}
+        {dealType && availableSegments.length > 0 && (
           <ToggleGroup type="single" value={segment} onValueChange={handleSegmentChange} className="bg-muted p-1 rounded-md">
-            {configForCurrentSelection.segments.map(s => (
+            {availableSegments.map(s => (
               <ToggleGroupItem key={s.id} value={s.id} className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3">
                 {s.label[language]}
               </ToggleGroupItem>
@@ -116,6 +124,7 @@ const PropertyFilters: React.FC = () => {
           </ToggleGroup>
         )}
 
+        {/* Property Type Selector */}
         {segment && availablePropertyTypes.length > 0 && (
           <Select
             value={selectedPropertyType || ''}
@@ -132,8 +141,10 @@ const PropertyFilters: React.FC = () => {
           </Select>
         )}
 
+        {/* Dynamic Filters */}
         {renderFilterInputs()}
 
+        {/* Action Buttons */}
         <div className="flex gap-2 ml-auto">
             <Button>
                 <Search className="mr-2 h-4 w-4" /> Поиск
