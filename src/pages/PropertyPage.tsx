@@ -6,64 +6,65 @@ import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { usePropertyListings } from '@/hooks/usePropertyListings';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { GuidedSearch } from '@/components/property/GuidedSearch';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { List, Map } from 'lucide-react';
 import MapView from '@/components/property/MapView';
 
 export default function PropertyPage() {
-  const { dealType, segment, filters, setFilters, setDealType, setSegment } = usePropertyFiltersStore();
+  const { filters, setFilters, setDealType, setSegment } = usePropertyFiltersStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const { listings, loading, error } = usePropertyListings(filters);
   
-  const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState('list');
 
   useEffect(() => {
-    // Sync URL params with store on initial load
     const urlDealType = searchParams.get('dealType');
     const urlSegment = searchParams.get('segment');
-    if (urlDealType && urlSegment) {
+    if (urlDealType) {
       setDealType(urlDealType);
+    }
+    if (urlSegment) {
       setSegment(urlSegment);
-      setShowFilters(true);
     }
   }, []);
 
-  const handleGuidedSearchComplete = (deal: string, seg: string) => {
-    setDealType(deal);
-    setSegment(seg);
-    setSearchParams({ dealType: deal, segment: seg });
-    setShowFilters(true);
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    const params = new URLSearchParams();
+    if (newFilters.dealType) params.set('dealType', newFilters.dealType);
+    if (newFilters.segment) params.set('segment', newFilters.segment);
+    setSearchParams(params);
   };
-
+  
   const processedListings = useMemo(() => {
-    return listings.map(l => ({ ...l, price: Number(l.price) }));
+    if (!listings) return [];
+    return listings;
   }, [listings]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="space-y-8">
-          {!showFilters ? (
-            <GuidedSearch onComplete={handleGuidedSearchComplete} />
-          ) : (
+      <main className="flex-1">
+        <div className="container mx-auto px-4 py-8">
             <>
-              <PropertyFilters />
-              
-              <div className="flex justify-end">
-                <ToggleGroup type="single" value={viewMode} onValueChange={(value) => {if (value) setViewMode(value)}} className="bg-card p-1 rounded-md">
-                  <ToggleGroupItem value="list" aria-label="List view">
+              <div className="flex justify-between items-center mb-4">
+                <h1 className="text-3xl font-bold">Недвижимость</h1>
+                <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value)} defaultValue="list">
+                  <ToggleGroupItem value="list" aria-label="Toggle list">
                     <List className="h-4 w-4" />
                   </ToggleGroupItem>
-                  <ToggleGroupItem value="map" aria-label="Map view">
+                  <ToggleGroupItem value="map" aria-label="Toggle map">
                     <Map className="h-4 w-4" />
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
+
+              <PropertyFilters 
+                filters={filters} 
+                onFilterChange={handleFilterChange} 
+              />
               
-              {loading && <div className="text-center">Загрузка объявлений...</div>}
+              {loading && <div className="text-center py-8">Загрузка...</div>}
               {error && <div className="text-center text-red-500">Ошибка: {error.message}</div>}
               
               {!loading && viewMode === 'list' && processedListings.length > 0 && (
@@ -85,7 +86,6 @@ export default function PropertyPage() {
                 </div>
               )}
             </>
-          )}
         </div>
       </main>
       <Footer />
