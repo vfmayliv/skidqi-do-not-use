@@ -1,132 +1,143 @@
-
 import { PropertyType } from '@/types/listingType';
 
-export interface FilterOption {
-  id: string;
-  label: { ru: string; kz: string };
+// Generic interfaces for configuration elements
+interface Label {
+  ru: string;
+  kz: string;
 }
 
-export interface FilterConfig {
+interface ConfigOption {
+  id: string;
+  label: Label;
+}
+
+interface FilterDefinition {
   id: string;
   type: 'range' | 'select' | 'boolean';
-  label: { ru: string; kz: string };
-  options?: FilterOption[];
+  label: Label;
+  options?: ConfigOption[];
 }
 
-export interface PropertyTypeConfig {
-  id: string;
-  label: { ru: string; kz: string };
+// Defines the complete filter setup for a specific segment (e.g., residential homes for sale)
+interface SegmentConfig {
+  propertyTypes: ConfigOption[];
+  filters: FilterDefinition[];
+  visibility: Partial<Record<PropertyType, string[]>>; // Maps a property type to its visible filter IDs
 }
 
-export interface SegmentConfig {
-  segments: Array<{ id: string; label: { ru: string; kz: string } }>;
-  propertyTypes: PropertyTypeConfig[];
-  filters: FilterConfig[];
-  visibility: Record<string, string[]>;
+// Defines the configuration for a deal type (e.g., 'sale'), including its available segments
+interface DealConfig {
+  segments: ConfigOption[];
+  segmentDetails: Record<string, SegmentConfig>; // Maps a segment ID to its configuration
 }
 
-export interface DealTypeConfig {
-  id: string;
-  label: { ru: string; kz: string };
-}
-
+// The main, top-level configuration interface
 export interface FiltersConfig {
-  dealTypes: DealTypeConfig[];
-  sale: SegmentConfig;
-  rent: SegmentConfig;
-  rent_daily: SegmentConfig;
+  dealTypes: ConfigOption[];
+  dealDetails: Record<string, DealConfig>; // Maps a deal type ID to its configuration
 }
 
 export const filtersConfig: FiltersConfig = {
   dealTypes: [
     { id: 'sale', label: { ru: 'Купить', kz: 'Сатып алу' } },
     { id: 'rent', label: { ru: 'Снять надолго', kz: 'Ұзақ мерзімге жалға алу' } },
-    { id: 'rent_daily', label: { ru: 'Снять посуточно', kz: 'Тәулікке жалға алу' } },
+    { id: 'rent_daily', label: { ru: 'Снять посуточно', kz: 'Тәуліктік жалға алу' } },
   ],
-
-  sale: {
-    segments: [
-      { id: 'residential', label: { ru: 'Жилая', kz: 'Тұрғын үй' } },
-      { id: 'commercial', label: { ru: 'Коммерческая', kz: 'Коммерциялық' } },
-    ],
-    propertyTypes: [
-      { id: PropertyType.NEW_BUILDING, label: { ru: 'Новостройка', kz: 'Жаңа құрылыс' } },
-      { id: PropertyType.SECONDARY, label: { ru: 'Вторичка', kz: 'Екінші нарық' } },
-      { id: PropertyType.HOUSE, label: { ru: 'Дом', kz: 'Үй' } },
-      { id: PropertyType.LAND, label: { ru: 'Участок', kz: 'Жер телімі' } },
-    ],
-    filters: [
-      {
-        id: 'priceRange',
-        type: 'range',
-        label: { ru: 'Цена', kz: 'Баға' }
+  dealDetails: {
+    sale: {
+      segments: [
+        { id: 'residential', label: { ru: 'Жилая', kz: 'Тұрғын үй' } },
+        { id: 'commercial', label: { ru: 'Коммерческая', kz: 'Коммерциялық' } },
+      ],
+      segmentDetails: {
+        residential: {
+          propertyTypes: [
+            { id: PropertyType.APARTMENT, label: { ru: 'Квартира', kz: 'Пәтер' } },
+            { id: PropertyType.ROOM, label: { ru: 'Комната', kz: 'Бөлме' } },
+            { id: PropertyType.HOUSE, label: { ru: 'Дом', kz: 'Үй' } },
+            { id: PropertyType.LAND, label: { ru: 'Участок', kz: 'Жер учаскесі' } },
+          ],
+          filters: [
+            { id: 'price', type: 'range', label: { ru: 'Цена', kz: 'Бағасы' } },
+            { id: 'area', type: 'range', label: { ru: 'Площадь', kz: 'Ауданы' } },
+            { id: 'rooms', type: 'select', label: { ru: 'Комнаты', kz: 'Бөлмелер' }, options: [
+              { id: '1', label: { ru: '1', kz: '1' } },
+              { id: '2', label: { ru: '2', kz: '2' } },
+              { id: '3', label: { ru: '3', kz: '3' } },
+              { id: '4+', label: { ru: '4+', kz: '4+' } },
+            ]},
+          ],
+          visibility: {
+            [PropertyType.APARTMENT]: ['price', 'area', 'rooms'],
+            [PropertyType.ROOM]: ['price', 'area'],
+            [PropertyType.HOUSE]: ['price', 'area', 'rooms'],
+            [PropertyType.LAND]: ['price', 'area'],
+          },
+        },
+        commercial: {
+            propertyTypes: [
+                { id: PropertyType.OFFICE, label: { ru: 'Офис', kz: 'Кеңсе' } },
+                { id: PropertyType.BUILDING, label: { ru: 'Здание', kz: 'Ғимарат' } },
+            ],
+            filters: [
+                { id: 'price', type: 'range', label: { ru: 'Цена', kz: 'Бағасы' } },
+                { id: 'area', type: 'range', label: { ru: 'Площадь', kz: 'Ауданы' } },
+            ],
+            visibility: {
+                [PropertyType.OFFICE]: ['price', 'area'],
+                [PropertyType.BUILDING]: ['price', 'area'],
+            }
+        }
       },
-      {
-        id: 'areaRange',
-        type: 'range',
-        label: { ru: 'Площадь', kz: 'Ауданы' }
-      },
-      {
-        id: 'floorRange',
-        type: 'range',
-        label: { ru: 'Этаж', kz: 'Қабат' }
-      }
-    ],
-    visibility: {
-      [PropertyType.NEW_BUILDING]: ['priceRange', 'areaRange', 'floorRange'],
-      [PropertyType.SECONDARY]: ['priceRange', 'areaRange', 'floorRange'],
-      [PropertyType.HOUSE]: ['priceRange', 'areaRange'],
-      [PropertyType.LAND]: ['priceRange', 'areaRange'],
+    },
+    rent: {
+        segments: [
+            { id: 'residential', label: { ru: 'Жилая', kz: 'Тұрғын үй' } },
+        ],
+        segmentDetails: {
+            residential: {
+                propertyTypes: [
+                    { id: PropertyType.APARTMENT, label: { ru: 'Квартира', kz: 'Пәтер' } },
+                    { id: PropertyType.ROOM, label: { ru: 'Комната', kz: 'Бөлме' } },
+                    { id: PropertyType.HOUSE, label: { ru: 'Дом', kz: 'Үй' } },
+                ],
+                filters: [
+                    { id: 'price', type: 'range', label: { ru: 'Цена в месяц', kz: 'Ай сайынғы бағасы' } },
+                    { id: 'area', type: 'range', label: { ru: 'Площадь', kz: 'Ауданы' } },
+                    { id: 'rooms', type: 'select', label: { ru: 'Комнаты', kz: 'Бөлмелер' }, options: [
+                        { id: '1', label: { ru: '1', kz: '1' } },
+                        { id: '2', label: { ru: '2', kz: '2' } },
+                        { id: '3', label: { ru: '3', kz: '3' } },
+                        { id: '4+', label: { ru: '4+', kz: '4+' } },
+                    ]},
+                ],
+                visibility: {
+                    [PropertyType.APARTMENT]: ['price', 'area', 'rooms'],
+                    [PropertyType.ROOM]: ['price', 'area'],
+                    [PropertyType.HOUSE]: ['price', 'area', 'rooms'],
+                }
+            }
+        }
+    },
+    rent_daily: {
+        segments: [
+            { id: 'residential', label: { ru: 'Жилая', kz: 'Тұрғын үй' } },
+        ],
+        segmentDetails: {
+            residential: {
+                propertyTypes: [
+                    { id: PropertyType.APARTMENT, label: { ru: 'Квартира', kz: 'Пәтер' } },
+                    { id: PropertyType.ROOM, label: { ru: 'Комната', kz: 'Бөлме' } },
+                ],
+                filters: [
+                    { id: 'price', type: 'range', label: { ru: 'Цена за сутки', kz: 'Тәуліктік бағасы' } },
+                ],
+                visibility: {
+                    [PropertyType.APARTMENT]: ['price'],
+                    [PropertyType.ROOM]: ['price'],
+                }
+            }
+        }
     }
   },
-
-  rent: {
-    segments: [
-      { id: 'residential', label: { ru: 'Жилая', kz: 'Тұрғын үй' } },
-      { id: 'commercial', label: { ru: 'Коммерческая', kz: 'Коммерциялық' } },
-    ],
-    propertyTypes: [
-      { id: PropertyType.APARTMENT, label: { ru: 'Квартира', kz: 'Пәтер' } },
-      { id: PropertyType.ROOM, label: { ru: 'Комната', kz: 'Бөлме' } },
-      { id: PropertyType.HOUSE, label: { ru: 'Дом', kz: 'Үй' } },
-    ],
-    filters: [
-      {
-        id: 'priceRange',
-        type: 'range',
-        label: { ru: 'Цена', kz: 'Баға' }
-      },
-      {
-        id: 'areaRange',
-        type: 'range',
-        label: { ru: 'Площадь', kz: 'Ауданы' }
-      }
-    ],
-    visibility: {
-      [PropertyType.APARTMENT]: ['priceRange', 'areaRange'],
-      [PropertyType.ROOM]: ['priceRange'],
-      [PropertyType.HOUSE]: ['priceRange', 'areaRange'],
-    }
-  },
-
-  rent_daily: {
-    segments: [
-      { id: 'residential', label: { ru: 'Жилая', kz: 'Тұрғын үй' } },
-    ],
-    propertyTypes: [
-      { id: PropertyType.APARTMENT, label: { ru: 'Квартира', kz: 'Пәтер' } },
-      { id: PropertyType.ROOM, label: { ru: 'Комната', kz: 'Бөлме' } },
-    ],
-    filters: [
-      {
-        id: 'priceRange',
-        type: 'range',
-        label: { ru: 'Цена за сутки', kz: 'Тәуліктік баға' }
-      }
-    ],
-    visibility: {
-      [PropertyType.APARTMENT]: ['priceRange'],
-      [PropertyType.ROOM]: ['priceRange'],
-    }
-  }
 };
