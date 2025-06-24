@@ -19,11 +19,9 @@ export function usePropertyListings(filters: PropertyFilters) {
         if (filters.dealType) {
           query = query.eq('deal_type', filters.dealType);
         }
-        // The 'segment' column does not exist in the 'listings' table.
-        // This filter was causing the query to return no results.
-        // if (filters.segment) {
-        //   query = query.eq('segment', filters.segment);
-        // }
+        if (filters.segment) {
+          query = query.eq('segment', filters.segment);
+        }
 
         // Property type filter
         if (filters.propertyTypes && filters.propertyTypes.length > 0) {
@@ -100,7 +98,7 @@ export function usePropertyListings(filters: PropertyFilters) {
       }
     };
     
-    if (filters.dealType) { // Only load if a deal type is selected
+    if (filters.dealType && filters.segment) {
         loadListings();
     }
 
