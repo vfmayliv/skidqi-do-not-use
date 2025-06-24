@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -37,7 +38,8 @@ export default function PropertyPage() {
   };
   
   const processedListings = useMemo(() => {
-    if (!listings) return [];
+    // Add null/undefined check to prevent map error
+    if (!listings || !Array.isArray(listings)) return [];
     return listings;
   }, [listings]);
 
