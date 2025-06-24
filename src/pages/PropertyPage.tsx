@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -61,10 +62,7 @@ export default function PropertyPage() {
                 </ToggleGroup>
               </div>
 
-              <PropertyFilters 
-                filters={filters} 
-                onFilterChange={handleFilterChange} 
-              />
+              <PropertyFilters />
               
               {loading && <div className="text-center py-8">Загрузка...</div>}
               {error && <div className="text-center text-red-500">Ошибка: {error.message}</div>}

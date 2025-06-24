@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { filtersConfig } from '@/config/filtersConfig';
@@ -34,7 +35,7 @@ const PropertyFilters: React.FC = () => {
 
   const configForCurrentSelection = useMemo(() => {
     if (!dealType || !segment) return null;
-    return filtersConfig[dealType]?.[segment];
+    return filtersConfig[dealType];
   }, [dealType, segment]);
 
   const availablePropertyTypes = configForCurrentSelection?.propertyTypes || [];
@@ -105,9 +106,9 @@ const PropertyFilters: React.FC = () => {
           ))}
         </ToggleGroup>
 
-        {dealType && (
+        {dealType && configForCurrentSelection && (
           <ToggleGroup type="single" value={segment} onValueChange={handleSegmentChange} className="bg-muted p-1 rounded-md">
-            {filtersConfig[dealType]?.segments.map(s => (
+            {configForCurrentSelection.segments.map(s => (
               <ToggleGroupItem key={s.id} value={s.id} className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3">
                 {s.label[language]}
               </ToggleGroupItem>
