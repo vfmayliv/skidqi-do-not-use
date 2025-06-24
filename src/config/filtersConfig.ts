@@ -30,10 +30,14 @@ export interface DealTypeConfig {
   label: { ru: string; kz: string };
 }
 
-export const filtersConfig: {
+export interface FiltersConfig {
   dealTypes: DealTypeConfig[];
-  [key: string]: any;
-} & Record<string, SegmentConfig> = {
+  sale: SegmentConfig;
+  rent: SegmentConfig;
+  rent_daily: SegmentConfig;
+}
+
+export const filtersConfig: FiltersConfig = {
   dealTypes: [
     { id: 'sale', label: { ru: 'Купить', kz: 'Сатып алу' } },
     { id: 'rent', label: { ru: 'Снять надолго', kz: 'Ұзақ мерзімге жалға алу' } },
