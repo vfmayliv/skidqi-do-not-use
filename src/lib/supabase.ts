@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 // Конфигурация для проекта skidqi-kz
@@ -76,14 +77,43 @@ export type Listing = {
   user_id: string;
   city_id: number | null;
   microdistrict_id: number | null;
+  region_id: number | null;
   images: string[] | null;
   status: string;
   created_at: string;
   updated_at: string;
+  expires_at: string | null;
   views: number;
-  favorites_count: number;
   is_premium: boolean;
-  premium_until: string | null;
+  phone: string | null;
+  source_link: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  area: number | null;
+  rooms: number | null;
+  floor: number | null;
+  total_floors: number | null;
+  deal_type: string | null;
+  property_type: string | null;
+  building_type: string | null;
+  renovation_type: string | null;
+  bathroom_type: string | null;
+  year_built: number | null;
+  ceiling_height: number | null;
+  has_balcony: boolean;
+  has_elevator: boolean;
+  has_parking: boolean;
+  allow_pets: boolean;
+  furnished: boolean;
+  utilities_included: boolean;
+  security_guarded: boolean;
+  has_playground: boolean;
+  has_separate_entrance: boolean;
+  is_corner: boolean;
+  is_studio: boolean;
+  district_id: string | null;
+  segment: string | null;
 };
 
 export type Favorite = {

@@ -1,11 +1,11 @@
 
 export interface Listing {
   id: string;
-  title: {
+  title: string | {
     ru: string;
     kz: string;
   };
-  description: {
+  description: string | {
     ru: string;
     kz: string;
   };
@@ -13,7 +13,7 @@ export interface Listing {
   discountPrice: number;
   discount: number;
   imageUrl: string;
-  city: {
+  city: string | {
     ru: string;
     kz: string;
   };
@@ -22,6 +22,7 @@ export interface Listing {
   createdAt: string;
   isFeatured?: boolean;
   views: number;
+  phone?: string; // Added phone property
   
   // Add seller property to match listingType.ts Listing interface
   seller?: {
