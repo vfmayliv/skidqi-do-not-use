@@ -25,6 +25,35 @@ export interface SegmentWithPropertyTypes {
   property_types: PropertyTypeWithFilters[];
 }
 
+// Define the expected shape of the Supabase query result
+interface PropertyTypeFilterResult {
+  property_types: {
+    id: string;
+    name_ru: string;
+    name_kz: string;
+    segment_id: string;
+    segments: {
+      id: string;
+      name_ru: string;
+      name_kz: string;
+    };
+  };
+  filters: {
+    id: string;
+    name_ru: string;
+    name_kz: string;
+    type: string;
+    meta?: any;
+    filter_options: {
+      id: number;
+      filter_id: string;
+      value: string;
+      name_ru: string;
+      name_kz: string;
+    }[];
+  };
+}
+
 export async function getFiltersForDeal(dealTypeId: string): Promise<SegmentWithPropertyTypes[]> {
   // 1. Fetch all property types associated with the deal type
   const { data: pt_filters, error: ptError } = await supabase
@@ -44,7 +73,7 @@ export async function getFiltersForDeal(dealTypeId: string): Promise<SegmentWith
   // 2. Group by segment and then by property type
   const segmentsMap = new Map<string, SegmentWithPropertyTypes>();
 
-  for (const item of pt_filters) {
+  for (const item of pt_filters as PropertyTypeFilterResult[]) {
     const segment = item.property_types?.segments;
     const propertyType = item.property_types;
     const filter = item.filters;
@@ -82,7 +111,7 @@ export async function getFiltersForDeal(dealTypeId: string): Promise<SegmentWith
             id: filter.id,
             name_ru: filter.name_ru,
             name_kz: filter.name_kz,
-            type: filter.type,
+            type: filter.type as 'range' | 'select' | 'boolean',
             meta: filter.meta,
             options: filter.filter_options || [],
         });
