@@ -893,18 +893,21 @@ export type Database = {
       filters: {
         Row: {
           id: string
+          meta: Json | null
           name_kz: string
           name_ru: string
           type: string
         }
         Insert: {
           id: string
+          meta?: Json | null
           name_kz: string
           name_ru: string
           type: string
         }
         Update: {
           id?: string
+          meta?: Json | null
           name_kz?: string
           name_ru?: string
           type?: string

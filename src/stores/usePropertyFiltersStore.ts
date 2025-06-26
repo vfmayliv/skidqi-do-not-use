@@ -10,12 +10,16 @@ import {
 type PropertyFiltersState = {
   dealType?: string;
   segment?: string;
+  propertyType?: string;
   filters: PropertyFilters;
+  values: Record<string, any>;
   activeFiltersCount: number;
   
   // Actions
   setDealType: (dealType: string) => void;
   setSegment: (segment: string) => void;
+  setPropertyType: (propertyType: string) => void;
+  setFilterValue: (filterId: string, value: any) => void;
   setFilter: <K extends keyof PropertyFilters>(key: K, value: PropertyFilters[K]) => void;
   setFilters: (filters: Partial<PropertyFilters>) => void;
   resetFilters: () => void;
@@ -77,15 +81,43 @@ const initialFilters: PropertyFilters = {
 export const usePropertyFiltersStore = create<PropertyFiltersState>((set, get) => ({
   dealType: undefined,
   segment: undefined,
+  propertyType: undefined,
   filters: initialFilters,
+  values: {},
   activeFiltersCount: 0,
 
   setDealType: (dealType: string) => {
     set({ dealType });
+    set(state => ({
+      filters: {
+        ...state.filters,
+        dealType
+      }
+    }));
   },
 
   setSegment: (segment: string) => {
     set({ segment });
+    set(state => ({
+      filters: {
+        ...state.filters,
+        segment
+      }
+    }));
+  },
+
+  setPropertyType: (propertyType: string) => {
+    set({ propertyType });
+  },
+
+  setFilterValue: (filterId: string, value: any) => {
+    set(state => ({
+      values: {
+        ...state.values,
+        [filterId]: value
+      }
+    }));
+    set({ activeFiltersCount: get().calculateActiveFiltersCount() });
   },
 
   setFilter: (key, value) => {
@@ -109,7 +141,13 @@ export const usePropertyFiltersStore = create<PropertyFiltersState>((set, get) =
   },
 
   resetFilters: () => {
-    set({ filters: initialFilters });
+    set({ 
+      filters: initialFilters,
+      values: {},
+      dealType: undefined,
+      segment: undefined,
+      propertyType: undefined
+    });
     set({ activeFiltersCount: 0 });
   },
 

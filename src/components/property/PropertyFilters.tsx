@@ -1,158 +1,190 @@
-aW1wb3J0IFJlYWN0LCB7IHVzZU1lbW8gfSBmcm9tICdyZWFjdCc7CmltcG9y
-dCB7IHVzZVByb3BlcnR5RmlsdGVyc1N0b3JlIH0gZnJvbSAnQC9zdG9yZXMv
-dXNlUHJvcGVydHlGaWx0ZXJzU3RvcmUnOwppbXBvcnQgeyB1c2VBcHBTdG9y
-ZSB9IGZyb20gJ0Avc3RvcmVzL3VzZUFwcFN0b3JlJzsKaW1wb3J0IHsgU2Vn
-bWVudFdpdGhQcm9wZXJ0eVR5cGVzLCBGdWxsRmlsdGVyQ29uZmlnLCBQcm9w
-ZXJ0eVR5cGVXaXRoRmlsdGVycyB9IGZyb20gJ0AvbGliL2ZpbHRlcnMnOwpp
-bXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9u
-JzsKaW1wb3J0IHsgSW5wdXQgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvaW5w
-dXQnOwppbXBvcnQgeyBTZWxlY3QsIFNlbGVjdENvbnRlbnQsIFNlbGVjdEl0
-ZW0sIFNlbGVjdFRyaWdnZXIsIFNlbGVjdFZhbHVlIH0gZnJvbSAnQC9jb21w
-b25lbnRzL3VpL3NlbGVjdCc7CmltcG9ydCB7IExhYmVsIH0gZnJvbSAnQC9j
-b21wb25lbnRzL3VpL2xhYmVsJzsKaW1wb3J0IHsgQ2hlY2tib3ggfSBmcm9t
-ICdAL2NvbXBvbmVudHMvdWkvY2hlY2tib3gnOwppbXBvcnQgeyBUb2dnbGVH
-cm91cCwgVG9nZ2xlR3JvdXBJdGVtIH0gZnJvbSAnQC9jb21wb25lbnRzL3Vp
-L3RvZ2dsZS1ncm91cCc7CmltcG9ydCB7IFNlYXJjaCwgWCB9IGZyb20gJ2x1
-Y2lkZS1yZWFjdCc7CgppbnRlcmZhY2UgUHJvcGVydHlGaWx0ZXJzUHJvcHMgeyAKICBjb25maWc6IFNlZ21lbnRXaXRoUHJvcGVydHlUeXBlc1tdOwogIG9uRmls
-dGVyQ2hhbmdlOiAoZmlsdGVyczogYW55KSA9PiB2b2lkOwogIG9uU2VhcmNo
-OiAoKSA9PiB2b2lkOwp9Cgpjb25zdCBkZWFsVHlwZXMgPSBbCiAgeyBpZDog
-J3NhbGUnLCBuYW1lOiB7IHJ1OiAn0JrRg9C/0LjRgtGMCcsIGt6OiAn0KHQ
-sNGC0YvQvyDQsNC70YMnIH0gfSwKICB7IGlkOiAncmVudCcsIG5hbWU6IHsg
-cnU6ICfQodC90Y/RgtGMJywga3o6ICfQltCw0LvSk9CwINCw0LvRgycgfSB9
-LApdOwoKY29uc3QgUHJvcGVydHlGaWx0ZXJzOiBSZWFjdC5GQzxQcm9wZXJ0
-eUZpbHRlcnNQcm9wcz4gPSAoeyBjb25maWcsIG9uRmlsdGVyQ2hhbmdlLCBv
-blNlYXJjaCB9KSA9PiB7CiAgY29uc3QgeyBsYW5ndWFnZSB9ID0gdXNlQXBw
-U3RvcmUoKTsKICBjb25zdCB7IGZpbHRlcnMsIHNldERlYWxUeXBlLCBzZXRT
-ZWdtZW50LCBzZXRQcm9wZXJ0eVR5cGUsIHNldEZpbHRlclZhbHVlLCByZXNl
-dEZpbHRlcnMgfSA9IHVzZVByb3BlcnR5RmlsdGVyc1N0b3JlKCk7CgogIGNv
-bnN0IGhhbmRsZURlYWxUeXBlQ2hhbmdlID0gKHZhbHVlOiBzdHJpbmcpID0+
-iB7CiAgICBpZiAodmFsdWUpIHsKICAgICAgc2V0RGVhbFR5cGUodmFsdWUp
-OwogICAgICBzZXRTZWdtZW50KCcnKTsKICAgICAgc2V0UHJvcGVydHlUeXBl
-KCcnKTsKICAgIH0KICB9OwoKICBjb25zdCBoYW5kbGVTZWdtZW50Q2hhbmdl
-ID0gKHZhbHVlOiBzdHJpbmcpID0+IHsKICAgIGlmICh2YWx1ZSkgewogICAg
-ICBzZXRTZWdtZW50KHZhbHVlKTsKICAgICAgc2V0UHJvcGVydHlUeXBlKCcn
-KTsKICAgIH0KICB9OwogIAogIGNvbnN0IGhhbmRsZVByb3BlcnR5VHlwZUNo
-YW5nZSA9ICh2YWx1ZTogc3RyaW5nKSA9PiB7CiAgICBpZiAodmFsdWUpIHsK
-ICAgICAgc2V0UHJvcGVydHlUeXBlKHZhbHVlKTsKICAgIH0KICB9OwoKICBj
-b25zdCBoYW5kbGVWYWx1ZUNoYW5nZSA9IChmaWx0ZXJJZDogc3RyaW5nLCB2
-YWx1ZTogYW55KSA9PiB7CiAgICBzZXRGaWx0ZXJWYWx1ZShmaWx0ZXJJZCwg
-dmFsdWUpOwogIH07CiAgCiAgY29uc3QgaGFuZGxlUmVzZXQgPSAoKSA9PiB7
-CiAgICByZXNldEZpbHRlcnMoKTsKICB9CgogIGNvbnN0IGFjdGl2ZVNlZ21l
-bnRzID0gdXNlTWVtbygoKSA9PiB7CiAgICByZXR1cm4gY29uZmlnLm1hcChz
-ID0+ICh7IGlkOiBzLmlkLCBuYW1lOiB7IHJ1OiBzLm5hbWVfcnUsIGt6OiBz
-Lm5hbWVfa3ogfSB9KSk7CiAgfSwgW2NvbmZpZ10pOwoKICBjb25zdCBhdmFp
-bGFibGVQcm9wZXJ0eVR5cGVzID0gdXNlTWVtbygoKSA9PiB7CiAgICBpZiAo
-IWZpbHRlcnMuc2VnbWVudCkgcmV0dXJuIFtdOwogICAgY29uc3Qgc2VsZWN0
-ZWRTZWdtZW50ID0gY29uZmlnLmZpbmQocyA9PiBzLmlkID09PSBmaWx0ZXJz
-LnNlZ21lbnQpOwogICAgcmV0dXJuIHNlbGVjdGVkU2VnbWVudCA/IHNlbGVj
-dGVkU2VnbWVudC5wcm9wZXJ0eV90eXBlcyA6IFtdOwogIH0sIFtjb25maWcs
-IGZpbHRlcnMuc2VnbWVudF0pOwogIAogIGNvbnN0IHNlbGVjdGVkUHJvcGVy
-dHlUeXBlRGV0YWlscyA9IHVzZU1lbW8oKCkgPT4gewogICAgaWYgKCFmaWx0
-ZXJzLnByb3BlcnR5VHlwZSkgcmV0dXJuIG51bGw7CiAgICByZXR1cm4gYXZh
-aWxhYmxlUHJvcGVydHlUeXBlcy5maW5kKHB0ID0+IHB0LmlkID09PSBmaWx0
-ZXJzLnByb3BlcnR5VHlwZSk7CiAgfSwgW2F2YWlsYWJsZVByb3BlcnR5VHlw
-ZXMsIGZpbHRlcnMucHJvcGVydHlUeXBlXSk7CgoKICBjb25zdCByZW5kZXJG
-aWx0ZXIgPSAoZmlsdGVyOiBGdWxsRmlsdGVyQ29uZmlnKSA9PiB7CiAgICBj
-b25zdCBmaWx0ZXJMYWJlbCA9IGxhbmd1YWdlID09PSAncnUnID8gZmlsdGVy
-Lm5hbWVfcnUgOiBmaWx0ZXIubmFtZV9rejIKICAgIGNvbnN0IHJhbmdlVmFs
-dWUgPSBmaWx0ZXJzLnZhbHVlc1tmaWx0ZXIuaWRdIHx8IHt9OwoKICAgIHN3
-aXRjaCAoZmlsdGVyLnR5cGUpIHsKICAgICAgY2FzZSAncmFuZ2UnOgogICAg
-ICAgIHJldHVybiAoCiAgICAgICAgICA8ZGl2IGtleT17ZmlsdGVyLmlkfSBj
-bGFzc05hbWU9ImZsZXggaXRlbXMtY2VudGVyIGdhcC0yIj4KICAgICAgICAg
-ICAgPGxhYmVsIGNsYXNzTmFtZT0idGV4dC1zbSBmb250LW1lZGl1bSB3aGl0
-ZXNwYWNlLW5vd3JhcCI+e2ZpbHRlckxhYmVsfTwvbGFiZWw+CiAgICAgICAg
-ICAgIDxJbnB1dAogICAgICAgICAgICAgIHR5cGU9Im51bWJlciIKICAgICAg
-ICAgICAgICBwbGFjZWhvbGRlcj0i0L7RgiIKICAgICAgICAgICAgICBjbGFz
-c05hbWU9InctMjQiCiAgICAgICAgICAgICAgdmFsdWU9e3JhbmdlVmFsdWUu
-ZnJvbSB8fCAnJ30KICAgICAgICAgICAgICBvbkNoYW5nZT17KGUpID0+IGhh
-bmRsZVZhbHVlQ2hhbmdlKGZpbHRlci5pZCwgeyAuLi5yYW5nZVZhbHVlLCBm
-cm9tOiBlLnRhcmdldC52YWx1ZSA/IE51bWJlcihlLnRhcmdldC52YWx1ZSkg
-OiB1bmRlZmluZWR9KX0KICAgICAgICAgICAgLz4KICAgICAgICAgICAgPElu
-cHV0CiAgICAgICAgICAgICAgdHlwZT0ibnVtYmVyIgogICAgICAgICAgICAg
-IHBsYWNlaG9sZGVyPSLQstC+IgogICAgICAgICAgICAgIGNsYXNzTmFtZT0i
-dy0yNCIKICAgICAgICAgICAgICB2YWx1ZT17cmFuZ2VWYWx1ZS50byB8fCAn
-J30KICAgICAgICAgICAgICBvbkNoYW5nZT17KGUpID0+IGhhbmRsZVZhbHVl
-Q2hhbmdlKGZpbHRlci5pZCwgeyAuLi5yYW5nZVZhbHVlLCB0bzogZS50YXJn
-ZXQudmFsdWUgPyBOdW1iZXIoZS50YXJnZXQudmFsdWUpIDogdW5kZWZpbmVk
-fSl9CiAgICAgICAgICAgIC8+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAp
-OwogICAgICBjYXNlICdzZWxlY3QnOgogICAgICAgIHJldHVybiAoCiAgICAg
-ICAgICA8ZGl2IGtleT17ZmlsdGVyLmlkfT4KICAgICAgICAgICAgPFNlbGVj
-dCBvblZhbHVlQ2hhbmdlPXsodmFsdWUpID0+IGhhbmRsZVZhbHVlQ2hhbmdl
-KGZpbHRlci5pZCwgdmFsdWUpfSB2YWx1ZT17ZmlsdGVycy52YWx1ZXNbZmls
-dGVyLmlkXSB8fCAnJ30+CiAgICAgICAgICAgICAgPFNlbGVjdFRyaWdnZXIg
-Y2xhc3NOYW1lPSJ3LWF1dG8gbWluLXdbMTgwcHhdIGZsZXgtc2hyaW5rLTAi
-PgogICAgICAgICAgICAgICAgPFNlbGVjdFZhbHVlIHBsYWNlaG9sZGVyPXtmaWx0ZXJMYWJlbH0gLz4KICAgICAgICAgICAgICA8L1NlbGVjdFRyaWdnZXI+CiAg
-ICAgICAgICAgICAgPFNlbGVjdENvbnRlbnQ+CiAgICAgICAgICAgICAgICB7
-ZmlsdGVyLm9wdGlvbnM/Lm1hcChvcHRpb24gPT4gKAogICAgICAgICAgICAg
-ICAgIDxTZWxlY3RJdGVtIGtleT17b3B0aW9uLmlkfSB2YWx1ZT17b3B0aW9u
-LnZhbHVlfT4KICAgICAgICAgICAgICAgICAgICB7bGFuZ3VhZ2UgPT09ICdy
-dScgPyBvcHRpb24ubmFtZV9ydSA6IG9wdGlvbi5uYW1lX2t6fQogICAgICAg
-ICAgICAgICAgIDwvU2VsZWN0SXRlbT4KICAgICAgICAgICAgICAgICkpfQog
-ICAgICAgICAgICAgIDwvU2VsZWN0Q29udGVudD4KICAgICAgICAgICAgPC9T
-ZWxlY3Q+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICApOwogICAgICBjYXNl
-ICdib29sZWFuJzoKICAgICAgICByZXR1cm4gKAogICAgICAgICAgPGRpdiBr
-ZXk9e2ZpbHRlci5pZH0gY2xhc3NOYW1lPSJmbGV4IGl0ZW1zLWNlbnRlciBz
-cGFjZS14LTIgcHQtMiI+CiAgICAgICAgICAgIDxDaGVja2JveCAKICAgICAg
-ICAgICAgICBpZD17ZmlsdGVyLmlkfSAKICAgICAgICAgICAgICBjaGVja2Vk
-PXshIWZpbHRlcnMudmFsdWVzW2ZpbHRlci5pZF19CiAgICAgICAgICAgICAgb25DaGVja2VkQ2hhbmdlPXsoY2hlY2tlZCkgPT4gaGFuZGxlVmFsdWVD
-aGFuZ2UoZmlsdGVyLmlkLCBjaGVja2VkKX0KICAgICAgICAgICAgLz4KICAg
-ICAgICAgICAgPExhYmVsIGh0bWxGb3I9e2ZpbHRlci5pZH0+e2ZpbHRlckxh
-YmVsfTwvTGFiZWw+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICApOwogICAg
-ICBkZWZhdWx0OgogICAgICAgIHJldHVybiBudWxsOwogICAgfQogIH07Cgog
-IHJldHVybiAoCiAgICA8ZGl2IGNsYXNzTmFtZT0icC00IGJnLWNhcmQgYm9y
-ZGVyIGJvcmRlci1ib3JkZXIgcm91bmRlZC1sZyBtYi04Ij4KICAgICAgPGRp
-diBjbGFzc05hbWU9ImZsZXggZmxleC13cmFwIGdhcC14LTQgZ2FwLXktMyBp
-dGVtcy1jZW50ZXIiPgogICAgICAgIDxUb2dnbGVHcm91cCB0eXBlPSJzaW5n
-bGUiIHZhbHVlPXtilHRlcnMuZGVhbFR5cGV9IG9uVmFsdWVDaGFuZ2U9e2hh
-bmRsZURlYWxUeXBlQ2hhbmdlfSBjbGFzc05hbWU9ImJnLW11dGVkIHAtMSBy
-b3VuZGVkLW1kIj4KICAgICAgICAgIHtkZWFsVHlwZXMubWFwKGR0ID0+ICgK
-ICAgICAgICAgICAgPFRvZ2dsZUdyb3VwSXRlbSBrZXk9e2R0LmlkfSB2YWx1
-ZT17ZHQuaWR9IGNsYXNzTmFtZT0iZGF0YS1bc3RhdGU9b25dOmJnLXByaW1h
-cnkgZGF0YS1bc3RhdGU9b25dOnRleHQtcHJpbWFyeS1mb3JlZ3JvdW5kIHB4
-LTMiPgogICAgICAgICAgICAgIHtkdC5uYW1lW2xhbmd1YWdlXX0KICAgICAg
-ICAgICAgPC9Ub2dnbGVHcm91cEl0ZW0+CiAgICAgICAgICApKX0KICAgICAg
-ICA8L1RvZ2dsZUdyb3VwPgogICAgICAgIAogICAgICAgIHtmaWx0ZXJzLmRl
-YWxUeXBlICYmIGFjdGl2ZVNlZ21lbnRzLmxlbmd0aCA+IDAgJiYgKAogICAg
-ICAgICAgPFRvZ2dsZUdyb3VwIHR5cGU9InNpbmdsZSIgdmFsdWU9e2ZpbHRl
-cnMuc2VnbWVudH0gb25WYWx1ZUNoYW5nZT17aGFuZGxlU2VnbWVudENoYW5n
-ZX0gY2xhc3NOYW1lPSJiZy1tdXRlZCBwLTEgcm91bmRlZC1tZCI+CiAgICAg
-ICAgICAgIHthY3RpdmVTZWdtZW50cy5tYXAocyA9PiAoCiAgICAgICAgICAg
-ICAgPFRvZ2dsZUdyb3VwSXRlbSBrZXk9e3MuaWR9IHZhbHVlPXtzLmlkfSBj
-bGFzc05hbWU9ImRhdGEtW3N0YXRlPW9uXTpiZy1wcmltYXJ5IGRhdGEtW3N0
-YXRlPW9uXTp0ZXh0LXByaW1hcnktZm9yZWdyb3VuZCBweC0zIj4KICAgICAg
-ICAgICAgICAgIHtzLm5hbWVbbGFuZ3VhZ2VdfQogICAgICAgICAgICAgIDwv
-VG9nZ2xlR3JvdXBJdGVtPgogICAgICAgICAgICApKX0KICAgICAgICAgIDwv
-VG9nZ2xlR3JvdXA+CiAgICAgICAgKQogICAgICAgIH0KICAgICAgICAKICAg
-ICAgICB7ZmlsdGVycy5zZWdtZW50ICYmIGF2YWlsYWJsZVByb3BlcnR5VHlw
-ZXMubGVuZ3RoID4gMCAmJiAoCiAgICAgICAgICA8U2VsZWN0IHZhbHVlPXtm
-aWx0ZXJzLnByb3BlcnR5VHlwZX0gb25WYWx1ZUNoYW5nZT17aGFuZGxlUHJv
-cGVydHlUeXBlQ2hhbmdlfT4KICAgICAgICAgICAgPFNlbGVjdFRyaWdnZXIg
-Y2xhc3NOYW1lPSJ3LWF1dG8gbWluLXdbMTgwcHhdIGZsZXgtc2hyaW5rLTAi
-PgogICAgICAgICAgICAgIDxTZWxlY3RWYWx1ZSBwbGFjZWhvbGRlcj0i0KLQ
-uNC/INC90LXQtNCy0LXQttC40LzQvtGB0YLQuCIgLz4KICAgICAgICAgICAg
-PC9TZWxlY3RUcmlnZ2VyPgogICAgICAgICAgICA8U2VsZWN0Q29udGVudD4K
-ICAgICAgICAgICAgICB7YXZhaWxhYmxlUHJvcGVydHlUeXBlcy5tYXAocHQg
-PT4gKAogICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0ga2V5PXtwdC5pZH0g
-dmFsdWU9e3B0LmlkfT4KICAgICAgICAgICAgICAgICAge2xhbmd1YWdlID09
-PSAncnUnID8gcHQubmFtZV9ydSA6IHB0Lm5hbWVfa3p9CiAgICAgICAgICAg
-ICAgICA8L1NlbGVjdEl0ZW0+CiAgICAgICAgICAgICAgKSkKICAgICAgICAg
-ICAgIH0KICAgICAgICAgICAgPC9TZWxlY3RDb250ZW50PgogICAgICAgICAg
-PC9TZWxlY3Q+CiAgICAgICAgKQogICAgICAgIH0KICAgICAgPC9kaXY+Cgog
-ICAgICB7c2VsZWN0ZWRQcm9wZXJ0eVR5cGVEZXRhaWxzICYmICgKICAgICAg
-ICA8ZGl2IGNsYXNzTmFtZT0ic3BhY2UteS00IHB0LTQgbXQtNCBib3JkZXIt
-dCI+CiAgICAgICAgICA8aDMgY2xhc3NOYW1lPSJmb250LXNlbWlib2xkIj57
-bGFuZ3VhZ2UgPT09ICdyuscgPyBzZWxlY3RlZFByb3BlcnR5VHlwZURldGFp
-bHMubmFtZV9ydSA6IHNlbGVjdGVkUHJvcGVydHlUeXBlRGV0YWlscy5uYW1l
-X2t6fTwvaDM+CiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0iZmxleCBmbGV4
-LXdyYXAgZ2FwLTQgaXRlbXMtZW5kIj4KICAgICAgICAgICAge3NlbGVjdGVk
-UHJvcGVydHlUeXBlRGV0YWlscy5maWx0ZXJzLm1hcChyZW5kZXJGaWx0ZXIp
-fQogICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgICkKICAg
-ICAgfQoKICAgICAgPGRpdiBjbGFzc05amePSJmbGV4IGdhcC0yIG10LTQg
-cHQtNCBib3JkZXItdCBqdXN0aWZ5LWVuZCI+CiAgICAgICAgPEJ1dHRvbiBv
-bkNsaWNrPXtvblNlYXJjaH0+CiAgICAgICAgICA8U2VhcmNoIGNsYXNzTmFt
-ZT0ibXItMiBoLTQgdy00IiAvPiDQn9C+0LjcgdC6CiAgICAgICAgPC9CdXR0
-b24+CiAgICAgICAgPEJ1dHRvbiB2YXJpYW50PSJnaG9zdCIgb25DbGljaz17
-aGFuZGxlUmVzZXR9PgogICAgICAgICAgPFggY2xhc3NOYW1lPSJtci0yIGgt
-NCB3LTQiLz4g0KHQsdGA0L7RgdC40YLQjAogICAgICAgIDwvQnV0dG9uPgog
-ICAgICA8L2Rpdj4KICAgIDwvZGl2PgogICk7Cn07CgpleHBvcnQgZGVmYXVs
-dCBQcm9wZXJ0eUZpbHRlcnM7Cg==
+
+import React, { useMemo } from 'react';
+import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
+import { useAppStore } from '@/stores/useAppStore';
+import { SegmentWithPropertyTypes, FullFilterConfig, PropertyTypeWithFilters } from '@/lib/filters';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Search, X } from 'lucide-react';
+
+interface PropertyFiltersProps { 
+  config: SegmentWithPropertyTypes[];
+  onFilterChange: (filters: any) => void;
+  onSearch: () => void;
+}
+
+const dealTypes = [
+  { id: 'sale', name: { ru: 'Купить', kz: 'Сатып алу' } },
+  { id: 'rent', name: { ru: 'Снять', kz: 'Жалға алу' } },
+];
+
+const PropertyFilters: React.FC<PropertyFiltersProps> = ({ config, onFilterChange, onSearch }) => {
+  const { language } = useAppStore();
+  const { dealType, segment, propertyType, values, setDealType, setSegment, setPropertyType, setFilterValue, resetFilters } = usePropertyFiltersStore();
+
+  const handleDealTypeChange = (value: string) => {
+    if (value) {
+      setDealType(value);
+      setSegment('');
+      setPropertyType('');
+    }
+  };
+
+  const handleSegmentChange = (value: string) => {
+    if (value) {
+      setSegment(value);
+      setPropertyType('');
+    }
+  };
+  
+  const handlePropertyTypeChange = (value: string) => {
+    if (value) {
+      setPropertyType(value);
+    }
+  };
+
+  const handleValueChange = (filterId: string, value: any) => {
+    setFilterValue(filterId, value);
+  };
+  
+  const handleReset = () => {
+    resetFilters();
+  }
+
+  const activeSegments = useMemo(() => {
+    return config.map(s => ({ id: s.id, name: { ru: s.name_ru, kz: s.name_kz } }));
+  }, [config]);
+
+  const availablePropertyTypes = useMemo(() => {
+    if (!segment) return [];
+    const selectedSegment = config.find(s => s.id === segment);
+    return selectedSegment ? selectedSegment.property_types : [];
+  }, [config, segment]);
+  
+  const selectedPropertyTypeDetails = useMemo(() => {
+    if (!propertyType) return null;
+    return availablePropertyTypes.find(pt => pt.id === propertyType);
+  }, [availablePropertyTypes, propertyType]);
+
+
+  const renderFilter = (filter: FullFilterConfig) => {
+    const filterLabel = language === 'ru' ? filter.name_ru : filter.name_kz;
+    const rangeValue = values[filter.id] || {};
+
+    switch (filter.type) {
+      case 'range':
+        return (
+          <div key={filter.id} className="flex items-center gap-2">
+            <label className="text-sm font-medium whitespace-nowrap">{filterLabel}</label>
+            <Input
+              type="number"
+              placeholder="от"
+              className="w-24"
+              value={rangeValue.from || ''}
+              onChange={(e) => handleValueChange(filter.id, { ...rangeValue, from: e.target.value ? Number(e.target.value) : undefined})}
+            />
+            <Input
+              type="number"
+              placeholder="до"
+              className="w-24"
+              value={rangeValue.to || ''}
+              onChange={(e) => handleValueChange(filter.id, { ...rangeValue, to: e.target.value ? Number(e.target.value) : undefined})}
+            />
+          </div>
+        );
+      case 'select':
+        return (
+          <div key={filter.id}>
+            <Select onValueChange={(value) => handleValueChange(filter.id, value)} value={values[filter.id] || ''}>
+              <SelectTrigger className="w-auto min-w-[180px] flex-shrink-0">
+                <SelectValue placeholder={filterLabel} />
+              </SelectTrigger>
+              <SelectContent>
+                {filter.options?.map(option => (
+                  <SelectItem key={option.id} value={option.value}>
+                    {language === 'ru' ? option.name_ru : option.name_kz}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        );
+      case 'boolean':
+        return (
+          <div key={filter.id} className="flex items-center space-x-2 pt-2">
+            <Checkbox 
+              id={filter.id} 
+              checked={!!values[filter.id]}
+              onCheckedChange={(checked) => handleValueChange(filter.id, checked)}
+            />
+            <Label htmlFor={filter.id}>{filterLabel}</Label>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="p-4 bg-card border border-border rounded-lg mb-8">
+      <div className="flex flex-wrap gap-x-4 gap-y-3 items-center">
+        <ToggleGroup type="single" value={dealType} onValueChange={handleDealTypeChange} className="bg-muted p-1 rounded-md">
+          {dealTypes.map(dt => (
+            <ToggleGroupItem key={dt.id} value={dt.id} className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3">
+              {dt.name[language]}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        
+        {dealType && activeSegments.length > 0 && (
+          <ToggleGroup type="single" value={segment} onValueChange={handleSegmentChange} className="bg-muted p-1 rounded-md">
+            {activeSegments.map(s => (
+              <ToggleGroupItem key={s.id} value={s.id} className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3">
+                {s.name[language]}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        )}
+        
+        {segment && availablePropertyTypes.length > 0 && (
+          <Select value={propertyType} onValueChange={handlePropertyTypeChange}>
+            <SelectTrigger className="w-auto min-w-[180px] flex-shrink-0">
+              <SelectValue placeholder="Тип недвижимости" />
+            </SelectTrigger>
+            <SelectContent>
+              {availablePropertyTypes.map(pt => (
+                <SelectItem key={pt.id} value={pt.id}>
+                  {language === 'ru' ? pt.name_ru : pt.name_kz}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      {selectedPropertyTypeDetails && (
+        <div className="space-y-4 pt-4 mt-4 border-t">
+          <h3 className="font-semibold">{language === 'ru' ? selectedPropertyTypeDetails.name_ru : selectedPropertyTypeDetails.name_kz}</h3>
+          <div className="flex flex-wrap gap-4 items-end">
+            {selectedPropertyTypeDetails.filters.map(renderFilter)}
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-2 mt-4 pt-4 border-t justify-end">
+        <Button onClick={onSearch}>
+          <Search className="mr-2 h-4 w-4" /> Поиск
+        </Button>
+        <Button variant="ghost" onClick={handleReset}>
+          <X className="mr-2 h-4 w-4"/> Сбросить
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default PropertyFilters;
