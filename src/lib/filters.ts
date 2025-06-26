@@ -73,7 +73,7 @@ export async function getFiltersForDeal(dealTypeId: string): Promise<SegmentWith
   // 2. Group by segment and then by property type
   const segmentsMap = new Map<string, SegmentWithPropertyTypes>();
 
-  for (const item of pt_filters as PropertyTypeFilterResult[]) {
+  for (const item of pt_filters as any[]) {
     const segment = item.property_types?.segments;
     const propertyType = item.property_types;
     const filter = item.filters;
