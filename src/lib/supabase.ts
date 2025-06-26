@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Настройки Supabase
-export const supabaseUrl = 'https://huzugmkqszfayzhqmbwy.supabase.co';
-export const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1enVnbWtxc3pmYXl6aHFtYnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MzA0NTcsImV4cCI6MjA2MTUwNjQ1N30.3hnSv37KEp5qRaZUFG_S0pNxqEL09ary1S2j864GPkk';
+// Настройки Supabase из переменных окружения
+export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Создаем клиент Supabase для взаимодействия с базой данных
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -47,10 +47,10 @@ export type Listing = {
   status: string;
   created_at: string;
   updated_at: string;
-  expires_at: string | null;
   views: number;
-  phone: string | null;
+  favorites_count: number;
   is_premium: boolean;
+  premium_until: string | null;
 };
 
 export type Favorite = {
