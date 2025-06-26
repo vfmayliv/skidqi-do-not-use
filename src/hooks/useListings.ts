@@ -93,6 +93,7 @@ export function useListings() {
         user_id,
         city_id,
         microdistrict_id,
+        region_id,
         images,
         status,
         created_at,
@@ -128,8 +129,8 @@ export function useListings() {
         has_separate_entrance,
         is_corner,
         is_studio,
-        region_id,
-        district_id
+        district_id,
+        segment
       `, { count: 'exact' });
 
       // Аппалы фильтров
@@ -182,7 +183,59 @@ export function useListings() {
         throw error;
       }
 
-      setListings(data as Listing[] || []);
+      // Convert data to proper Listing type
+      const convertedListings: Listing[] = (data || []).map(item => ({
+        id: item.id,
+        title: item.title || '',
+        description: item.description || '',
+        regular_price: item.regular_price,
+        discount_price: item.discount_price,
+        discount_percent: item.discount_percent,
+        is_free: item.is_free || false,
+        category_id: item.category_id,
+        user_id: item.user_id,
+        city_id: item.city_id,
+        microdistrict_id: item.microdistrict_id,
+        region_id: item.region_id,
+        images: item.images,
+        status: item.status || 'active',
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        expires_at: item.expires_at,
+        views: item.views || 0,
+        is_premium: item.is_premium || false,
+        phone: item.phone,
+        source_link: item.source_link,
+        address: item.address,
+        latitude: item.latitude,
+        longitude: item.longitude,
+        area: item.area,
+        rooms: item.rooms,
+        floor: item.floor,
+        total_floors: item.total_floors,
+        deal_type: item.deal_type,
+        property_type: item.property_type,
+        building_type: item.building_type,
+        renovation_type: item.renovation_type,
+        bathroom_type: item.bathroom_type,
+        year_built: item.year_built,
+        ceiling_height: item.ceiling_height,
+        has_balcony: item.has_balcony || false,
+        has_elevator: item.has_elevator || false,
+        has_parking: item.has_parking || false,
+        allow_pets: item.allow_pets || false,
+        furnished: item.furnished || false,
+        utilities_included: item.utilities_included || false,
+        security_guarded: item.security_guarded || false,
+        has_playground: item.has_playground || false,
+        has_separate_entrance: item.has_separate_entrance || false,
+        is_corner: item.is_corner || false,
+        is_studio: item.is_studio || false,
+        district_id: item.district_id,
+        segment: item.segment
+      }));
+
+      setListings(convertedListings);
       setPaginationMeta({
         totalItems: count || 0,
         currentPage: page,

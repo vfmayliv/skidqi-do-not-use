@@ -1,31 +1,34 @@
 import React, { useMemo } from 'react';
 import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
-import { SegmentWithPropertyTypes, PropertyTypeWithFilters, FullFilterConfig } from '@/lib/filters';
+import { useAppStore } from '@/stores/useAppStore';
+import { SegmentWithPropertyTypes, FullFilterConfig } from '@/lib/filters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Search, X } from 'lucide-react';
 
 interface PropertyFiltersProps {
   config: SegmentWithPropertyTypes[];
   onFilterChange: (filters: any) => void;
+  onSearch: () => void;
 }
 
 const dealTypes = [
-  { id: 'sale', name_ru: 'Купить', name_kz: 'Сатып алу' },
-  { id: 'rent', name_ru: 'Снять', name_kz: 'Жалға алу' },
+  { id: 'sale', name: { ru: 'Купить', kz: 'Сатып алу' } },
+  { id: 'rent', name: { ru: 'Снять', kz: 'Жалға алу' } },
 ];
 
-const PropertyFilters: React.FC<PropertyFiltersProps> = ({ config, onFilterChange }) => {
-  const { filters, setDealType, setSegment, setFilterValue } = usePropertyFiltersStore();
+const PropertyFilters: React.FC<PropertyFiltersProps> = ({ config, onFilterChange, onSearch }) => {
+  const { language } = useAppStore();
+  const { filters, setDealType, setSegment, setFilterValue, resetFilters } = usePropertyFiltersStore();
 
   const handleDealTypeChange = (value: string) => {
     if (value) {
       setDealType(value);
-      // Reset segment and other filters when deal type changes
-      setSegment(''); 
+      setSegment(''); // Reset segment when deal type changes
     }
   };
 
@@ -37,11 +40,16 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ config, onFilterChang
 
   const handleValueChange = (filterId: string, value: any) => {
     setFilterValue(filterId, value);
-    onFilterChange(usePropertyFiltersStore.getState().filters);
   };
+  
+  const handleReset = () => {
+    resetFilters();
+    // We might want to trigger a search with default filters after reset
+    // onFilterChange(usePropertyFiltersStore.getState().filters);
+  }
 
   const activeSegments = useMemo(() => {
-    return config.map(s => ({ id: s.id, name_ru: s.name_ru, name_kz: s.name_kz }));
+    return config.map(s => ({ id: s.id, name: { ru: s.name_ru, kz: s.name_kz } }));
   }, [config]);
 
   const activePropertyTypes = useMemo(() => {
@@ -51,37 +59,41 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ config, onFilterChang
   }, [config, filters.segment]);
 
   const renderFilter = (filter: FullFilterConfig) => {
+    const filterLabel = language === 'ru' ? filter.name_ru : filter.name_kz;
     switch (filter.type) {
       case 'range':
+        const rangeValue = filters.values[filter.id] || {};
         return (
-          <div key={filter.id} className="grid grid-cols-2 gap-2 items-center">
-            <Label htmlFor={`${filter.id}-from`}>{filter.name_ru} от</Label>
+          <div key={filter.id} className="flex items-center gap-2">
+            <label className="text-sm font-medium whitespace-nowrap">{filterLabel}</label>
             <Input
-              id={`${filter.id}-from`}
               type="number"
-              placeholder={filter.meta?.min || '0'}
-              value={filters.values[filter.id]?.from || ''}
-              onChange={(e) => handleValueChange(filter.id, { ...filters.values[filter.id], from: e.target.value })}
+              placeholder="от"
+              className="w-24"
+              value={rangeValue.from || ''}
+              onChange={(e) => handleValueChange(filter.id, { ...rangeValue, from: e.target.value ? Number(e.target.value) : undefined })}
             />
-            <Label htmlFor={`${filter.id}-to`}>{filter.name_ru} до</Label>
             <Input
-              id={`${filter.id}-to`}
               type="number"
-              placeholder={filter.meta?.max || '1000'}
-              value={filters.values[filter.id]?.to || ''}
-              onChange={(e) => handleValueChange(filter.id, { ...filters.values[filter.id], to: e.target.value })}
+              placeholder="до"
+              className="w-24"
+              value={rangeValue.to || ''}
+              onChange={(e) => handleValueChange(filter.id, { ...rangeValue, to: e.target.value ? Number(e.target.value) : undefined })}
             />
           </div>
         );
       case 'select':
         return (
           <div key={filter.id}>
-            <Label>{filter.name_ru}</Label>
             <Select onValueChange={(value) => handleValueChange(filter.id, value)} value={filters.values[filter.id] || ''}>
-              <SelectTrigger><SelectValue placeholder={`Выберите ${filter.name_ru.toLowerCase()}`} /></SelectTrigger>
+              <SelectTrigger className="w-auto min-w-[180px] flex-shrink-0">
+                <SelectValue placeholder={filterLabel} />
+              </SelectTrigger>
               <SelectContent>
                 {filter.options?.map(option => (
-                  <SelectItem key={option.id} value={option.value}>{option.name_ru}</SelectItem>
+                  <SelectItem key={option.id} value={option.value}>
+                    {language === 'ru' ? option.name_ru : option.name_kz}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -89,13 +101,13 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ config, onFilterChang
         );
       case 'boolean':
         return (
-          <div key={filter.id} className="flex items-center space-x-2">
+          <div key={filter.id} className="flex items-center space-x-2 pt-2">
             <Checkbox 
               id={filter.id} 
               checked={!!filters.values[filter.id]}
               onCheckedChange={(checked) => handleValueChange(filter.id, checked)}
             />
-            <Label htmlFor={filter.id}>{filter.name_ru}</Label>
+            <Label htmlFor={filter.id}>{filterLabel}</Label>
           </div>
         );
       default:
@@ -104,35 +116,43 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ config, onFilterChang
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
-      {/* Deal Type and Segment Toggles */}
-      <div className="flex flex-wrap gap-4">
-        <ToggleGroup type="single" value={filters.dealType} onValueChange={handleDealTypeChange}>
+    <div className="p-4 bg-card border border-border rounded-lg mb-8">
+      <div className="flex flex-wrap gap-x-4 gap-y-3 items-center">
+        <ToggleGroup type="single" value={filters.dealType} onValueChange={handleDealTypeChange} className="bg-muted p-1 rounded-md">
           {dealTypes.map(dt => (
-            <ToggleGroupItem key={dt.id} value={dt.id}>{dt.name_ru}</ToggleGroupItem>
+            <ToggleGroupItem key={dt.id} value={dt.id} className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3">
+              {dt.name[language]}
+            </ToggleGroupItem>
           ))}
         </ToggleGroup>
+
         {filters.dealType && activeSegments.length > 0 && (
-          <ToggleGroup type="single" value={filters.segment} onValueChange={handleSegmentChange}>
+          <ToggleGroup type="single" value={filters.segment} onValueChange={handleSegmentChange} className="bg-muted p-1 rounded-md">
             {activeSegments.map(s => (
-              <ToggleGroupItem key={s.id} value={s.id}>{s.name_ru}</ToggleGroupItem>
+              <ToggleGroupItem key={s.id} value={s.id} className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3">
+                {s.name[language]}
+              </ToggleGroupItem>
             ))}
           </ToggleGroup>
         )}
       </div>
 
-      {/* Dynamic Filters */}
       {filters.segment && activePropertyTypes.map(pt => (
-        <div key={pt.id} className="space-y-4 pt-4 border-t">
-          <h3 className="font-semibold">{pt.name_ru}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div key={pt.id} className="space-y-4 pt-4 mt-4 border-t">
+          <h3 className="font-semibold">{language === 'ru' ? pt.name_ru : pt.name_kz}</h3>
+          <div className="flex flex-wrap gap-4 items-end">
             {pt.filters.map(renderFilter)}
           </div>
         </div>
       ))}
 
-      <div className="flex justify-end pt-4">
-        <Button onClick={() => onFilterChange(filters)}>Поиск</Button>
+      <div className="flex gap-2 mt-4 pt-4 border-t justify-end">
+        <Button onClick={onSearch}>
+          <Search className="mr-2 h-4 w-4" /> Поиск
+        </Button>
+        <Button variant="ghost" onClick={handleReset}>
+          <X className="mr-2 h-4 w-4"/> Сбросить
+        </Button>
       </div>
     </div>
   );

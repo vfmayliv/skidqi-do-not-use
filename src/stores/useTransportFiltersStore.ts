@@ -9,7 +9,7 @@ import {
   BodyType,
   SteeringWheelType,
   VehicleFeature,
-  SortOption
+  SortOptions
 } from '@/types/listingType';
 
 type TransportFiltersState = {

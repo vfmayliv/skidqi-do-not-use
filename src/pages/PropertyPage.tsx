@@ -14,65 +14,92 @@ import { getFiltersForDeal, SegmentWithPropertyTypes } from '@/lib/filters';
 export default function PropertyPage() {
   const { filters, setFilters, setDealType, setSegment } = usePropertyFiltersStore();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { listings, loading, error } = usePropertyListings(filters);
+  
+  // We will trigger the search manually
+  const [activeFilters, setActiveFilters] = useState(filters);
+  const { listings, loading, error, refetch } = usePropertyListings(activeFilters);
   
   const [viewMode, setViewMode] = useState('list');
   const [filtersConfig, setFiltersConfig] = useState<SegmentWithPropertyTypes[]>([]);
 
+  // Effect to sync URL params to state on initial load
   useEffect(() => {
     const urlDealType = searchParams.get('dealType');
     const urlSegment = searchParams.get('segment');
-    if (urlDealType) {
-      setDealType(urlDealType);
-    } else {
-      // Default to 'sale' if not in URL
-      setDealType('sale');
-    }
+    
+    // Set initial deal type, defaulting to 'sale'
+    const initialDealType = urlDealType || 'sale';
+    setDealType(initialDealType);
+
     if (urlSegment) {
       setSegment(urlSegment);
     }
-  }, []);
+    
+    // Trigger initial search with filters from URL/defaults
+    setActiveFilters(usePropertyFiltersStore.getState().filters);
 
+  }, []); // Runs only once on mount
+
+  // Effect to load filter configuration when dealType changes
   useEffect(() => {
     if (filters.dealType) {
       const loadFilters = async () => {
-        console.log(`Loading filters for deal type: ${filters.dealType}`);
         const config = await getFiltersForDeal(filters.dealType);
-        console.log('Loaded config:', config);
         setFiltersConfig(config);
       };
       loadFilters();
     }
   }, [filters.dealType]);
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
+  // Effect to update URL when filters change
+  useEffect(() => {
     const params = new URLSearchParams();
-    if (newFilters.dealType) params.set('dealType', newFilters.dealType);
-    if (newFilters.segment) params.set('segment', newFilters.segment);
+    if (filters.dealType) params.set('dealType', filters.dealType);
+    if (filters.segment) params.set('segment', filters.segment);
     setSearchParams(params, { replace: true });
+  }, [filters.dealType, filters.segment, setSearchParams]);
+
+  const handleFilterChange = (newFilters) => {
+    // This function is now primarily for live updates in the store
+    setFilters(newFilters);
+  };
+
+  const handleSearch = () => {
+    // Set the active filters to the current state and trigger a refetch
+    setActiveFilters(filters);
+    refetch();
   };
 
   const processedListings = useMemo(() => {
+    if (!listings || !Array.isArray(listings)) return [];
     return listings.map(listing => ({ ...listing, price: Number(listing.price) }));
   }, [listings]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
-          <PropertyFilters config={filtersConfig} onFilterChange={handleFilterChange} />
-          
-          <div className="flex justify-end items-center">
-            <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value)} aria-label="View mode">
-              <ToggleGroupItem value="list" aria-label="List view"><List className="h-4 w-4 mr-2" />Список</ToggleGroupItem>
-              <ToggleGroupItem value="map" aria-label="Map view"><Map className="h-4 w-4 mr-2" />Карта</ToggleGroupItem>
+      <main className="flex-1">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-bold">Недвижимость</h1>
+            <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value)} defaultValue="list">
+              <ToggleGroupItem value="list" aria-label="Toggle list">
+                <List className="h-4 w-4 mr-2" />Список
+              </ToggleGroupItem>
+              <ToggleGroupItem value="map" aria-label="Toggle map">
+                <Map className="h-4 w-4 mr-2" />Карта
+              </ToggleGroupItem>
             </ToggleGroup>
           </div>
 
+          <PropertyFilters 
+            config={filtersConfig} 
+            onFilterChange={handleFilterChange}
+            onSearch={handleSearch}
+          />
+          
           <>
-            {loading && <div className="text-center">Загрузка объявлений...</div>}
+            {loading && <div className="text-center py-8">Загрузка объявлений...</div>}
             {error && <div className="text-center text-red-500">Ошибка: {error.message}</div>}
             
             {!loading && viewMode === 'list' && processedListings.length > 0 && (
@@ -87,7 +114,7 @@ export default function PropertyPage() {
               <MapView listings={processedListings} />
             )}
             
-            {!loading && processedListings.length === 0 && (
+            {!loading && !error && processedListings.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-gray-500">Подходящих объявлений не найдено.</p>
                 <p className="text-sm text-gray-400 mt-2">Попробуйте изменить критерии поиска или сбросьте фильтры.</p>

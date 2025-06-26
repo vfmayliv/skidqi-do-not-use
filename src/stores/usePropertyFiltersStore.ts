@@ -4,14 +4,18 @@ import {
   PropertyFilters,
   PropertyType,
   BuildingType,
-  SortOption
+  SortOptions
 } from '@/types/listingType';
 
 type PropertyFiltersState = {
+  dealType?: string;
+  segment?: string;
   filters: PropertyFilters;
   activeFiltersCount: number;
   
   // Actions
+  setDealType: (dealType: string) => void;
+  setSegment: (segment: string) => void;
   setFilter: <K extends keyof PropertyFilters>(key: K, value: PropertyFilters[K]) => void;
   setFilters: (filters: Partial<PropertyFilters>) => void;
   resetFilters: () => void;
@@ -20,59 +24,69 @@ type PropertyFiltersState = {
 
 // Initial filters state
 const initialFilters: PropertyFilters = {
-  propertyTypes: null,
+  propertyTypes: [],
   priceRange: {
-    min: null,
-    max: null
+    min: undefined,
+    max: undefined
   },
   areaRange: {
-    min: null,
-    max: null
+    min: undefined,
+    max: undefined
   },
   floorRange: {
-    min: null,
-    max: null
+    min: undefined,
+    max: undefined
   },
-  buildingTypes: null,
-  rooms: null,
-  districts: null,
-  hasPhoto: null,
-  onlyNewBuilding: null,
-  furnished: null,
-  allowPets: null,
-  hasParking: null,
-  dealType: null,
-  segment: null,
+  buildingType: [],
+  rooms: [],
+  districts: [],
+  hasPhoto: undefined,
+  onlyNewBuilding: undefined,
+  furnished: undefined,
+  allowPets: undefined,
+  hasParking: undefined,
+  dealType: undefined,
+  segment: undefined,
   yearBuiltRange: {
-    min: null,
-    max: null
+    min: undefined,
+    max: undefined
   },
   ceilingHeightRange: {
-    min: null,
-    max: null
+    min: undefined,
+    max: undefined
   },
-  bathroomTypes: null,
-  renovationTypes: null,
-  hasBalcony: null,
-  hasElevator: null,
-  rentPeriodMin: null,
-  isCorner: null,
-  isStudio: null,
-  hasSeparateEntrance: null,
-  securityGuarded: null,
-  hasPlayground: null,
-  utilityBillsIncluded: null,
-  sortBy: null,
-  viewTypes: null,
-  nearbyInfrastructure: null,
-  regionId: null,
-  cityId: null,  
-  microdistrictId: null
+  bathroomTypes: [],
+  renovationTypes: [],
+  hasBalcony: undefined,
+  hasElevator: undefined,
+  rentPeriodMin: undefined,
+  isCorner: undefined,
+  isStudio: undefined,
+  hasSeparateEntrance: undefined,
+  securityGuarded: undefined,
+  hasPlayground: undefined,
+  utilityBillsIncluded: undefined,
+  sortBy: undefined,
+  viewTypes: [],
+  nearbyInfrastructure: [],
+  regionId: undefined,
+  cityId: undefined,  
+  microdistrictId: undefined
 };
 
 export const usePropertyFiltersStore = create<PropertyFiltersState>((set, get) => ({
+  dealType: undefined,
+  segment: undefined,
   filters: initialFilters,
   activeFiltersCount: 0,
+
+  setDealType: (dealType: string) => {
+    set({ dealType });
+  },
+
+  setSegment: (segment: string) => {
+    set({ segment });
+  },
 
   setFilter: (key, value) => {
     set(state => ({
@@ -112,8 +126,8 @@ function calculateActiveFiltersCount(filters: PropertyFilters): number {
     
     if (filterKey === 'priceRange' || filterKey === 'areaRange' || filterKey === 'floorRange' || 
         filterKey === 'yearBuiltRange' || filterKey === 'ceilingHeightRange') {
-      const range = filterValue as { min: number | null, max: number | null } | null;
-      if (range && ((range.min !== null && range.min > 0) || (range.max !== null && range.max < 1000000000))) {
+      const range = filterValue as { min: number | undefined, max: number | undefined } | undefined;
+      if (range && ((range.min !== undefined && range.min > 0) || (range.max !== undefined && range.max < 1000000000))) {
         return count + 1;
       }
       return count;

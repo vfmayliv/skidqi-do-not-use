@@ -31,10 +31,10 @@ export function usePropertyListings(filters: PropertyFilters) {
         // Price range filter
         if (filters.priceRange) {
           if (filters.priceRange.min) {
-            query = query.gte('price', filters.priceRange.min);
+            query = query.gte('regular_price', filters.priceRange.min);
           }
           if (filters.priceRange.max) {
-            query = query.lte('price', filters.priceRange.max);
+            query = query.lte('regular_price', filters.priceRange.max);
           }
         }
         
@@ -47,34 +47,23 @@ export function usePropertyListings(filters: PropertyFilters) {
             query = query.lte('area', filters.areaRange.max);
           }
         }
-        
+
+        // Rooms filter
+        if (filters.rooms && filters.rooms.length > 0) {
+          query = query.in('rooms', filters.rooms);
+        }
+
         // Floor filter
         if (filters.floorRange) {
-          if (filters.floorRange.min) {
-            query = query.gte('floor', filters.floorRange.min);
-          }
-          if (filters.floorRange.max) {
-            query = query.lte('floor', filters.floorRange.max);
-          }
+            if (filters.floorRange.min) {
+                query = query.gte('floor', filters.floorRange.min);
+            }
+            if (filters.floorRange.max) {
+                query = query.lte('floor', filters.floorRange.max);
+            }
         }
-        
-        // Building type filter
-        if (filters.buildingType) {
-          query = query.eq('building_type', filters.buildingType);
-        }
-        
-        // Condition filter
-        if (filters.condition) {
-          query = query.eq('condition', filters.condition);
-        }
-        
+
         // Boolean filters
-        if (typeof filters.hasPhotos === 'boolean') {
-          query = query.eq('has_photos', filters.hasPhotos);
-        }
-        if (typeof filters.hasParking === 'boolean') {
-          query = query.eq('has_parking', filters.hasParking);
-        }
         if (typeof filters.hasBalcony === 'boolean') {
           query = query.eq('has_balcony', filters.hasBalcony);
         }
@@ -86,7 +75,7 @@ export function usePropertyListings(filters: PropertyFilters) {
         if (filters.sortBy) {
           const [sortField, sortOrder] = filters.sortBy.split('_');
           const isAscending = sortOrder === 'asc';
-          const sortColumn = sortField === 'date' ? 'created_at' : 'price';
+          const sortColumn = sortField === 'date' ? 'created_at' : 'regular_price';
           query = query.order(sortColumn, { ascending: isAscending });
         } else {
           // Default sort by creation date

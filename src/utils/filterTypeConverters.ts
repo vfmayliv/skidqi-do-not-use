@@ -1,43 +1,42 @@
-
-import { PropertyFilters } from '@/types/listingType';
+import { PropertyFilters, PropertyType, SortOptions, BuildingType } from '@/types/listingType';
 
 export function convertToPropertyListingFilters(params: Record<string, string | string[]>): Partial<PropertyFilters> {
   const filters: Partial<PropertyFilters> = {};
 
-  // Handle property types
+  // Handle property types with proper type casting
   if (params.propertyTypes) {
     const types = Array.isArray(params.propertyTypes) ? params.propertyTypes : [params.propertyTypes];
-    filters.propertyTypes = types.filter(Boolean);
+    filters.propertyTypes = types.filter(Boolean) as PropertyType[];
   }
 
   // Handle price range
   if (params.minPrice || params.maxPrice) {
     filters.priceRange = {
-      min: params.minPrice ? parseInt(params.minPrice as string) : null,
-      max: params.maxPrice ? parseInt(params.maxPrice as string) : null
+      min: params.minPrice ? parseInt(params.minPrice as string) : undefined,
+      max: params.maxPrice ? parseInt(params.maxPrice as string) : undefined
     };
   }
 
   // Handle area range
   if (params.minArea || params.maxArea) {
     filters.areaRange = {
-      min: params.minArea ? parseInt(params.minArea as string) : null,
-      max: params.maxArea ? parseInt(params.maxArea as string) : null
+      min: params.minArea ? parseInt(params.minArea as string) : undefined,
+      max: params.maxArea ? parseInt(params.maxArea as string) : undefined
     };
   }
 
   // Handle floor range
   if (params.minFloor || params.maxFloor) {
     filters.floorRange = {
-      min: params.minFloor ? parseInt(params.minFloor as string) : null,
-      max: params.maxFloor ? parseInt(params.maxFloor as string) : null
+      min: params.minFloor ? parseInt(params.minFloor as string) : undefined,
+      max: params.maxFloor ? parseInt(params.maxFloor as string) : undefined
     };
   }
 
-  // Handle building types
+  // Handle building types with proper property name and type casting
   if (params.buildingTypes) {
     const types = Array.isArray(params.buildingTypes) ? params.buildingTypes : [params.buildingTypes];
-    filters.buildingTypes = types.filter(Boolean);
+    filters.buildingType = types.filter(Boolean) as BuildingType[];
   }
 
   // Handle rooms
@@ -73,18 +72,18 @@ export function convertToPropertyListingFilters(params: Record<string, string | 
     filters.hasParking = params.hasParking === 'true';
   }
 
-  // Handle deal type and segment
+  // Handle deal type and segment with proper type casting
   if (params.dealType) {
-    filters.dealType = params.dealType as string;
+    filters.dealType = params.dealType as 'buy' | 'rent' | 'rent_daily';
   }
 
   if (params.segment) {
-    filters.segment = params.segment as string;
+    filters.segment = params.segment as 'residential' | 'commercial' | 'overseas';
   }
 
-  // Handle sort
+  // Handle sort with proper type casting
   if (params.sortBy) {
-    filters.sortBy = params.sortBy as string;
+    filters.sortBy = params.sortBy as SortOptions;
   }
 
   // Handle location filters
