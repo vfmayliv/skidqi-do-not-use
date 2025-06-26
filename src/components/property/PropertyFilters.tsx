@@ -1,4 +1,5 @@
 
+
 import React, { useMemo } from 'react';
 import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { filtersConfig } from '@/config/filtersConfig';
@@ -60,6 +61,10 @@ const PropertyFilters: React.FC = () => {
 
       switch (filter.type) {
         case 'range':
+          // Get the current range value, ensuring it's an object with min/max properties
+          const currentRange = filters[filter.id as keyof typeof filters] as { min?: number; max?: number } | undefined;
+          const rangeValue = currentRange && typeof currentRange === 'object' ? currentRange : { min: undefined, max: undefined };
+          
           return (
             <div key={filter.id} className="flex items-center gap-2">
               <label className="text-sm font-medium whitespace-nowrap">{filter.label[language]}</label>
@@ -67,23 +72,27 @@ const PropertyFilters: React.FC = () => {
                 type="number"
                 placeholder="от"
                 className="w-24"
-                value={filters[filter.id as keyof typeof filters]?.min || ''}
-                onChange={e => handleFilterChange(filter.id, { ...filters[filter.id as keyof typeof filters], min: e.target.value ? Number(e.target.value) : undefined })}
+                value={rangeValue.min || ''}
+                onChange={e => handleFilterChange(filter.id, { ...rangeValue, min: e.target.value ? Number(e.target.value) : undefined })}
               />
               <Input
                 type="number"
                 placeholder="до"
                 className="w-24"
-                value={filters[filter.id as keyof typeof filters]?.max || ''}
-                onChange={e => handleFilterChange(filter.id, { ...filters[filter.id as keyof typeof filters], max: e.target.value ? Number(e.target.value) : undefined })}
+                value={rangeValue.max || ''}
+                onChange={e => handleFilterChange(filter.id, { ...rangeValue, max: e.target.value ? Number(e.target.value) : undefined })}
               />
             </div>
           );
         case 'select':
+          // Get the current select value as a string
+          const selectValue = filters[filter.id as keyof typeof filters];
+          const stringValue = typeof selectValue === 'string' ? selectValue : '';
+          
           return (
             <Select
               key={filter.id}
-              value={filters[filter.id as keyof typeof filters] || ''}
+              value={stringValue}
               onValueChange={value => handleFilterChange(filter.id, value)}
             >
               <SelectTrigger className="w-[180px]">
@@ -160,3 +169,4 @@ const PropertyFilters: React.FC = () => {
 };
 
 export default PropertyFilters;
+
