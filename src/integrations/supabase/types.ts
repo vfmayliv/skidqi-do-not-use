@@ -702,6 +702,24 @@ export type Database = {
           },
         ]
       }
+      deal_types: {
+        Row: {
+          id: string
+          name_kz: string
+          name_ru: string
+        }
+        Insert: {
+          id: string
+          name_kz: string
+          name_ru: string
+        }
+        Update: {
+          id?: string
+          name_kz?: string
+          name_ru?: string
+        }
+        Relationships: []
+      }
       excavator_brands: {
         Row: {
           created_at: string
@@ -839,6 +857,59 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      filter_options: {
+        Row: {
+          filter_id: string
+          id: number
+          name_kz: string
+          name_ru: string
+          value: string
+        }
+        Insert: {
+          filter_id: string
+          id?: number
+          name_kz: string
+          name_ru: string
+          value: string
+        }
+        Update: {
+          filter_id?: string
+          id?: number
+          name_kz?: string
+          name_ru?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "filter_options_filter_id_fkey"
+            columns: ["filter_id"]
+            isOneToOne: false
+            referencedRelation: "filters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      filters: {
+        Row: {
+          id: string
+          name_kz: string
+          name_ru: string
+          type: string
+        }
+        Insert: {
+          id: string
+          name_kz: string
+          name_ru: string
+          type: string
+        }
+        Update: {
+          id?: string
+          name_kz?: string
+          name_ru?: string
+          type?: string
+        }
+        Relationships: []
       }
       food_categories: {
         Row: {
@@ -1650,6 +1721,78 @@ export type Database = {
           },
         ]
       }
+      property_type_filters: {
+        Row: {
+          deal_type_id: string
+          filter_id: string
+          id: number
+          property_type_id: string
+        }
+        Insert: {
+          deal_type_id: string
+          filter_id: string
+          id?: number
+          property_type_id: string
+        }
+        Update: {
+          deal_type_id?: string
+          filter_id?: string
+          id?: number
+          property_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_type_filters_deal_type_id_fkey"
+            columns: ["deal_type_id"]
+            isOneToOne: false
+            referencedRelation: "deal_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_type_filters_filter_id_fkey"
+            columns: ["filter_id"]
+            isOneToOne: false
+            referencedRelation: "filters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_type_filters_property_type_id_fkey"
+            columns: ["property_type_id"]
+            isOneToOne: false
+            referencedRelation: "property_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_types: {
+        Row: {
+          id: string
+          name_kz: string
+          name_ru: string
+          segment_id: string
+        }
+        Insert: {
+          id: string
+          name_kz: string
+          name_ru: string
+          segment_id: string
+        }
+        Update: {
+          id?: string
+          name_kz?: string
+          name_ru?: string
+          segment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_types_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       regions: {
         Row: {
           id: number
@@ -1770,6 +1913,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      segments: {
+        Row: {
+          id: string
+          name_kz: string
+          name_ru: string
+        }
+        Insert: {
+          id: string
+          name_kz: string
+          name_ru: string
+        }
+        Update: {
+          id?: string
+          name_kz?: string
+          name_ru?: string
+        }
+        Relationships: []
       }
       services_categories: {
         Row: {
