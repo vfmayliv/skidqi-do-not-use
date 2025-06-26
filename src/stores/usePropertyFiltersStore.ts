@@ -91,7 +91,7 @@ export const usePropertyFiltersStore = create<PropertyFiltersState>((set, get) =
     set(state => ({
       filters: {
         ...state.filters,
-        dealType
+        dealType: dealType as 'buy' | 'rent' | 'rent_daily'
       }
     }));
   },
@@ -101,7 +101,7 @@ export const usePropertyFiltersStore = create<PropertyFiltersState>((set, get) =
     set(state => ({
       filters: {
         ...state.filters,
-        segment
+        segment: segment as 'residential' | 'commercial' | 'overseas'
       }
     }));
   },

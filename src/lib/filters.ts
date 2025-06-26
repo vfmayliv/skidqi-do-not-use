@@ -1,3 +1,4 @@
+
 import { supabase } from './supabase';
 import { DealType, Segment, PropertyType, Filter, FilterOption } from '@/types/filters';
 
@@ -36,11 +37,15 @@ export async function getFiltersForDeal(dealTypeId: string): Promise<SegmentWith
     return [];
   }
 
+  if (!pt_filters || !Array.isArray(pt_filters)) {
+    return [];
+  }
+
   // 2. Group by segment and then by property type
   const segmentsMap = new Map<string, SegmentWithPropertyTypes>();
 
   for (const item of pt_filters) {
-    const segment = item.property_types.segments;
+    const segment = item.property_types?.segments;
     const propertyType = item.property_types;
     const filter = item.filters;
 
