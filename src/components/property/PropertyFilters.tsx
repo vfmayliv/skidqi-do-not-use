@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { usePropertyFiltersStore } from '@/stores/usePropertyFiltersStore';
 import { filtersConfig } from '@/config/filtersConfig';
@@ -28,7 +29,7 @@ const PropertyFilters: React.FC = () => {
     }
   };
 
-  const handleFilterChange = (key: keyof typeof filters, value: any) => {
+  const handleFilterChange = (key: string, value: any) => {
     setFilters({ [key]: value });
   };
 
@@ -66,15 +67,15 @@ const PropertyFilters: React.FC = () => {
                 type="number"
                 placeholder="от"
                 className="w-24"
-                value={filters[filter.id]?.min || ''}
-                onChange={e => handleFilterChange(filter.id, { ...filters[filter.id], min: e.target.value ? Number(e.target.value) : undefined })}
+                value={filters[filter.id as keyof typeof filters]?.min || ''}
+                onChange={e => handleFilterChange(filter.id, { ...filters[filter.id as keyof typeof filters], min: e.target.value ? Number(e.target.value) : undefined })}
               />
               <Input
                 type="number"
                 placeholder="до"
                 className="w-24"
-                value={filters[filter.id]?.max || ''}
-                onChange={e => handleFilterChange(filter.id, { ...filters[filter.id], max: e.target.value ? Number(e.target.value) : undefined })}
+                value={filters[filter.id as keyof typeof filters]?.max || ''}
+                onChange={e => handleFilterChange(filter.id, { ...filters[filter.id as keyof typeof filters], max: e.target.value ? Number(e.target.value) : undefined })}
               />
             </div>
           );
@@ -82,7 +83,7 @@ const PropertyFilters: React.FC = () => {
           return (
             <Select
               key={filter.id}
-              value={filters[filter.id] || ''}
+              value={filters[filter.id as keyof typeof filters] || ''}
               onValueChange={value => handleFilterChange(filter.id, value)}
             >
               <SelectTrigger className="w-[180px]">
