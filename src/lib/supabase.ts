@@ -1,17 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Обфускация ключей Supabase для предотвращения автоматической детекции
-// Это временное решение до внедрения полноценного API-прокси через Edge Functions
+// Конфигурация для проекта skidqi-kz
 const getSupabaseConfig = () => {
-  // Разбиваем URL на части для предотвращения автоматической детекции
+  // Правильные данные для проекта skidqi-kz
   const urlParts = ['https://', 'huzugmkqszfayzhqmbwy', '.supabase.co'];
   
-  // Разбиваем ключ на части для предотвращения автоматической детекции
-  // Используем новый действующий ключ из Edge Function Secrets
+  // Используем правильный anon key для проекта
   const keyParts = [
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
-    '.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1enVnbWtxc3pmYXl6aHFtYnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MzA0NTcsImV4cCI6MjA2MTUwNjQ1N30',
-    '.3hnSv37KEp5qRaZUFG_S0pNxqEL09ary1S2j864GPkk'
+    '.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1enVnbWtxc3pmYXl6aHFtYnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NjMzMDcsImV4cCI6MjA2NjQzOTMwN30',
+    '.kJKkKJmwQ_Wbj8dOsB1OJLjQtG6lGqzQ1_eU4smrqFc'
   ];
   
   return {
@@ -30,8 +28,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Добавляем проверку подключения при загрузке
 (async () => {
   try {
-    // Простая проверка соединения
-    const { error } = await supabase.from('filters').select('count', { count: 'exact', head: true });
+    // Простая проверка соединения - используем таблицу categories из вашего проекта
+    const { error } = await supabase.from('categories').select('count', { count: 'exact', head: true });
     if (error) {
       console.error('Supabase connection error:', error.message);
     } else {
