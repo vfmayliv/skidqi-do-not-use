@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Настройки Supabase из переменных окружения
-export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-export const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Настройки Supabase
+export const supabaseUrl = 'https://huzugmkqszfayzhqmbwy.supabase.co';
+export const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1enVnbWtxc3pmYXl6aHFtYnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MzA0NTcsImV4cCI6MjA2MTUwNjQ1N30.3hnSv37KEp5qRaZUFG_S0pNxqEL09ary1S2j864GPkk';
 
 // Создаем клиент Supabase для взаимодействия с базой данных
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
