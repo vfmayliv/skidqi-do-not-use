@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { supabase, Listing } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useSupabase } from '@/contexts/SupabaseContext';
 
 // Типы для параметров фильтрации объявлений
@@ -66,103 +65,41 @@ type PaginationMeta = {
 };
 
 export function useListings() {
-  const { supabase, user } = useSupabase();
-  const [listings, setListings] = useState<Listing[]>([]);
+  const { user } = useSupabase();
+  const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
+  const [paginationMeta, setPaginationMeta] = useState<any | null>(null);
 
   // Get all listings with filtering, sorting, and pagination
-  const getListings = async (filters: ListingFilters = {}, sort: SortOptions = 'newest', page: number = 1, limit: number = 10) => {
+  const getListings = async (filters: any = {}, sort: string = 'newest', limit: number = 10, offset: number = 0) => {
     setLoading(true);
     setError(null);
 
     try {
-      // Очистить фильтры от вредных Zustand proxy
-      const cleanedFilters = cleanFilters(filters);
-      console.log('Cleaned Filters:', cleanedFilters);
+      console.log('Fetching listings with filters:', filters);
 
       let query = supabase.from('listings').select(`
-        id,
-        title,
-        description,
-        regular_price,
-        discount_price,
-        discount_percent,
-        is_free,
-        user_id,
-        city_id,
-        microdistrict_id,
-        region_id,
-        images,
-        status,
-        created_at,
-        updated_at,
-        expires_at,
-        views,
-        phone,
-        is_premium,
-        category_id,
-        source_link,
-        address,
-        latitude,
-        longitude,
-        area,
-        rooms,
-        floor,
-        total_floors,
-        deal_type,
-        property_type,
-        building_type,
-        renovation_type,
-        bathroom_type,
-        year_built,
-        ceiling_height,
-        has_balcony,
-        has_elevator,
-        has_parking,
-        allow_pets,
-        furnished,
-        utilities_included,
-        security_guarded,
-        has_playground,
-        has_separate_entrance,
-        is_corner,
-        is_studio,
-        district_id,
-        segment
+        *,
+        cities(name_ru, name_kz),
+        categories(name_ru, name_kz)
       `, { count: 'exact' });
 
-      // Аппалы фильтров
-      if (cleanedFilters.categoryId) {
-        query = query.eq('category_id', cleanedFilters.categoryId);
+      // Apply filters
+      if (filters.categoryId) {
+        query = query.eq('category_id', filters.categoryId);
       }
-      if (cleanedFilters.cityId) {
-        query = query.eq('city_id', cleanedFilters.cityId);
+      if (filters.cityId) {
+        query = query.eq('city_id', filters.cityId);
       }
-      if (cleanedFilters.microdistrictId) {
-        query = query.eq('microdistrict_id', cleanedFilters.microdistrictId);
-      }
-      if (cleanedFilters.priceMin) {
-        query = query.gte('regular_price', cleanedFilters.priceMin);
-      }
-      if (cleanedFilters.priceMax) {
-        query = query.lte('regular_price', cleanedFilters.priceMax);
-      }
-      if (cleanedFilters.condition) {
-        // Поддержим для condition
-      }
-      if (cleanedFilters.searchQuery) {
-        query = query.ilike('title', `%${cleanedFilters.searchQuery}%`);
-      }
-      if (cleanedFilters.isPremium !== undefined) {
-        query = query.eq('is_premium', cleanedFilters.isPremium);
-      }
-      if (cleanedFilters.isFree !== undefined) {
-        query = query.eq('is_free', cleanedFilters.isFree);
+      if (filters.searchQuery) {
+        query = query.ilike('title', `%${filters.searchQuery}%`);
       }
       
-      // Сортировка
+      // Only show active listings
+      query = query.eq('status', 'active');
+      
+      // Sorting
       if (sort === 'newest') {
         query = query.order('created_at', { ascending: false });
       } else if (sort === 'price_asc') {
@@ -170,12 +107,9 @@ export function useListings() {
       } else if (sort === 'price_desc') {
         query = query.order('regular_price', { ascending: false });
       }
-      // TODO: добедите сортировка по диргонта
       
-      // Панация
-      const from = (page - 1) * limit;
-      const to = from + limit - 1;
-      query = query.range(from, to);
+      // Pagination
+      query = query.range(offset, offset + limit - 1);
 
       const { data, error, count } = await query;
 
@@ -183,68 +117,18 @@ export function useListings() {
         throw error;
       }
 
-      // Convert data to proper Listing type
-      const convertedListings: Listing[] = (data || []).map(item => ({
-        id: item.id,
-        title: item.title || '',
-        description: item.description || '',
-        regular_price: item.regular_price,
-        discount_price: item.discount_price,
-        discount_percent: item.discount_percent,
-        is_free: item.is_free || false,
-        category_id: item.category_id,
-        user_id: item.user_id,
-        city_id: item.city_id,
-        microdistrict_id: item.microdistrict_id,
-        region_id: item.region_id,
-        images: item.images,
-        status: item.status || 'active',
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        expires_at: item.expires_at,
-        views: item.views || 0,
-        is_premium: item.is_premium || false,
-        phone: item.phone,
-        source_link: item.source_link,
-        address: item.address,
-        latitude: item.latitude,
-        longitude: item.longitude,
-        area: item.area,
-        rooms: item.rooms,
-        floor: item.floor,
-        total_floors: item.total_floors,
-        deal_type: item.deal_type,
-        property_type: item.property_type,
-        building_type: item.building_type,
-        renovation_type: item.renovation_type,
-        bathroom_type: item.bathroom_type,
-        year_built: item.year_built,
-        ceiling_height: item.ceiling_height,
-        has_balcony: item.has_balcony || false,
-        has_elevator: item.has_elevator || false,
-        has_parking: item.has_parking || false,
-        allow_pets: item.allow_pets || false,
-        furnished: item.furnished || false,
-        utilities_included: item.utilities_included || false,
-        security_guarded: item.security_guarded || false,
-        has_playground: item.has_playground || false,
-        has_separate_entrance: item.has_separate_entrance || false,
-        is_corner: item.is_corner || false,
-        is_studio: item.is_studio || false,
-        district_id: item.district_id,
-        segment: item.segment
-      }));
-
-      setListings(convertedListings);
+      console.log('Listings fetched successfully:', data?.length || 0);
+      
+      setListings(data || []);
       setPaginationMeta({
         totalItems: count || 0,
-        currentPage: page,
+        currentPage: Math.floor(offset / limit) + 1,
         itemsPerPage: limit,
         totalPages: Math.ceil((count || 0) / limit),
       });
     } catch (err: any) {
-      setError(err.message);
       console.error('Error fetching listings:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -252,107 +136,74 @@ export function useListings() {
 
   // Get a single listing by ID
   const getListingById = async (id: string) => {
-    setLoading(true);
-    setError(null);
-
     try {
-      const { data, error } = await supabase.from('listings').select('*').eq('id', id).single();
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('id', id)
+        .single();
       
-      if (error) {
-        throw error;
-      }
-
-      return data as Listing | null;
+      if (error) throw error;
+      return data;
     } catch (err: any) {
-      setError(err.message);
-      console.error('Error fetching listing by ID: ', err);
+      console.error('Error fetching listing:', err);
       return null;
-    } finally {
-      setLoading(false);
     }
   };
 
   // Create a new listing
-  const createListing = async (listingData: Omit<Listing, 'id' | 'created_at' | 'updated_at'>) => {
-    setLoading(true);
-    setError(null);
-
+  const createListing = async (listingData: any) => {
     try {
-      const { data, error } = await supabase.from('listings').insert([listingData]).select();
+      const { data, error } = await supabase
+        .from('listings')
+        .insert([listingData])
+        .select();
 
-      if (error) {
-        throw error;
-      }
-
-      if (data && data.length > 0) {
-        setListings(op => [...op, data[0]]);
-        return data[0] as Listing;
-      }
-      return null;
+      if (error) throw error;
+      return data?.[0] || null;
     } catch (err: any) {
-      setError(err.message);
       console.error('Error creating listing:', err);
       return null;
-    } finally {
-      setLoading(false);
     }
   };
 
   // Update an existing listing
-  const updateListing = async (id: string, listingData: Partial<Listing>) => {
-    setLoading(true);
-    setError(null);
-
+  const updateListing = async (id: string, listingData: any) => {
     try {
-      const { data, error } = await supabase.from('listings').update(listingData).eq('id', id).select();
+      const { data, error } = await supabase
+        .from('listings')
+        .update(listingData)
+        .eq('id', id)
+        .select();
 
-      if (error) {
-        throw error;
-      }
-
-      if (data && data.length > 0) {
-        setListings(op => op.map(l => (l.id === id ? data[0] : l)));
-        return data[0] as Listing;
-      }
-      return null;
+      if (error) throw error;
+      return data?.[0] || null;
     } catch (err: any) {
-      setError(err.message);
       console.error('Error updating listing:', err);
       return null;
-    } finally {
-      setLoading(false);
     }
   };
 
   // Delete a listing
   const deleteListing = async (id: string) => {
-    setLoading(true);
-    setError(null);
-
     try {
-      const { error } = await supabase.from('listings')
+      const { error } = await supabase
+        .from('listings')
         .delete()
         .eq('id', id);
 
-      if (error) {
-        throw error;
-      }
-
+      if (error) throw error;
       return true;
     } catch (err: any) {
-      setError(err.message);
-      console.error(`Ошибка при удалении объявления ${id}:`, err);
+      console.error('Error deleting listing:', err);
       return false;
     }
   };
 
   // Получение объявлений текущего пользователя
   const getUserListings = async () => {
-    if (!user) {
-      setError('Пользователь не авторизован');
-      return [];
-    }
-
+    if (!user) return [];
+    
     try {
       const { data, error } = await supabase
         .from('listings')
@@ -360,14 +211,10 @@ export function useListings() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        throw error;
-      }
-
-      return data;
+      if (error) throw error;
+      return data || [];
     } catch (err: any) {
-      setError(err.message);
-      console.error('Ошибка при загрузке объявлений пользователя:', err);
+      console.error('Error fetching user listings:', err);
       return [];
     }
   };

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,10 +14,9 @@ export function EnhancedFeaturedListings() {
   const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
-    // Загружаем объявления только один раз при инициализации с правильными параметрами
+    // Загружаем объявления только один раз при инициализации
     if (!isInitialized) {
       console.log('Загружаем объявления для главной страницы...');
-      // Исправляем: используем offset 0 вместо случайного значения
       getListings({}, 'newest', 16, 0).finally(() => {
         setIsInitialized(true);
       });
@@ -40,13 +40,17 @@ export function EnhancedFeaturedListings() {
     originalPrice: listing.regular_price || 0,
     discountPrice: listing.discount_price || listing.regular_price || 0,
     discount: listing.discount_percent || 0,
-    city: (listing as any).cities?.name_ru || 'Не указан',
+    city: listing.cities?.name_ru || 'Не указан',
     categoryId: listing.category_id?.toString() || '',
     subcategoryId: '',
     isFeatured: listing.is_premium || false,
     createdAt: listing.created_at,
     views: listing.views || 0
   });
+
+  if (error) {
+    console.error('Error loading listings:', error);
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

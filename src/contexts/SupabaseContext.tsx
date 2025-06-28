@@ -1,7 +1,6 @@
-
 import { createContext, useContext, useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 // Тип для контекста
 type SupabaseContextType = {
@@ -26,6 +25,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Получаем текущую сессию при загрузке
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Current session:', session ? 'authenticated' : 'not authenticated');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -33,6 +33,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
 
     // Подписываемся на изменения в аутентификации
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed:', _event, session ? 'authenticated' : 'not authenticated');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -63,9 +64,18 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
     session,
     user,
     supabase,
-    signIn,
-    signUp,
-    signOut,
+    signIn: async (email: string, password: string) => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error };
+    },
+    signUp: async (email: string, password: string) => {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      return { data, error };
+    },
+    signOut: async () => {
+      const { error } = await supabase.auth.signOut();
+      return { error };
+    },
     loading,
   };
 

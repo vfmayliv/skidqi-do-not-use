@@ -1,19 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Получаем URL и ключ с помощью частей для обхода обнаружения сканерами
-// ВАЖНО: Это временное решение. В идеале нужно использовать переменные окружения!
-const p1 = 'https://qxlpwk';
-const p2 = 'payxln.supabase.co';
-const supabaseUrl = `${p1}${p2}`;
-
-const k1 = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4bHB3a3BheXhs';
-const k2 = 'bCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzE2ODk4MTUzLCJleHAiOjIwMzI0NzQxNTN9.gpU7tVM0_';
-const k3 = 'T7ShQxra6PfNLh4KkCdbvUr3TG7Tkdk';
-const supabaseAnonKey = `${k1}${k2}${k3}`;
-
-// ВАЖНОЕ ПРИМЕЧАНИЕ: В рабочем окружении следует использовать переменные окружения:
-// const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-// const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Используем актуальные данные проекта из integrations
+const supabaseUrl = "https://huzugmkqszfayzhqmbwy.supabase.co";
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1enVnbWtxc3pmYXl6aHFtYnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NjMzMDcsImV4cCI6MjA2NjQzOTMwN30.kJKkKJmwQ_Wbj8dOsB1OJLjQtG6lGqzQ1_eU4smrqFc";
 
 // Создаем клиент Supabase для работы с базой данных
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
