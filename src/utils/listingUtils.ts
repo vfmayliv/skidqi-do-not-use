@@ -1,7 +1,24 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
-import { Listing } from '@/types/listingType';
+
+// Определяем тип для создания объявления в Supabase
+interface CreateListingData {
+  title: string;
+  description: string;
+  regular_price: number;
+  discount_price?: number;
+  category_id: number;
+  user_id: string;
+  city_id?: number;
+  region_id?: number;
+  microdistrict_id?: number;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  images: string[];
+  status: string;
+}
 
 // Загрузка изображения в Supabase Storage
 export async function uploadImageToSupabase(file: File): Promise<string | null> {
@@ -48,7 +65,7 @@ export async function uploadImagestoSupabase(files: File[]): Promise<string[]> {
 }
 
 // Сохранение объявления в Supabase
-export async function saveListingToSupabase(listing: Omit<Listing, 'id' | 'created_at' | 'updated_at'>): Promise<string | null> {
+export async function saveListingToSupabase(listing: CreateListingData): Promise<string | null> {
   try {
     // Проверяем аутентификацию
     const { data: { user } } = await supabase.auth.getUser();
@@ -61,9 +78,7 @@ export async function saveListingToSupabase(listing: Omit<Listing, 'id' | 'creat
       .from('listings')
       .insert([{
         ...listing,
-        user_id: user.id, // Гарантируем правильный user_id
-        latitude: listing.lat, // Правильное соответствие полей
-        longitude: listing.lng,
+        user_id: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }])
@@ -83,14 +98,12 @@ export async function saveListingToSupabase(listing: Omit<Listing, 'id' | 'creat
 }
 
 // Обновление объявления в Supabase
-export async function updateListingInSupabase(id: string, listing: Partial<Listing>): Promise<boolean> {
+export async function updateListingInSupabase(id: string, listing: Partial<CreateListingData>): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('listings')
       .update({
         ...listing,
-        latitude: listing.lat,
-        longitude: listing.lng,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id);
@@ -108,11 +121,11 @@ export async function updateListingInSupabase(id: string, listing: Partial<Listi
 }
 
 // Функция для сохранения объявлений в localStorage (для совместимости со старой логикой)
-export function saveListingToLocalStorage(listing: Listing) {
+export function saveListingToLocalStorage(listing: any) {
   try {
     // Получаем текущие объявления пользователя
     const userListingsString = localStorage.getItem('userListings');
-    const userListings: Listing[] = userListingsString ? JSON.parse(userListingsString) : [];
+    const userListings: any[] = userListingsString ? JSON.parse(userListingsString) : [];
     
     // Проверяем, есть ли уже объявление с таким ID
     const existingIndex = userListings.findIndex(item => item.id === listing.id);
@@ -121,15 +134,15 @@ export function saveListingToLocalStorage(listing: Listing) {
       // Обновляем существующее объявление
       userListings[existingIndex] = {
         ...listing,
-        updated_at: new Date().toISOString()
+        updatedAt: new Date().toISOString()
       };
     } else {
       // Добавляем новое объявление с уникальным ID
       userListings.push({
         ...listing,
         id: listing.id || uuidv4(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       });
     }
     
