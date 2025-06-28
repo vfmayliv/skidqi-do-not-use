@@ -1,119 +1,68 @@
-
 import { createClient } from '@supabase/supabase-js';
 
-// Конфигурация для проекта skidqi-kz
-const getSupabaseConfig = () => {
-  // Правильные данные для проекта skidqi-kz
-  const urlParts = ['https://', 'huzugmkqszfayzhqmbwy', '.supabase.co'];
-  
-  // Используем правильный anon key для проекта
-  const keyParts = [
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
-    '.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1enVnbWtxc3pmYXl6aHFtYnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NjMzMDcsImV4cCI6MjA2NjQzOTMwN30',
-    '.kJKkKJmwQ_Wbj8dOsB1OJLjQtG6lGqzQ1_eU4smrqFc'
-  ];
-  
-  return {
-    url: urlParts.join(''),
-    anonKey: keyParts.join('')
-  };
-};
+// Получаем URL и ключ из переменных окружения
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Публичные константы для использования в приложении
-export const supabaseUrl = getSupabaseConfig().url;
-export const supabaseAnonKey = getSupabaseConfig().anonKey;
+// Проверка наличия переменных окружения
+if (!supabaseUrl || !supabaseAnonKey) {
+  // ВАЖНО: Не выводить ключи в ошибку в продакшене
+  console.error('Supabase URL and/or anon key are not defined in environment variables.');
+  // Можно выбросить ошибку, чтобы остановить выполнение, если ключи обязательны
+  throw new Error("Supabase credentials not found. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.");
+}
 
-// Создаем клиент Supabase для взаимодействия с базой данных
+
+// Создаем клиент Supabase для работы с базой данных
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Добавляем проверку подключения при загрузке
+// Тестовый запрос для проверки подключения (асинхронно)
 (async () => {
   try {
-    // Простая проверка соединения - используем таблицу categories из вашего проекта
-    const { error } = await supabase.from('categories').select('count', { count: 'exact', head: true });
+    // Проверяем подключение - получаем все категории из подключения
+    const { error } = await supabase.from('categories').select('*').limit(1);
     if (error) {
-      console.error('Supabase connection error:', error.message);
+      console.error('Ошибка подключения к Supabase:', error);
     } else {
-      console.log('Supabase connection successful');
+      console.log('Подключение к Supabase успешно!');
     }
-  } catch (err) {
-    console.error('Failed to check Supabase connection:', err);
+  } catch (error) {
+    console.error('Критическая ошибка при подключении к Supabase:', error);
   }
 })();
 
-// Типы данных для таблиц в базе данных
+// Типы данных для работы с Supabase
 export type Profile = {
   id: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  phone: string | null;
-  created_at: string;
+  username: string;
+  avatar_url: string;
   updated_at: string;
-  city_id: number | null;
-  email: string;
 };
 
 export type Category = {
   id: number;
-  parent_id: number | null;
   name_ru: string;
   name_kz: string;
+  parent_id: number | null;
   slug: string;
-  icon: string | null;
-  level: number;
-  is_active: boolean;
-  sort_order: number;
+  subcategories?: Category[];
 };
 
 export type Listing = {
   id: string;
   title: string;
   description: string;
-  regular_price: number | null;
-  discount_price: number | null;
-  discount_percent: number | null;
-  is_free: boolean;
-  category_id: number | null;
+  price: number;
+  discount_price?: number;
+  images: string[];
   user_id: string;
-  city_id: number | null;
-  microdistrict_id: number | null;
-  region_id: number | null;
-  images: string[] | null;
-  status: string;
+  category_id: number;
   created_at: string;
-  updated_at: string;
-  expires_at: string | null;
-  views: number;
-  is_premium: boolean;
-  phone: string | null;
-  source_link: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  area: number | null;
-  rooms: number | null;
-  floor: number | null;
-  total_floors: number | null;
-  deal_type: string | null;
-  property_type: string | null;
-  building_type: string | null;
-  renovation_type: string | null;
-  bathroom_type: string | null;
-  year_built: number | null;
-  ceiling_height: number | null;
-  has_balcony: boolean;
-  has_elevator: boolean;
-  has_parking: boolean;
-  allow_pets: boolean;
-  furnished: boolean;
-  utilities_included: boolean;
-  security_guarded: boolean;
-  has_playground: boolean;
-  has_separate_entrance: boolean;
-  is_corner: boolean;
-  is_studio: boolean;
-  district_id: string | null;
-  segment: string | null;
+  // Дополнительные поля для недвижимости
+  deal_type?: 'sale' | 'rent';
+  property_type?: string;
+  address?: string;
+  // ... другие поля
 };
 
 export type Favorite = {
@@ -133,21 +82,21 @@ export type Message = {
   read: boolean;
 };
 
-// Вспомогательные функции для работы с базой данных
+// Вспомогательные функции для работы с Supabase
 export const SupabaseHelper = {
-  // Проверить, авторизован ли пользователь
+  // Проверяем, залогинен ли пользователь
   isLoggedIn: async () => {
     const { data } = await supabase.auth.getSession();
     return !!data.session;
   },
 
-  // Получить текущего пользователя
+  // Получаем текущего пользователя
   getCurrentUser: async () => {
     const { data } = await supabase.auth.getUser();
     return data.user;
   },
 
-  // Получить профиль пользователя
+  // Получаем профиль пользователя
   getUserProfile: async (userId: string) => {
     const { data, error } = await supabase
       .from('profiles')
