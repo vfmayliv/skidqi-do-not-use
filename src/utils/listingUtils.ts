@@ -1,5 +1,6 @@
+
 import { v4 as uuidv4 } from 'uuid';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/listingType';
 
 // Загрузка изображения в Supabase Storage
@@ -11,9 +12,14 @@ export async function uploadImageToSupabase(file: File): Promise<string | null> 
     
     console.log('Загрузка изображения:', filePath);
     
+    // Добавляем метаданные для RLS политик
     const { error: uploadError } = await supabase.storage
-      .from('images')
-      .upload(filePath, file);
+      .from('listings')
+      .upload(filePath, file, {
+        metadata: {
+          uploader: (await supabase.auth.getUser()).data.user?.id
+        }
+      });
     
     if (uploadError) {
       console.error('Ошибка загрузки изображения:', uploadError);
@@ -22,7 +28,7 @@ export async function uploadImageToSupabase(file: File): Promise<string | null> 
     
     // Получение публичного URL изображения
     const { data } = supabase.storage
-      .from('images')
+      .from('listings')
       .getPublicUrl(filePath);
     
     return data.publicUrl;
@@ -44,10 +50,20 @@ export async function uploadImagestoSupabase(files: File[]): Promise<string[]> {
 // Сохранение объявления в Supabase
 export async function saveListingToSupabase(listing: Omit<Listing, 'id' | 'created_at' | 'updated_at'>): Promise<string | null> {
   try {
+    // Проверяем аутентификацию
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('Пользователь не аутентифицирован');
+      return null;
+    }
+
     const { data, error } = await supabase
       .from('listings')
       .insert([{
         ...listing,
+        user_id: user.id, // Гарантируем правильный user_id
+        latitude: listing.lat, // Правильное соответствие полей
+        longitude: listing.lng,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }])
@@ -73,6 +89,8 @@ export async function updateListingInSupabase(id: string, listing: Partial<Listi
       .from('listings')
       .update({
         ...listing,
+        latitude: listing.lat,
+        longitude: listing.lng,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id);
