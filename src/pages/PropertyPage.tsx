@@ -12,6 +12,7 @@ import MapView from '@/components/property/MapView';
 import { getFiltersForDeal, SegmentWithPropertyTypes } from '@/lib/filters';
 
 export default function PropertyPage() {
+  console.log('🏠 PropertyPage component rendering');
   const { filters, setFilters, setDealType, setSegment } = usePropertyFiltersStore();
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -24,80 +25,94 @@ export default function PropertyPage() {
 
   // Effect to sync URL params to state on initial load
   useEffect(() => {
+    console.log('🔄 Effect: Syncing URL params to state');
     const urlDealType = searchParams.get('dealType');
     const urlSegment = searchParams.get('segment');
-    
-    // Set initial deal type, defaulting to 'sale'
-    const initialDealType = urlDealType || 'sale';
-    setDealType(initialDealType);
 
+    if (urlDealType) {
+      console.log('🔍 URL dealType found:', urlDealType);
+      setDealType(urlDealType);
+    }
     if (urlSegment) {
+      console.log('🔍 URL segment found:', urlSegment);
       setSegment(urlSegment);
     }
-    
-    // Trigger initial search with filters from URL/defaults
-    setActiveFilters(usePropertyFiltersStore.getState().filters);
+  }, [searchParams]);
 
-  }, []); // Runs only once on mount
-
-  // Effect to load filter configuration when dealType changes
+  // Effect to sync state to URL params
   useEffect(() => {
+    console.log('🔄 Effect: Syncing state to URL params');
+    const params = new URLSearchParams();
     if (filters.dealType) {
-      const loadFilters = async () => {
-        const config = await getFiltersForDeal(filters.dealType);
-        setFiltersConfig(config);
-      };
-      loadFilters();
+      params.set('dealType', filters.dealType);
     }
+    if (filters.segment) {
+      params.set('segment', filters.segment);
+    }
+    setSearchParams(params);
+  }, [filters.dealType, filters.segment]);
+
+  // Effect to load filters config when dealType changes
+  useEffect(() => {
+    console.log('🔄 Effect: Loading filters config for dealType:', filters.dealType);
+    async function loadFiltersConfig() {
+      if (filters.dealType) {
+        console.log('📥 Fetching filters for dealType:', filters.dealType);
+        try {
+          const filtersForDeal = await getFiltersForDeal(filters.dealType);
+          console.log('✅ Filters loaded successfully:', filtersForDeal);
+          setFiltersConfig(filtersForDeal);
+        } catch (err) {
+          console.error('❌ Error loading filters:', err);
+        }
+      }
+    }
+    loadFiltersConfig();
   }, [filters.dealType]);
 
-  // Effect to update URL when filters change
+  // Effect to apply filters
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (filters.dealType) params.set('dealType', filters.dealType);
-    if (filters.segment) params.set('segment', filters.segment);
-    setSearchParams(params, { replace: true });
-  }, [filters.dealType, filters.segment, setSearchParams]);
-
-  const handleFilterChange = (newFilters) => {
-    // This function is now primarily for live updates in the store
-    setFilters(newFilters);
-  };
-
-  const handleSearch = () => {
-    // Set the active filters to the current state and trigger a refetch
+    console.log('🔄 Effect: Setting active filters for search');
     setActiveFilters(filters);
-    refetch();
-  };
+  }, [filters]);
 
+  // Transform listings for display
   const processedListings = useMemo(() => {
-    if (!listings || !Array.isArray(listings)) return [];
-    return listings.map(listing => ({ ...listing, price: Number(listing.price) }));
+    console.log('🔄 Processing listings:', listings?.length || 0);
+    return listings;
   }, [listings]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-1">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold">Недвижимость</h1>
-            <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value)} defaultValue="list">
-              <ToggleGroupItem value="list" aria-label="Toggle list">
-                <List className="h-4 w-4 mr-2" />Список
+      <main className="flex-1 container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <h1 className="text-2xl font-bold mb-6">Недвижимость</h1>
+        
+        {/* Filters */}
+        <PropertyFilters filtersConfig={filtersConfig} />
+        
+        <div className="mt-4 flex justify-between items-center">
+          <div>
+            {!loading && (
+              <span className="text-gray-600">
+                {processedListings?.length || 0} объявлений найдено
+              </span>
+            )}
+          </div>
+          
+          <div>
+            <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value)}>
+              <ToggleGroupItem value="list" aria-label="Список">
+                <List className="h-4 w-4" />
               </ToggleGroupItem>
-              <ToggleGroupItem value="map" aria-label="Toggle map">
-                <Map className="h-4 w-4 mr-2" />Карта
+              <ToggleGroupItem value="map" aria-label="Карта">
+                <Map className="h-4 w-4" />
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
+        </div>
 
-          <PropertyFilters 
-            config={filtersConfig} 
-            onFilterChange={handleFilterChange}
-            onSearch={handleSearch}
-          />
-          
+        <div className="mt-4">
           <>
             {loading && <div className="text-center py-8">Загрузка объявлений...</div>}
             {error && <div className="text-center text-red-500">Ошибка: {error.message}</div>}
@@ -117,7 +132,7 @@ export default function PropertyPage() {
             {!loading && !error && processedListings.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-gray-500">Подходящих объявлений не найдено.</p>
-                <p className="text-sm text-gray-400 mt-2">Попробуйте изменить критерии поиска или сбросьте фильтры.</p>
+                <p className="text-sm text-gray-400 mt-2">Попробуйте изменить критерии поиска или сбросить фильтры.</p>
               </div>
             )}
           </>
