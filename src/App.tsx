@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +27,7 @@ const CreateListing = lazy(() => import("./pages/CreateListing"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const ConfirmEmail = lazy(() => import("./pages/ConfirmEmail"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const About = lazy(() => import("./pages/About"));
@@ -121,6 +121,12 @@ function App() {
                     <Route path="/register" element={
                       <Suspense fallback={<LoadingSpinner />}>
                         <Register />
+                      </Suspense>
+                    } />
+                    
+                    <Route path="/reset-password" element={
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <ResetPassword />
                       </Suspense>
                     } />
                     

@@ -1730,18 +1730,21 @@ export type Database = {
           filter_id: string
           id: number
           property_type_id: string
+          rent_type_id: string | null
         }
         Insert: {
           deal_type_id: string
           filter_id: string
           id?: number
           property_type_id: string
+          rent_type_id?: string | null
         }
         Update: {
           deal_type_id?: string
           filter_id?: string
           id?: number
           property_type_id?: string
+          rent_type_id?: string | null
         }
         Relationships: [
           {
@@ -1763,6 +1766,13 @@ export type Database = {
             columns: ["property_type_id"]
             isOneToOne: false
             referencedRelation: "property_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_type_filters_rent_type_id_fkey"
+            columns: ["rent_type_id"]
+            isOneToOne: false
+            referencedRelation: "rent_types"
             referencedColumns: ["id"]
           },
         ]
@@ -1810,6 +1820,24 @@ export type Database = {
         Update: {
           id?: number
           name_kz?: string | null
+          name_ru?: string
+        }
+        Relationships: []
+      }
+      rent_types: {
+        Row: {
+          id: string
+          name_kz: string
+          name_ru: string
+        }
+        Insert: {
+          id: string
+          name_kz: string
+          name_ru: string
+        }
+        Update: {
+          id?: string
+          name_kz?: string
           name_ru?: string
         }
         Relationships: []
