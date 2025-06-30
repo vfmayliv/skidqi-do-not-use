@@ -1,5 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { DealType, Segment, PropertyType, Filter, FilterOption } from '@/types/filters';
 
 export interface FullFilterConfig {
