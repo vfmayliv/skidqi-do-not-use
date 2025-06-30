@@ -16,7 +16,7 @@ export function EnhancedFeaturedListings() {
   useEffect(() => {
     // Загружаем объявления только один раз при инициализации
     if (!isInitialized) {
-      console.log('Загружаем объявления для главной страницы...');
+      console.log('🏠 Загружаем объявления для главной страницы...');
       getListings({}, 'newest', 16, 0).finally(() => {
         setIsInitialized(true);
       });
@@ -49,7 +49,7 @@ export function EnhancedFeaturedListings() {
   });
 
   if (error) {
-    console.error('Error loading listings:', error);
+    console.error('❌ Error loading listings:', error);
   }
 
   return (
@@ -88,6 +88,9 @@ export function EnhancedFeaturedListings() {
           {loading && !isInitialized ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-gray-600">
+                {language === 'ru' ? 'Загружаем данные из Supabase...' : 'Supabase дерегінен деректер жүктеу...'}
+              </p>
             </div>
           ) : (
             <>
@@ -113,6 +116,9 @@ export function EnhancedFeaturedListings() {
           {loading && !isInitialized ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-gray-600">
+                {language === 'ru' ? 'Загружаем данные из Supabase...' : 'Supabase дерегінен деректер жүктеу...'}
+              </p>
             </div>
           ) : (
             <>

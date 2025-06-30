@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -27,7 +26,7 @@ export async function uploadImageToSupabase(file: File): Promise<string | null> 
     const fileName = `${uuidv4()}.${fileExt}`;
     const filePath = `listings/${fileName}`;
     
-    console.log('Загрузка изображения:', filePath);
+    console.log('📤 Загрузка изображения в Supabase Storage:', filePath);
     
     // Добавляем метаданные для RLS политик
     const { error: uploadError } = await supabase.storage
@@ -39,7 +38,7 @@ export async function uploadImageToSupabase(file: File): Promise<string | null> 
       });
     
     if (uploadError) {
-      console.error('Ошибка загрузки изображения:', uploadError);
+      console.error('❌ Ошибка загрузки изображения:', uploadError);
       return null;
     }
     
@@ -48,9 +47,10 @@ export async function uploadImageToSupabase(file: File): Promise<string | null> 
       .from('listings')
       .getPublicUrl(filePath);
     
+    console.log('✅ Изображение загружено:', data.publicUrl);
     return data.publicUrl;
   } catch (error) {
-    console.error('Ошибка при загрузке изображения:', error);
+    console.error('💥 Ошибка при загрузке изображения:', error);
     return null;
   }
 }
@@ -70,9 +70,11 @@ export async function saveListingToSupabase(listing: CreateListingData): Promise
     // Проверяем аутентификацию
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      console.error('Пользователь не аутентифицирован');
+      console.error('❌ Пользователь не аутентифицирован');
       return null;
     }
+
+    console.log('💾 Сохраняем объявление в Supabase:', listing);
 
     const { data, error } = await supabase
       .from('listings')
@@ -86,13 +88,14 @@ export async function saveListingToSupabase(listing: CreateListingData): Promise
       .single();
     
     if (error) {
-      console.error('Ошибка сохранения объявления:', error);
+      console.error('❌ Ошибка сохранения объявления:', error);
       return null;
     }
     
+    console.log('✅ Объявление сохранено с ID:', data.id);
     return data.id;
   } catch (error) {
-    console.error('Непредвиденная ошибка при сохранении объявления:', error);
+    console.error('💥 Непредвиденная ошибка при сохранении объявления:', error);
     return null;
   }
 }
@@ -109,13 +112,13 @@ export async function updateListingInSupabase(id: string, listing: Partial<Creat
       .eq('id', id);
     
     if (error) {
-      console.error('Ошибка обновления объявления:', error);
+      console.error('❌ Ошибка обновления объявления:', error);
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error('Непредвиденная ошибка при обновлении объявления:', error);
+    console.error('💥 Непредвиденная ошибка при обновлении объявления:', error);
     return false;
   }
 }

@@ -78,7 +78,7 @@ export function useListings() {
     setError(null);
 
     try {
-      console.log('Fetching listings with filters:', filters);
+      console.log('🔄 Fetching listings with filters:', filters);
 
       let query = supabase.from('listings').select(`
         *,
@@ -88,6 +88,7 @@ export function useListings() {
 
       // Apply filters
       if (filters.categoryId) {
+        console.log('📂 Applying category filter:', filters.categoryId);
         query = query.eq('category_id', filters.categoryId);
       }
       if (filters.cityId) {
@@ -121,10 +122,12 @@ export function useListings() {
       const { data, error: queryError } = await query;
 
       if (queryError) {
+        console.error('❌ Supabase query error:', queryError);
         throw queryError;
       }
 
-      console.log('Listings fetched successfully:', data?.length || 0);
+      console.log('✅ Listings fetched successfully:', data?.length || 0);
+      console.log('📊 Raw data from Supabase:', data);
       
       setListings(data || []);
       setPaginationMeta({
@@ -134,7 +137,7 @@ export function useListings() {
         totalPages: Math.ceil((count || 0) / limit),
       });
     } catch (err: any) {
-      console.error('Error fetching listings:', err);
+      console.error('💥 Error fetching listings:', err);
       setError(err.message);
     } finally {
       setLoading(false);
