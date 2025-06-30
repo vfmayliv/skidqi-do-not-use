@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -22,6 +21,8 @@ import { useNavigate } from 'react-router-dom';
 import { useCategoryHierarchy } from '@/hooks/useCategoryHierarchy';
 import { useLocationData } from '@/hooks/useLocationData';
 import { uploadImagestoSupabase, saveListingToSupabase } from '@/utils/listingUtils';
+import { CategorySelector } from '@/components/create-listing/CategorySelector';
+import { CategoryFilters } from '@/components/create-listing/CategoryFilters';
 
 // Define a form data interface that matches our form structure
 interface CreateListingFormData {
@@ -37,6 +38,7 @@ interface CreateListingFormData {
   images: string[];
   status: string;
   userId: string;
+  filters: Record<string, any>;
 }
 
 const CreateListing = () => {
@@ -60,6 +62,7 @@ const CreateListing = () => {
     images: [],
     status: 'draft',
     userId: user?.id || '',
+    filters: {},
   });
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -126,6 +129,27 @@ const CreateListing = () => {
       if (category.children) {
         const found = findCategoryById(category.children, id);
         if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  // Обработка изменения фильтров
+  const handleFilterChange = (filterKey: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      filters: {
+        ...prev.filters,
+        [filterKey]: value
+      }
+    }));
+  };
+
+  // Получаем последнюю выбранную категорию для фильтров
+  const getSelectedCategory = () => {
+    for (let i = selectedCategories.length - 1; i >= 0; i--) {
+      if (selectedCategories[i]) {
+        return selectedCategories[i];
       }
     }
     return null;
@@ -236,40 +260,10 @@ const CreateListing = () => {
                 <h2 className="text-2xl font-bold mb-4">Создание объявления</h2>
                 
                 {/* Category Selection */}
-                {!categoriesLoading && categoryTree.length > 0 && (
-                  <div className="mb-4">
-                    <Label>Категория *</Label>
-                    <div className="space-y-2">
-                      <Select onValueChange={(value) => handleCategoryChange(0, value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите категорию" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categoryTree.map(category => (
-                            <SelectItem key={category.id} value={category.id.toString()}>
-                              {category.name.ru}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      
-                      {selectedCategories[0]?.children && (
-                        <Select onValueChange={(value) => handleCategoryChange(1, value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Выберите подкатегорию" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {selectedCategories[0].children.map((category: any) => (
-                              <SelectItem key={category.id} value={category.id.toString()}>
-                                {category.name.ru}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <CategorySelector
+                  selectedCategories={selectedCategories}
+                  onCategoryChange={handleCategoryChange}
+                />
                 
                 {/* Title */}
                 <div className="mb-4">
@@ -305,6 +299,13 @@ const CreateListing = () => {
                     placeholder="0"
                   />
                 </div>
+
+                {/* Category Filters */}
+                <CategoryFilters
+                  selectedCategory={getSelectedCategory()}
+                  formData={formData}
+                  onFilterChange={handleFilterChange}
+                />
                 
                 {/* Location */}
                 {!locationsLoading && (
