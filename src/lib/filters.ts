@@ -25,7 +25,7 @@ export interface SegmentWithPropertyTypes {
   property_types: PropertyTypeWithFilters[];
 }
 
-// Define the expected shape of the Supabase query result
+// Updated interface to match actual Supabase response structure
 interface PropertyTypeFilterResult {
   property_types: {
     id: string;
