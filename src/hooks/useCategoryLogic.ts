@@ -9,10 +9,10 @@ export function useCategoryLogic(categoryId: string | undefined) {
   const { filters } = useUniversalFiltersStore();
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Исправленный маппинг ID категорий от строковых к числовым (согласно реальным данным в Supabase)
+  // Исправленный маппинг ID категорий для соответствия данным в Supabase
   const getCategoryIdNumber = (categoryStr: string): number | undefined => {
     const categoryMap: Record<string, number> = {
-      'electronics': 3, // Исправлено с 1 на 3 для соответствия данным в Supabase
+      'electronics': 1, // Изменено обратно на 1 для правильного соответствия
       'fashion': 2,
       'home': 3,
       'transport': 4,
@@ -42,10 +42,10 @@ export function useCategoryLogic(categoryId: string | undefined) {
       };
       
       console.log('📋 Параметры фильтрации при инициализации:', filterParams);
-      console.log('🎯 Загружаем объявления для категории Electronics (ID: 3)');
+      console.log('🎯 Загружаем объявления для категории Electronics (ID: 1)');
       
-      // Исправляем: используем правильные параметры пагинации (page: 1, limit: 50)
-      getListings(filterParams, 'newest', 1, 50).finally(() => {
+      // Используем правильные параметры пагинации
+      getListings(filterParams, 'newest', 50, 0).finally(() => {
         setIsInitialized(true);
       });
     } else {
@@ -67,8 +67,8 @@ export function useCategoryLogic(categoryId: string | undefined) {
       };
       
       console.log('🔄 Параметры фильтрации при обновлении:', filterParams);
-      // Исправляем: используем правильные параметры пагинации (page: 1, limit: 50)
-      getListings(filterParams, 'newest', 1, 50);
+      // Используем правильные параметры пагинации
+      getListings(filterParams, 'newest', 50, 0);
     }
   }, [filters, isInitialized, categoryId, getListings]);
 
@@ -77,12 +77,11 @@ export function useCategoryLogic(categoryId: string | undefined) {
     if (categoryId) {
       const numericCategoryId = getCategoryIdNumber(categoryId);
       if (numericCategoryId) {
-        // Исправляем: используем правильные параметры пагинации (page: 1, limit: 50)
         getListings({
           categoryId: numericCategoryId,
           priceRange: filters.priceRange,
           condition: filters.condition !== 'any' ? filters.condition : undefined
-        }, 'newest', 1, 50);
+        }, 'newest', 50, 0);
       }
     }
   };

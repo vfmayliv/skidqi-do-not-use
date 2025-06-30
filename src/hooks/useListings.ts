@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabase } from '@/contexts/SupabaseContext';
@@ -72,7 +73,7 @@ export function useListings() {
   const [paginationMeta, setPaginationMeta] = useState<any | null>(null);
 
   // Get all listings with filtering, sorting, and pagination
-  const getListings = async (filters: any = {}, sort: string = 'newest', limit: number = 10, offset: number = 0) => {
+  const getListings = async (filters: any = {}, sort: string = 'newest', limit: number = 50, offset: number = 0) => {
     setLoading(true);
     setError(null);
 
@@ -108,13 +109,19 @@ export function useListings() {
         query = query.order('regular_price', { ascending: false });
       }
       
-      // Pagination
-      query = query.range(offset, offset + limit - 1);
+      // Первый запрос для получения общего количества
+      const { count } = await query;
+      
+      // Если offset больше общего количества записей, сбрасываем на 0
+      const safeOffset = (count && offset >= count) ? 0 : offset;
+      
+      // Pagination с безопасным offset
+      query = query.range(safeOffset, safeOffset + limit - 1);
 
-      const { data, error, count } = await query;
+      const { data, error: queryError } = await query;
 
-      if (error) {
-        throw error;
+      if (queryError) {
+        throw queryError;
       }
 
       console.log('Listings fetched successfully:', data?.length || 0);
@@ -122,7 +129,7 @@ export function useListings() {
       setListings(data || []);
       setPaginationMeta({
         totalItems: count || 0,
-        currentPage: Math.floor(offset / limit) + 1,
+        currentPage: Math.floor(safeOffset / limit) + 1,
         itemsPerPage: limit,
         totalPages: Math.ceil((count || 0) / limit),
       });
