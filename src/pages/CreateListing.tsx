@@ -22,7 +22,22 @@ import { useNavigate } from 'react-router-dom';
 import { useCategoryHierarchy } from '@/hooks/useCategoryHierarchy';
 import { useLocationData } from '@/hooks/useLocationData';
 import { uploadImagestoSupabase, saveListingToSupabase } from '@/utils/listingUtils';
-import type { Listing } from '@/types/listing';
+
+// Define a form data interface that matches our form structure
+interface CreateListingFormData {
+  title: string;
+  description: string;
+  originalPrice: number;
+  categoryId: string | null;
+  regionId: string;
+  cityId: string;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
+  images: string[];
+  status: string;
+  userId: string;
+}
 
 const CreateListing = () => {
   const { user } = useSupabase();
@@ -32,10 +47,10 @@ const CreateListing = () => {
   const { regions, cities, loading: locationsLoading } = useLocationData();
 
   const [selectedCategories, setSelectedCategories] = useState<(any | null)[]>([null, null, null]);
-  const [formData, setFormData] = useState<Partial<Listing>>({
+  const [formData, setFormData] = useState<CreateListingFormData>({
     title: '',
     description: '',
-    regularPrice: 0,
+    originalPrice: 0,
     categoryId: null,
     regionId: '',
     cityId: '',
@@ -98,7 +113,7 @@ const CreateListing = () => {
     
     // Устанавливаем categoryId в formData
     if (category) {
-      setFormData(prev => ({ ...prev, categoryId: parseInt(categoryId) }));
+      setFormData(prev => ({ ...prev, categoryId: categoryId }));
     }
   };
 
@@ -108,8 +123,8 @@ const CreateListing = () => {
       if (category.id.toString() === id) {
         return category;
       }
-      if (category.subcategories) {
-        const found = findCategoryById(category.subcategories, id);
+      if (category.children) {
+        const found = findCategoryById(category.children, id);
         if (found) return found;
       }
     }
@@ -138,13 +153,13 @@ const CreateListing = () => {
       const imageUrls = await uploadImagestoSupabase(imageFiles);
       
       const finalListingData = {
-        title: formData.title!,
-        description: formData.description!,
-        regularPrice: formData.regularPrice || 0,
-        categoryId: formData.categoryId!,
-        userId: user.id,
-        cityId: formData.cityId ? parseInt(formData.cityId) : undefined,
-        regionId: formData.regionId ? parseInt(formData.regionId) : undefined,
+        title: formData.title,
+        description: formData.description,
+        regular_price: formData.originalPrice || 0,
+        category_id: parseInt(formData.categoryId),
+        user_id: user.id,
+        city_id: formData.cityId ? parseInt(formData.cityId) : undefined,
+        region_id: formData.regionId ? parseInt(formData.regionId) : undefined,
         address: formData.address,
         latitude: formData.latitude,
         longitude: formData.longitude,
@@ -180,11 +195,11 @@ const CreateListing = () => {
       const draftData = {
         title: formData.title || '',
         description: formData.description || '',
-        regularPrice: formData.regularPrice || 0,
-        categoryId: formData.categoryId || 1,
-        userId: user.id,
-        cityId: formData.cityId ? parseInt(formData.cityId) : undefined,
-        regionId: formData.regionId ? parseInt(formData.regionId) : undefined,
+        regular_price: formData.originalPrice || 0,
+        category_id: formData.categoryId ? parseInt(formData.categoryId) : 1,
+        user_id: user.id,
+        city_id: formData.cityId ? parseInt(formData.cityId) : undefined,
+        region_id: formData.regionId ? parseInt(formData.regionId) : undefined,
         address: formData.address,
         latitude: formData.latitude,
         longitude: formData.longitude,
@@ -238,13 +253,13 @@ const CreateListing = () => {
                         </SelectContent>
                       </Select>
                       
-                      {selectedCategories[0]?.subcategories && (
+                      {selectedCategories[0]?.children && (
                         <Select onValueChange={(value) => handleCategoryChange(1, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Выберите подкатегорию" />
                           </SelectTrigger>
                           <SelectContent>
-                            {selectedCategories[0].subcategories.map((category: any) => (
+                            {selectedCategories[0].children.map((category: any) => (
                               <SelectItem key={category.id} value={category.id.toString()}>
                                 {category.name.ru}
                               </SelectItem>
@@ -261,7 +276,7 @@ const CreateListing = () => {
                   <Label htmlFor="title">Название *</Label>
                   <Input 
                     id="title" 
-                    value={formData.title || ''} 
+                    value={formData.title} 
                     onChange={(e) => setFormData({...formData, title: e.target.value})} 
                     placeholder="Введите название объявления"
                   />
@@ -272,7 +287,7 @@ const CreateListing = () => {
                   <Label htmlFor="description">Описание *</Label>
                   <Textarea 
                     id="description" 
-                    value={formData.description || ''} 
+                    value={formData.description} 
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     placeholder="Подробное описание"
                     rows={4}
@@ -285,8 +300,8 @@ const CreateListing = () => {
                   <Input 
                     id="price" 
                     type="number" 
-                    value={formData.regularPrice || 0} 
-                    onChange={(e) => setFormData({...formData, regularPrice: Number(e.target.value)})}
+                    value={formData.originalPrice || 0} 
+                    onChange={(e) => setFormData({...formData, originalPrice: Number(e.target.value)})}
                     placeholder="0"
                   />
                 </div>
@@ -296,7 +311,7 @@ const CreateListing = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <Label>Регион</Label>
-                      <Select onValueChange={(value) => setFormData({...formData, regionId: value, cityId: ''})} value={formData.regionId || ''}>
+                      <Select onValueChange={(value) => setFormData({...formData, regionId: value, cityId: ''})} value={formData.regionId}>
                         <SelectTrigger>
                           <SelectValue placeholder="Выберите регион" />
                         </SelectTrigger>
@@ -313,7 +328,7 @@ const CreateListing = () => {
                       <Label>Город</Label>
                       <Select 
                         onValueChange={(value) => setFormData({...formData, cityId: value})} 
-                        value={formData.cityId || ''} 
+                        value={formData.cityId} 
                         disabled={!formData.regionId}
                       >
                         <SelectTrigger>
@@ -338,7 +353,7 @@ const CreateListing = () => {
                   <Label htmlFor="address">Адрес</Label>
                   <Input 
                     id="address" 
-                    value={formData.address || ''} 
+                    value={formData.address} 
                     onChange={(e) => setFormData({...formData, address: e.target.value})}
                     placeholder="Укажите адрес"
                   />
