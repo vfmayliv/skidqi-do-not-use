@@ -1,4 +1,5 @@
 
+
 import { supabase } from '@/lib/supabase';
 import { DealType, Segment, PropertyType, Filter, FilterOption } from '@/types/filters';
 
@@ -23,35 +24,6 @@ export interface SegmentWithPropertyTypes {
   name_ru: string;
   name_kz: string;
   property_types: PropertyTypeWithFilters[];
-}
-
-// Updated interface to match actual Supabase response structure
-interface PropertyTypeFilterResult {
-  property_types: {
-    id: string;
-    name_ru: string;
-    name_kz: string;
-    segment_id: string;
-    segments: {
-      id: string;
-      name_ru: string;
-      name_kz: string;
-    };
-  };
-  filters: {
-    id: string;
-    name_ru: string;
-    name_kz: string;
-    type: string;
-    meta?: any;
-    filter_options: {
-      id: number;
-      filter_id: string;
-      value: string;
-      name_ru: string;
-      name_kz: string;
-    }[];
-  };
 }
 
 export async function getFiltersForDeal(dealTypeId: string): Promise<SegmentWithPropertyTypes[]> {
@@ -105,48 +77,52 @@ export async function getFiltersForDeal(dealTypeId: string): Promise<SegmentWith
     // 2. Group by segment and then by property type
     const segmentsMap = new Map<string, SegmentWithPropertyTypes>();
 
-    // Remove the type assertion and handle the data as it comes from Supabase
+    // Handle the data as it comes from Supabase - each item has property_types and filters as single objects
     for (const item of pt_filters) {
-      const segment = item.property_types?.segments;
-      const propertyType = item.property_types;
-      const filter = item.filters;
+      // Access the nested data correctly
+      const propertyTypeData = item.property_types;
+      const filterData = item.filters;
 
-      if (!segment || !propertyType || !filter) continue;
+      if (!propertyTypeData || !filterData) continue;
+
+      // Get segment data from the property type
+      const segmentData = propertyTypeData.segments;
+      if (!segmentData) continue;
 
       // Ensure segment exists in map
-      if (!segmentsMap.has(segment.id)) {
-        segmentsMap.set(segment.id, {
-          id: segment.id,
-          name_ru: segment.name_ru,
-          name_kz: segment.name_kz,
+      if (!segmentsMap.has(segmentData.id)) {
+        segmentsMap.set(segmentData.id, {
+          id: segmentData.id,
+          name_ru: segmentData.name_ru,
+          name_kz: segmentData.name_kz,
           property_types: [],
         });
       }
 
-      const currentSegment = segmentsMap.get(segment.id)!;
+      const currentSegment = segmentsMap.get(segmentData.id)!;
 
       // Ensure property type exists in segment
-      let currentPropertyType = currentSegment.property_types.find(pt => pt.id === propertyType.id);
+      let currentPropertyType = currentSegment.property_types.find(pt => pt.id === propertyTypeData.id);
       if (!currentPropertyType) {
         currentPropertyType = {
-          id: propertyType.id,
-          name_ru: propertyType.name_ru,
-          name_kz: propertyType.name_kz,
+          id: propertyTypeData.id,
+          name_ru: propertyTypeData.name_ru,
+          name_kz: propertyTypeData.name_kz,
           filters: [],
         };
         currentSegment.property_types.push(currentPropertyType);
       }
 
       // Add filter to property type
-      const existingFilter = currentPropertyType.filters.find(f => f.id === filter.id);
+      const existingFilter = currentPropertyType.filters.find(f => f.id === filterData.id);
       if (!existingFilter) {
           currentPropertyType.filters.push({
-              id: filter.id,
-              name_ru: filter.name_ru,
-              name_kz: filter.name_kz,
-              type: filter.type as 'range' | 'select' | 'boolean',
-              meta: filter.meta,
-              options: filter.filter_options || [],
+              id: filterData.id,
+              name_ru: filterData.name_ru,
+              name_kz: filterData.name_kz,
+              type: filterData.type as 'range' | 'select' | 'boolean',
+              meta: filterData.meta,
+              options: filterData.filter_options || [],
           });
       }
     }
@@ -159,3 +135,4 @@ export async function getFiltersForDeal(dealTypeId: string): Promise<SegmentWith
     return [];
   }
 }
+
