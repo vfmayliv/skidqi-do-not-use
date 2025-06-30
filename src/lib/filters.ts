@@ -105,7 +105,8 @@ export async function getFiltersForDeal(dealTypeId: string): Promise<SegmentWith
     // 2. Group by segment and then by property type
     const segmentsMap = new Map<string, SegmentWithPropertyTypes>();
 
-    for (const item of pt_filters as PropertyTypeFilterResult[]) {
+    // Remove the type assertion and handle the data as it comes from Supabase
+    for (const item of pt_filters) {
       const segment = item.property_types?.segments;
       const propertyType = item.property_types;
       const filter = item.filters;
