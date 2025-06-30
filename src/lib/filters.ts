@@ -1,5 +1,6 @@
 
 
+
 import { supabase } from '@/lib/supabase';
 import { DealType, Segment, PropertyType, Filter, FilterOption } from '@/types/filters';
 
@@ -79,9 +80,38 @@ export async function getFiltersForDeal(dealTypeId: string): Promise<SegmentWith
 
     // Handle the data as it comes from Supabase - each item has property_types and filters as single objects
     for (const item of pt_filters) {
+      // Type assertion since we know the structure from our query
+      const typedItem = item as {
+        property_types: {
+          id: string;
+          name_ru: string;
+          name_kz: string;
+          segment_id: string;
+          segments: {
+            id: string;
+            name_ru: string;
+            name_kz: string;
+          };
+        };
+        filters: {
+          id: string;
+          name_ru: string;
+          name_kz: string;
+          type: string;
+          meta?: any;
+          filter_options: {
+            id: number;
+            filter_id: string;
+            value: string;
+            name_ru: string;
+            name_kz: string;
+          }[];
+        };
+      };
+
       // Access the nested data correctly
-      const propertyTypeData = item.property_types;
-      const filterData = item.filters;
+      const propertyTypeData = typedItem.property_types;
+      const filterData = typedItem.filters;
 
       if (!propertyTypeData || !filterData) continue;
 
