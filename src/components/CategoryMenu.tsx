@@ -18,83 +18,78 @@ const CategoryButton = ({ category }: { category: Category }) => {
   
   // ID категорий, которые являются ссылками, а не выпадающими меню
   const linkCategories = [1, 2]; // Недвижимость и Транспорт
-  // Также исключаем "Бесплатно" - найдем его ID
+  // Также исключаем "Бесплатно" - найдем его ID по slug
   const excludedSlugs = ['property', 'transport', 'free'];
+
+  // Получаем подкатегории для данной категории
+  const { categories: subcategories, loading: subcategoriesLoading } = useSubcategories(category.id);
 
   // Если это одна из специальных категорий, рендерим как простую ссылку
   if (linkCategories.includes(category.id) || excludedSlugs.includes(category.slug)) {
     return (
-      <Link
-        to={`/category/${category.id}`}
-        className="flex flex-col items-center p-4 rounded-lg border border-transparent hover:border-primary hover:bg-primary/5 transition-colors h-full justify-center"
-      >
-        <DefaultIcon className="h-6 w-6 mb-2" />
-        <span className="text-sm text-center">{language === 'ru' ? category.name_ru : category.name_kz}</span>
+      <Link to={`/${category.slug}`} className="text-center">
+        <Button variant="ghost" className="flex flex-col items-center w-full h-auto py-2">
+          <DefaultIcon className="w-8 h-8 mb-1" />
+          <span className="text-xs">{category.name}</span>
+        </Button>
       </Link>
     );
   }
 
-  // Для всех остальных категорий используем Popover с хуком useSubcategories
+  // Для остальных категорий рендерим с выпадающим меню подкатегорий
   return (
     <Popover open={isPopoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          className="flex flex-col items-center h-full w-full p-4 rounded-lg border border-transparent hover:border-primary hover:bg-primary/5 transition-colors"
+        <Button 
+          variant="ghost" 
+          className="flex flex-col items-center w-full h-auto py-2"
+          onClick={() => setPopoverOpen(true)}
         >
-          <DefaultIcon className="h-6 w-6 mb-2" />
-          <span className="text-sm text-center">{language === 'ru' ? category.name_ru : category.name_kz}</span>
+          <DefaultIcon className="w-8 h-8 mb-1" />
+          <span className="text-xs">{category.name}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-64 p-0" align="start">
-        <SubcategoryList categoryId={category.id} onLinkClick={() => setPopoverOpen(false)} />
+      <PopoverContent className="w-64 p-2" align="center">
+        <div className="grid gap-1">
+          <h3 className="font-medium mb-2 text-center">{category.name}</h3>
+          {subcategoriesLoading ? (
+            <div className="text-center py-2">Загрузка...</div>
+          ) : subcategories.length > 0 ? (
+            subcategories.map((subcategory) => (
+              <Link 
+                key={subcategory.id} 
+                to={`/${category.slug}/${subcategory.slug}`}
+                className="block px-2 py-1.5 text-sm hover:bg-gray-100 rounded-md"
+                onClick={() => setPopoverOpen(false)}
+              >
+                {subcategory.name}
+              </Link>
+            ))
+          ) : (
+            <div className="text-center py-2 text-gray-500">Нет подкатегорий</div>
+          )}
+          <Link 
+            to={`/${category.slug}`}
+            className="mt-2 text-center text-sm text-blue-600 hover:underline"
+            onClick={() => setPopoverOpen(false)}
+          >
+            Все объявления в {category.name}
+          </Link>
+        </div>
       </PopoverContent>
     </Popover>
   );
 };
 
-// Компонент для отображения списка подкатегорий
-const SubcategoryList = ({ categoryId, onLinkClick }: { categoryId: number, onLinkClick: () => void }) => {
-  const { language, t } = useAppWithTranslations();
-  const { categories: subcategories, loading, error } = useSubcategories(categoryId);
-
-  if (loading) {
-    return <div className="p-4 text-sm text-gray-500">{t('loading')}...</div>;
-  }
-
-  if (error) {
-    return <div className="p-4 text-sm text-red-500">{t('error_loading_data')}</div>;
-  }
-
-  if (subcategories.length === 0) {
-    return <div className="p-4 text-sm text-gray-500">{t('no_subcategories')}</div>;
-  }
-
-  return (
-    <div className="grid gap-1 p-2">
-      {subcategories.map(subcat => (
-        <Link
-          key={subcat.id}
-          to={`/category/${subcat.id}`}
-          className="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors"
-          onClick={onLinkClick} // Закрываем popover при клике
-        >
-          {subcat.icon && <DefaultIcon className="h-4 w-4 mr-2" />}
-          <span className="text-sm">{language === 'ru' ? subcat.name_ru : subcat.name_kz}</span>
-        </Link>
-      ))}
-    </div>
-  );
-};
-
-// Основной компонент меню
-export function CategoryMenu() {
+export const CategoryMenu = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCategories = async () => {
+      setLoading(true);
       try {
+        // Получаем только корневые категории (parent_id = null)
         const { data, error } = await supabase
           .from('categories')
           .select('*')
