@@ -2367,6 +2367,24 @@ export type Database = {
         }
         Relationships: []
       }
+      uuid_to_id_mapping: {
+        Row: {
+          category_type: string
+          new_id: number
+          old_uuid: string
+        }
+        Insert: {
+          category_type: string
+          new_id: number
+          old_uuid: string
+        }
+        Update: {
+          category_type?: string
+          new_id?: number
+          old_uuid?: string
+        }
+        Relationships: []
+      }
       vehicle_brands: {
         Row: {
           id: number
@@ -2428,6 +2446,10 @@ export type Database = {
       check_admin_role: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      generate_unique_slug: {
+        Args: { base_slug: string; category_prefix: string }
+        Returns: string
       }
       has_role: {
         Args: {

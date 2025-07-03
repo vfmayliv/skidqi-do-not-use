@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase, Category } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
+import type { Category } from '@/types/category';
 
 // Хук для получения категорий
 export function useCategories() {

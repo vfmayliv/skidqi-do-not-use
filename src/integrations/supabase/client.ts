@@ -2,15 +2,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Используем переменные окружения для URL и ключа
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Проверка наличия переменных окружения
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  console.error('Ошибка: Отсутствуют переменные окружения для Supabase');
-  console.error('Убедитесь, что файл .env.local содержит VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY');
-}
+// Прямые URL и ключи для Supabase
+const SUPABASE_URL = 'https://huzugmkqszfayzhqmbwy.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1enVnbWtxc3pmYXl6aHFtYnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NjMzMDcsImV4cCI6MjA2NjQzOTMwN30.kJKkKJmwQ_Wbj8dOsB1OJLjQtG6lGqzQ1_eU4smrqFc';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

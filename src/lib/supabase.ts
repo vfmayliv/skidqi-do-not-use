@@ -1,5 +1,5 @@
 import { supabase as supabaseClient } from '@/integrations/supabase/client';
-import type { Profile } from '@/integrations/supabase/types';
+import type { Database } from '@/integrations/supabase/types';
 
 // Реэкспортируем единый клиент Supabase для всего приложения
 export const supabase = supabaseClient;
@@ -49,6 +49,6 @@ export const SupabaseHelper = {
       return null;
     }
 
-    return data as Profile;
+    return data;
   }
 };

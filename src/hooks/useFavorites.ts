@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase, Favorite, Listing } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useSupabase } from '@/contexts/SupabaseContext';
 
 export function useFavorites() {
@@ -42,7 +42,7 @@ export function useFavorites() {
         throw listingsError;
       }
 
-      return listings as Listing[];
+      return listings || [];
     } catch (err: any) {
       setError(err.message);
       console.error('Ошибка при загрузке избранных объявлений:', err);
