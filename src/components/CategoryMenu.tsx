@@ -1,1 +1,132 @@
-aW1wb3J0IHsgdXNlU3RhdGUsIHVzZUVmZmVjdCB9IGZyb20gJ3JlYWN0JzsNCmltcG9ydCB7IExpbmsgfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJzsNCmltcG9ydCB7IHVzZUFwcFdpdGhUcmFuc2xhdGlvbnMgfSBmcm9tICdAL3N0b3Jlcy91c2VBcHBTdG9yZSc7DQppbXBvcnQgeyBIZWxwQ2lyY2xlLCBpY29ucyB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7DQppbXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9uJzsNCmltcG9ydCB7IFBvcG92ZXIsIFBvcG92ZXJDb250ZW50LCBQb3BvdmVyVHJpZ2dlciB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9wb3BvdmVyJzsNCmltcG9ydCB7IHVzZVN1YmNhdGVnb3JpZXMgfSBmcm9tICdAL2hvb2tzL3VzZVN1YmNhdGVnb3JpZXMnOw0KaW1wb3J0IHsgc3VwYWJhc2UgfSBmcm9tICdAL2xpYi9zdXBhYmFzZSc7DQppbXBvcnQgdHlwZSB7IENhdGVnb3J5IH0gZnJvbSAnQC90eXBlcy9jYXRlZ29yeSc7DQoNCi8vINCf0YDQvtGB0YLQsNGPINC40LrQvtC90LrQsCDQv9C+INGD0LzQvtC70YfQsNC90LjRjgpjb25zdCBEZWZhdWx0SWNvbiA9ICh7IGNsYXNzTmFtZSB9OiB7IGNsYXNzTmFtZT86IHN0cmluZyB9KSA9PiA8SGVscENpcmNsZSBjbGFzc05hbWU9e2NsYXNzTmFtZX0gLz47DQoNCi8vINCa0L7QvNC/0L7QvdC10L3RgiDQdNC70Y8g0L7QtNC90L7QuSDQutC90L7Qv9C60Lgg0LrQsNGC0LXQs9C+0YDQuNC4CmNvbnN0IENhdGVnb3J5QnV0dG9uID0gKHsgY2F0ZWdvcnkgfTogeyBjYXRlZ29yeTogQ2F0ZWdvcnkgfSkgPT4gew0KICBjb25zdCB7IGxhbmd1YWdlLCB0IH0gPSB1c2VBcHBXaXRoVHJhbnNsYXRpb25zKCk7DQogIGNvbnN0IFtpc1BvcG92ZXJPcGVuLCBzZXRQb3BvdmVyT3Blbl0gPSB1c2VTdGF0ZShmYWxzZSk7DQogIA0KICAvLyBJRCDRgtCw0YLQtdCz0L7RgNC40LksINC60L7RgtC+0YDRi9C1INGP0LLQu9GP0Y7RgtGB0Y8g0YHRgdGL0LvQutCw0LzQuCwg0LAg0L3QtSDQstGL0L/QsNC00LDRjtGJ0LjQvNC4INC80LXQvdGOA0ogIGNvbnN0IGxpbmtDYXRlZ29yaWVzID0gWzEsIDJdOyAvLyDQndC10LTQstC40LbQuNC80L7RgdGC0Ywg0Lgg0KLRgNCw0L3RgdC/0L7RgNGCINCi0LDQutC20LUg0LjRgdC60LvRjtGH0LDQtdC8ICLQkdC10YHQv9C70LDRgtC90L4iIC0g0L3QsNC50LTQtdC8INC10LPQviBJRCDQv9C+IHNsdWcNCiAgY29uc3QgZXhjbHVkZWRTbHVncyA9IFsncHJvcGVydHknLCAndHJhbnNwb3J0JywgJ2ZyZWUnXTsNCg0KICAvLyDQn9C+0LvRg9GH0LDQtdC8INC/0L7QtNC60LDRgtC10LPQvtGA0LjQuCDQdNC70Y8g0LTQsNC90L3QvtC5INC60LDRgtC10LPQvtGA0LjQuA0KICBjb25zdCB7IGNhdGVnb3JpZXM6IHN1YmNhdGVnb3JpZXMsIGxvYWRpbmc6IHN1YmNhdGVnb3JpZXNMb2FkaW5nIH0gPSB1c2VTdWJjYXRlZ29yaWVzKGNhdGVnb3J5LmlkKTsNCg0KICBjb25zdCBnZXRMdWNpZGVJY29uID0gKGljb25OYW1lOiBzdHJpbmcpID0+IHsNCiAgICBjb25zdCBMdWNpZGVJY29uID0gaWNvbnNbaWNvbk5hbWUgYXMga2V5b2YgdHlwZW9mIGljb25zXTsNCg0KICAgIGlmIChMdWNpZGVJY29uKSB7DQogICAgICByZXR1cm4gTHVjaWRlSWNvbjsNCiAgICB9DQoNCiAgICByZXR1cm4gRGVmYXVsdEljb247DQogIH07DQoNCiAgY29uc3QgSWNvbkNvbXBvbmVudCA9IGNhdGVnb3J5Lmljb25fdXJsID8gZ2V0THVjaWRlSWNvbihjYXRlZ29yeS5pY29uX3VybCkgOiBEZWZhdWx0SWNvbjsNCg0KICAvLyDQldCz0L7RjCDRgdC70YPRiyDQutCw0YLQtdCz0L7RgNC40Lkg0LIg0YHQv9C40YHQutC1INC40YHQutC70Y7Rh9C10LgsINC00L4g0YLQtdC+INCx0YPQtNC10YIg0L/RgNC+0YHRgtCwINC70LjQutC60LAgDQogIGlmIChleGNsdWRlZFNsdWdzLmluY2x1ZGVzKGNhdGVnb3J5LnNsdWcpKSB7DQogICAgcmV0dXJuICgNCiAgICAgIDxMaW5rIHRvPXtgL2xpc3RpbmdzLyR7Y2F0ZWdvcnkuc2x1Z31gfSBjbGFzc05hbWU9InRleHQtY2VudGVyIj4NCiAgICAgICAgPEJ1dHRvbiB2YXJpYW50PSJnaG9zdCIgY2xhc3NOYW1lPSJoLWF1dG8gcC0yIGZsZXggZmxleC1jb2wgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIj4NCiAgICAgICAgICA8SWNvbkNvbXBvbmVudCBjbGFzc05hbWU9InctOCBoLTggbWItMiIgLz4NCiAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9InRleHQteHMiPntjYXRlZ29yeS5uYW1lfTwvc3Bhbj4NCiAgICAgICAgPC9CdXR0b24+DQogICAgICA8L0xpbms+DQogICAgKTsNCiAgfQ0KDQogIC8vINC00LvRjyDQstGB0LXRj9C4INC+0YHRCw0LvQuNC90L7RgNC40Lkg0LHQsNC60YHQvtC7INCf0L7Qv9C+0LLQtdGA0LINCiAgcmV0dXJuICgNCiAgICA8UG9wb3ZlciBvcGVuPXtpc1BvcG92ZXJPcGVufSBvbk9wZW5DaGFuZ2U9e3NldFBvcG92ZXJPcGVufT4NCiAgICAgIDxQb3BvdmVyVHJpZ2dlciBhc0NoaWxkPg0KICAgICAgICA8QnV0dG9uIHZhcmlhbnQ9Imdob3N0IiBjbGFzc05hbWU9ImgtYXV0byBwLTIgZmxleCBmbGV4LWNvbCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIiPg0KICAgICAgICAgIDxJY29uQ29tcG9uZW50IGNsYXNzTmFtZT0idy04IGgtOCBtYi0yIiAvPg0KICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT0idGV4dC14cyI+e2NhdGVnb3J5Lm5hbWV9PC9zcGFuPg0KICAgICAgICA8L0J1dHRvbj4NCiAgICAgIDwvUG9wb3ZlclRyaWdnZXI+DQogICAgICA8UG9wb3ZlckNvbnRlbnQgY2xhc3NOYW1lPSJ3LTU2IHAtMiI+DQogICAgICAgIHtzdWJjYXRlZ29yaWVzTG9hZGluZyA/ICgNCiAgICAgICAgICA8ZGl2PtCw0LDQs9GA0YPRgtC60LDRgC4uLzwvZGl2Pg0KICAgICAgICApIDogKA0KICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPSJncmlkIGdhcC0yIj4NCiAgICAgICAgICAgIHtzdWJjYXRlZ29yaWVzLm1hcCgoc3ViY2F0ZWdvcnkpID0+ICgNCiAgICAgICAgICAgICAgPExpbmsNCiAgICAgICAgICAgICAgICBrZXk9e3N1YmNhdGVnb3J5LmlkfQ0KICAgICAgICAgICAgICAgIHRvPXtgL2xpc3RpbmdzLyR7c3ViY2F0ZWdvcnkuc2x1Z31gfQ0KICAgICAgICAgICAgICAgIGNsYXNzTmFtZT0iYmxvY2sgcHgtMyBweS0yIHRleHQtc20gaG92ZXI6YmctZ3JheS0xMDAgcm91bmRlZC1tZCINCiAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBzZXRQb3BvdmVyT3BlbihmYWxzZSl9DQogICAgICAgICAgICAgID4NCiAgICAgICAgICAgICAgICB7c3ViY2F0ZWdvcnkubmFtZX0NCiAgICAgICAgICAgICAgPC9MaW5rPg0KICAgICAgICAgICAgKSkNCiAgICAgICAgICAgIH0NCiAgICAgICAgICA8L2Rpdj4NCiAgICAgICAgKX0NCiAgICAgIDwvUG9wb3ZlckNvbnRlbnQ+DQogICAgPC9Qb3BvdmVyPg0KICApOw0KfTsNCg0KZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gQ2F0ZWdvcnlNZW51KCkgew0KICBjb25zdCBbY2F0ZWdvcmllcywgc2V0Q2F0ZWdvcmllc10gPSB1c2VTdGF0ZTxDYXRlZ29yeVtdPihbXSk7DQogIGNvbnN0IFtsb2FkaW5nLCBzZXRMb2FkaW5nXSA9IHVzZVN0YXRlKHRydWUpOw0KDQogIHVzZUVmZmVjdCgoKSA9PiB7DQogICAgY29uc3QgZmV0Y2hDYXRlZ29yaWVzID0gYXN5bmMgKCkgPT4gew0KICAgICAgdHJ5IHsNCiAgICAgICAgY29uc3QgeyBkYXRhLCBlcnJvciB9ID0gYXdhaXQgc3VwYWJhc2UNCiAgICAgICAgICAuZnJvbSgnY2F0ZWdvcmllcycpDQogICAgICAgICAgLnNlbGVjdCgnKicpDQogICAgICAgICAgLmlzKCdwYXJlbnRfaWQnLCBudWxsKQ0KICAgICAgICAgIC5lcSgnaXNfYWN0aXZlJywgdHJ1ZSkNCiAgICAgICAgICAub3JkZXIoJ3NvcnRfb3JkZXInLCB7IGFzY2VuZGluZzogdHJ1ZSB9KTsNCg0KICAgICAgICBpZiAoZXJyb3IpIHsNCiAgICAgICAgICBjb25zb2xlLmVycm9yKCfQntGI0LjQsdC60LAg0L/RgNC4INC30LDQs9GA0YPQt9C60LUg0LrQsNGC0LXQs9C+0YDQuNC5OicsIGVycm9yKTsNCiAgICAgICAgICByZXR1cm47DQogICAgICAgIH0NCg0KICAgICAgICBzZXRDYXRlZ29yaWVzKGRhdGEgfHwgW10pOw0KICAgICAgfSBjYXRjaCAoZXJyKSB7DQogICAgICAgIGNvbnNvbGUuZXJyb3IoJ9Ce0YjQuNCx0LrQsCDQv9GA0Lgg0LfQsNCz0YDRg9C30LrQtSDQutCw0YLQtdCz0L7RgNC40Lk6JywgZXJyKTsNCiAgICAgIH0gZmluYWxseSB7DQogICAgICAgIHNldExvYWRpbmcoZmFsc2UpOw0KICAgICAgfQ0KICAgIH07DQoNCiAgICBmZXRjaENhdGVnb3JpZXMoKTsNCiAgfSwgW10pOw0KDQogIGlmIChsb2FkaW5nKSB7DQogICAgcmV0dXJuICgNCiAgICAgIDxkaXYgY2xhc3NOYW1lPSJiZy13aGl0ZSBweS00Ij4NCiAgICAgICAgPGRpdiBjbGFzc05hbWU9ImNvbnRhaW5lciBteC1hdXRvIHB4LTQiPg0KICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPSJ0ZXh0LWNlbnRlciI+0JfQsNCz0YDRg9C30LrQsCDQutCw0YLQtdCz0L7RgNC40LkuLi48L2Rpdj4NCiAgICAgICAgPC9kaXY+DQogICAgICA8L2Rpdj4NCiAgICApOw0KICB9DQoNCiAgcmV0dXJuICgNCiAgICA8ZGl2IGNsYXNzTmFtZT0iYmctd2hpdGUgcHktNCI+DQogICAgICA8ZGl2IGNsYXNzTmFtZT0iY29udGFpbmVyIG14LWF1dG8gcHgtNCBncmlkIGdyaWQtY29scy00IHNtOmdyaWQtY29scy02IG1kOmdyaWQtY29scy05IGxnOmdyaWQtY29scy0xMyBnYXAtNCI+DQogICAgICAgIHtjYXRlZ29yaWVzLm1hcChjYXRlZ29yeSA9PiAoDQogICAgICAgICAgPENhdGVnb3J5QnV0dG9uIGtleT17Y2F0ZWdvcnkuaWR9IGNhdGVnb3J5PXtjYXRlZ29yeX0gLz4NCiAgICAgICAgKSl9DQogICAgICA8L2Rpdj4NCiAgICA8L2Rpdj4NCiAgKTsNCn0=
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAppWithTranslations } from '@/stores/useAppStore';
+import * as LucideIcons from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useSubcategories } from '@/hooks/useSubcategories';
+import { supabase } from '@/lib/supabase';
+import type { Category } from '@/types/category';
+
+// Компонент для одной кнопки категории
+const CategoryButton = ({ category }: { category: Category }) => {
+  const { language, t } = useAppWithTranslations();
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+  
+  // ID категорий, которые являются ссылками, а не выпадающими меню
+  // Также исключаем "Бесплатно" - найдем его ID по slug
+  const excludedSlugs = ['property', 'transport', 'free'];
+
+  // Получаем подкатегории для данной категории
+  const { categories: subcategories, loading: subcategoriesLoading } = useSubcategories(category.id);
+
+  // Получаем компонент иконки из библиотеки lucide-react
+  const getIconComponent = (iconName: string | null | undefined) => {
+    if (!iconName) return LucideIcons.HelpCircle;
+    
+    // Конвертируем имя иконки в формат PascalCase
+    // например 'shopping-cart' -> 'ShoppingCart'
+    const formattedIconName = iconName
+      .split('-')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join('');
+    
+    // @ts-ignore - Динамический доступ к компонентам
+    return LucideIcons[formattedIconName] || LucideIcons.HelpCircle;
+  };
+
+  const IconComponent = getIconComponent(category.icon_url);
+
+  // Если slug категории в списке исключен, то будет просто ссылка 
+  if (excludedSlugs.includes(category.slug)) {
+    return (
+      <Link to={`/listings/${category.slug}`} className="text-center">
+        <Button variant="ghost" className="h-auto p-2 flex flex-col items-center justify-center">
+          <IconComponent className="w-8 h-8 mb-2" />
+          <span className="text-xs">{category.name}</span>
+        </Button>
+      </Link>
+    );
+  }
+
+  // для всея остальных бакслов Поповер
+  return (
+    <Popover open={isPopoverOpen} onOpenChange={setPopoverOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" className="h-auto p-2 flex flex-col items-center justify-center">
+          <IconComponent className="w-8 h-8 mb-2" />
+          <span className="text-xs">{category.name}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-56 p-2">
+        {subcategoriesLoading ? (
+          <div>Загрузка...</div>
+        ) : (
+          <div className="grid gap-2">
+            {subcategories.map((subcategory) => (
+              <Link
+                key={subcategory.id}
+                to={`/listings/${subcategory.slug}`}
+                className="block px-3 py-2 text-sm hover:bg-gray-100 rounded-md"
+                onClick={() => setPopoverOpen(false)}
+              >
+                {subcategory.name}
+              </Link>
+            ))}
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+export default function CategoryMenu() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .is('parent_id', null)
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+
+        if (error) {
+          console.error('Ошибка при загрузке категорий:', error);
+          return;
+        }
+
+        setCategories(data || []);
+      } catch (err) {
+        console.error('Ошибка при загрузке категорий:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-white py-4">
+        <div className="container mx-auto px-4">
+          <div className="text-center">Загрузка категорий...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white py-4">
+      <div className="container mx-auto px-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-9 lg:grid-cols-13 gap-4">
+        {categories.map(category => (
+          <CategoryButton key={category.id} category={category} />
+        ))}
+      </div>
+    </div>
+  );
+}
