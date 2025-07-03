@@ -8,6 +8,9 @@ import { useSubcategories } from '@/hooks/useSubcategories';
 import { supabase } from '@/lib/supabase';
 import type { Category } from '@/types/category';
 
+// ID или slug основных категорий верхнего уровня
+const MAIN_CATEGORY_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+
 // Компонент для одной кнопки категории
 const CategoryButton = ({ category }: { category: Category }) => {
   const { language, t } = useAppWithTranslations();
@@ -49,7 +52,7 @@ const CategoryButton = ({ category }: { category: Category }) => {
     );
   }
 
-  // для всея остальных бакслов Поповер
+  // для всех остальных слагов Поповер
   return (
     <Popover open={isPopoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
@@ -83,23 +86,54 @@ const CategoryButton = ({ category }: { category: Category }) => {
 export default function CategoryMenu() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mainCategories, setMainCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data, error } = await supabase
+        // Сначала попробуем получить основные категории по условию parent_id IS NULL
+        const { data: parentNullData, error: parentNullError } = await supabase
           .from('categories')
           .select('*')
           .is('parent_id', null)
           .eq('is_active', true)
           .order('sort_order', { ascending: true });
 
-        if (error) {
-          console.error('Ошибка при загрузке категорий:', error);
-          return;
+        if (parentNullError) {
+          console.error('Ошибка при загрузке категорий с parent_id = null:', parentNullError);
         }
 
-        setCategories(data || []);
+        // Если получили ровно 13 категорий, используем их
+        if (parentNullData && parentNullData.length === 13) {
+          setMainCategories(parentNullData);
+        } 
+        // Иначе, получаем все категории и отбираем 13 основных по ID или другим критериям
+        else {
+          const { data: allData, error: allError } = await supabase
+            .from('categories')
+            .select('*')
+            .eq('is_active', true)
+            .order('id', { ascending: true });
+
+          if (allError) {
+            console.error('Ошибка при загрузке всех категорий:', allError);
+            return;
+          }
+
+          // Отбираем основные категории по массиву MAIN_CATEGORY_IDS
+          // Или берём первые 13 категорий, если не найдём точное соответствие
+          const mainCats = allData
+            .filter(cat => MAIN_CATEGORY_IDS.includes(cat.id))
+            .sort((a, b) => a.sort_order - b.sort_order);
+          
+          if (mainCats.length > 0) {
+            setMainCategories(mainCats);
+          } else {
+            // Запасной вариант - берем первые 13 категорий
+            setMainCategories(allData.slice(0, 13));
+          }
+        }
+
       } catch (err) {
         console.error('Ошибка при загрузке категорий:', err);
       } finally {
@@ -123,7 +157,7 @@ export default function CategoryMenu() {
   return (
     <div className="bg-white py-4">
       <div className="container mx-auto px-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-9 lg:grid-cols-13 gap-4">
-        {categories.map(category => (
+        {mainCategories.map(category => (
           <CategoryButton key={category.id} category={category} />
         ))}
       </div>
